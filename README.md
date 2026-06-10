@@ -45,3 +45,9 @@ See `docs/local-development.md` for local runtime details.
 ## Planned Backend
 
 The backend will be a production-shaped Node.js platform slice with Fastify, GraphQL, PostgreSQL, backend-owned validation, upload policy, activity events, submission summaries, outbox events and safe operations endpoints.
+
+Current backend health endpoints:
+
+- `GET /health`
+- `GET /health/live`
+- `GET /health/ready`
