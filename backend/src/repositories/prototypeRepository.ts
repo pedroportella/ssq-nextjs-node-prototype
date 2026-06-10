@@ -15,6 +15,18 @@ export interface CustomerProfileAttributeRecord {
   attributeValue: Record<string, unknown>;
 }
 
+export interface CustomerProfileEvidenceRecord {
+  id: string;
+  serviceRequestId: string;
+  customerProfileAttributeId?: string;
+  attributeKey: string;
+  attributeValue: Record<string, unknown>;
+  evidenceSource: "SIMULATED_PROFILE";
+  verificationStatus: "SIMULATED_VERIFIED" | "SIMULATED_UNVERIFIED";
+  evidenceMetadata: Record<string, unknown>;
+  createdAt: string;
+}
+
 export interface TransactionDefinitionRecord {
   id: string;
   transactionKey: string;
@@ -81,6 +93,18 @@ interface CustomerProfileAttributeRow {
   customer_id: string;
   attribute_key: string;
   attribute_value: Record<string, unknown>;
+}
+
+interface CustomerProfileEvidenceRow {
+  id: string;
+  service_request_id: string;
+  customer_profile_attribute_id?: string | null;
+  attribute_key: string;
+  attribute_value: Record<string, unknown>;
+  evidence_source: CustomerProfileEvidenceRecord["evidenceSource"];
+  verification_status: CustomerProfileEvidenceRecord["verificationStatus"];
+  evidence_metadata: Record<string, unknown>;
+  created_at: Date | string;
 }
 
 interface TransactionDefinitionRow {
@@ -161,6 +185,28 @@ export class PrototypeRepository {
         ORDER BY attribute_key ASC
       `,
       [customerId]
+    );
+
+    return result.rows.map(mapCustomerProfileAttribute);
+  }
+
+  async listCustomerProfileAttributesByKeys(input: {
+    customerId: string;
+    attributeKeys: string[];
+  }): Promise<CustomerProfileAttributeRecord[]> {
+    if (input.attributeKeys.length === 0) {
+      return [];
+    }
+
+    const result = await this.database.query<CustomerProfileAttributeRow>(
+      `
+        SELECT id, customer_id, attribute_key, attribute_value
+        FROM customer_profile_attributes
+        WHERE customer_id = $1
+          AND attribute_key = ANY($2::text[])
+        ORDER BY attribute_key ASC
+      `,
+      [input.customerId, input.attributeKeys]
     );
 
     return result.rows.map(mapCustomerProfileAttribute);
@@ -461,6 +507,73 @@ export class PrototypeRepository {
 
     return mapServiceRequestEvent(result.rows[0]);
   }
+
+  async createCustomerProfileEvidence(input: {
+    serviceRequestId: string;
+    customerProfileAttributeId?: string;
+    attributeKey: string;
+    attributeValue: Record<string, unknown>;
+    verificationStatus: CustomerProfileEvidenceRecord["verificationStatus"];
+    evidenceMetadata?: Record<string, unknown>;
+  }): Promise<CustomerProfileEvidenceRecord> {
+    const result = await this.database.query<CustomerProfileEvidenceRow>(
+      `
+        INSERT INTO customer_profile_evidence (
+          service_request_id,
+          customer_profile_attribute_id,
+          attribute_key,
+          attribute_value,
+          evidence_source,
+          verification_status,
+          evidence_metadata
+        )
+        VALUES ($1, $2, $3, $4::jsonb, 'SIMULATED_PROFILE', $5, $6::jsonb)
+        RETURNING
+          id,
+          service_request_id,
+          customer_profile_attribute_id,
+          attribute_key,
+          attribute_value,
+          evidence_source,
+          verification_status,
+          evidence_metadata,
+          created_at
+      `,
+      [
+        input.serviceRequestId,
+        input.customerProfileAttributeId ?? null,
+        input.attributeKey,
+        JSON.stringify(input.attributeValue),
+        input.verificationStatus,
+        JSON.stringify(input.evidenceMetadata ?? {})
+      ]
+    );
+
+    return mapCustomerProfileEvidence(result.rows[0]);
+  }
+
+  async listCustomerProfileEvidence(serviceRequestId: string): Promise<CustomerProfileEvidenceRecord[]> {
+    const result = await this.database.query<CustomerProfileEvidenceRow>(
+      `
+        SELECT
+          id,
+          service_request_id,
+          customer_profile_attribute_id,
+          attribute_key,
+          attribute_value,
+          evidence_source,
+          verification_status,
+          evidence_metadata,
+          created_at
+        FROM customer_profile_evidence
+        WHERE service_request_id = $1
+        ORDER BY attribute_key ASC
+      `,
+      [serviceRequestId]
+    );
+
+    return result.rows.map(mapCustomerProfileEvidence);
+  }
 }
 
 function mapCustomer(row: CustomerRow): CustomerRecord {
@@ -479,6 +592,20 @@ function mapCustomerProfileAttribute(row: CustomerProfileAttributeRow): Customer
     customerId: row.customer_id,
     attributeKey: row.attribute_key,
     attributeValue: row.attribute_value
+  };
+}
+
+function mapCustomerProfileEvidence(row: CustomerProfileEvidenceRow): CustomerProfileEvidenceRecord {
+  return {
+    id: row.id,
+    serviceRequestId: row.service_request_id,
+    customerProfileAttributeId: row.customer_profile_attribute_id ?? undefined,
+    attributeKey: row.attribute_key,
+    attributeValue: row.attribute_value,
+    evidenceSource: row.evidence_source,
+    verificationStatus: row.verification_status,
+    evidenceMetadata: row.evidence_metadata,
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at
   };
 }
 

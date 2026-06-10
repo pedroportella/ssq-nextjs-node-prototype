@@ -56,6 +56,18 @@ export const schema = createSchema<GraphqlContext>({
       value: JSON!
     }
 
+    type CustomerProfileEvidence {
+      id: ID!
+      serviceRequestId: ID!
+      customerProfileAttributeId: ID
+      attributeKey: String!
+      attributeValue: JSON!
+      evidenceSource: String!
+      verificationStatus: String!
+      evidenceMetadata: JSON!
+      createdAt: String!
+    }
+
     type CustomerProfile {
       customer: Viewer!
       attributes: [ProfileAttribute!]!
@@ -178,6 +190,7 @@ export const schema = createSchema<GraphqlContext>({
       serviceRequestDraft(id: ID!): ServiceRequestDraft
       serviceRequests: [ServiceRequest!]!
       serviceRequest(referenceNumber: String!): ServiceRequest
+      customerProfileEvidence(serviceRequestId: ID!): [CustomerProfileEvidence!]!
       activityLogs(serviceRequestId: ID!): [ActivityLog!]!
     }
 
@@ -280,6 +293,9 @@ export const schema = createSchema<GraphqlContext>({
       },
       serviceRequest(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
         return context.repository.getServiceRequestByReference(args.referenceNumber);
+      },
+      customerProfileEvidence(_parent: unknown, args: { serviceRequestId: string }, context: GraphqlContext) {
+        return context.repository.listCustomerProfileEvidence(args.serviceRequestId);
       },
       activityLogs(_parent: unknown, args: { serviceRequestId: string }, context: GraphqlContext) {
         return context.repository.listActivityLogs(args.serviceRequestId);

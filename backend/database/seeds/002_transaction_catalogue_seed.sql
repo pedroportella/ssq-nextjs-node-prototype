@@ -63,7 +63,8 @@ SELECT id,
            "concessionConsent": {
              "type": "boolean"
            }
-         }
+         },
+         "prefillProfileAttributes": ["residency", "preferred_contact"]
        }'::jsonb
 FROM transaction_definitions
 WHERE transaction_key = 'seniors-card'
@@ -93,7 +94,8 @@ SELECT id,
                "type": "string"
              }
            }
-         }
+         },
+         "prefillProfileAttributes": ["residency", "preferred_contact"]
        }'::jsonb
 FROM transaction_definitions
 WHERE transaction_key = 'rental-security-subsidy'

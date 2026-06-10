@@ -6,6 +6,7 @@ import type { QueryResult, QueryResultRow } from "pg";
 import type { Queryable } from "../database/types.js";
 
 class SeededTestDatabase implements Queryable {
+  private readonly customerProfileEvidence: QueryResultRow[] = [];
   private readonly serviceRequestEvents: QueryResultRow[] = [];
   private readonly serviceRequests: QueryResultRow[] = [];
   private readonly serviceRequestDrafts: QueryResultRow[] = [];
@@ -33,6 +34,35 @@ class SeededTestDatabase implements Queryable {
           family_name: "Queensland"
         } as unknown as T
       ]);
+    }
+
+    if (normalizedSql.includes("FROM customer_profile_attributes")) {
+      const rows = [
+        {
+          id: "40000000-0000-4000-8000-000000000001",
+          customer_id: values[0],
+          attribute_key: "residency",
+          attribute_value: {
+            state: "QLD",
+            verified: true
+          }
+        },
+        {
+          id: "40000000-0000-4000-8000-000000000002",
+          customer_id: values[0],
+          attribute_key: "preferred_contact",
+          attribute_value: {
+            channel: "email",
+            verified: false
+          }
+        }
+      ];
+
+      if (normalizedSql.includes("attribute_key = ANY")) {
+        return result<T>(rows.filter((row) => (values[1] as string[]).includes(row.attribute_key)) as unknown as T[]);
+      }
+
+      return result<T>(rows as unknown as T[]);
     }
 
     if (normalizedSql.includes("FROM transaction_definitions")) {
@@ -98,6 +128,23 @@ class SeededTestDatabase implements Queryable {
       return result<T>([row as unknown as T]);
     }
 
+    if (normalizedSql.startsWith("INSERT INTO customer_profile_evidence")) {
+      const row = {
+        id: "80000000-0000-4000-8000-000000000001",
+        service_request_id: String(values[0]),
+        customer_profile_attribute_id: values[1] === null ? null : String(values[1]),
+        attribute_key: String(values[2]),
+        attribute_value: JSON.parse(String(values[3])),
+        evidence_source: "SIMULATED_PROFILE",
+        verification_status: String(values[4]),
+        evidence_metadata: JSON.parse(String(values[5])),
+        created_at: "2026-06-10T00:15:00.000Z"
+      };
+
+      this.customerProfileEvidence.push(row);
+      return result<T>([row as unknown as T]);
+    }
+
     if (normalizedSql.startsWith("UPDATE service_request_drafts")) {
       const draft = this.serviceRequestDrafts.find((row) => row.id === values[0] && row.customer_id === values[1]);
 
@@ -131,6 +178,10 @@ class SeededTestDatabase implements Queryable {
 
     if (normalizedSql.includes("FROM service_request_events")) {
       return result<T>(this.serviceRequestEvents.filter((row) => row.service_request_id === values[0]) as T[]);
+    }
+
+    if (normalizedSql.includes("FROM customer_profile_evidence")) {
+      return result<T>(this.customerProfileEvidence.filter((row) => row.service_request_id === values[0]) as T[]);
     }
 
     return result<T>([]);
@@ -197,6 +248,38 @@ describe("PrototypeRepository", () => {
       }
     });
     expect(activityLogs).toHaveLength(1);
+  });
+
+  it("creates and reads simulated customer profile evidence", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+    const [attribute] = await repository.listCustomerProfileAttributesByKeys({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      attributeKeys: ["residency"]
+    });
+
+    const evidence = await repository.createCustomerProfileEvidence({
+      serviceRequestId: "30000000-0000-4000-8000-000000000099",
+      customerProfileAttributeId: attribute?.id,
+      attributeKey: "residency",
+      attributeValue: attribute?.attributeValue ?? {},
+      verificationStatus: "SIMULATED_VERIFIED",
+      evidenceMetadata: {
+        integrationClaim: "none",
+        source: "prototype-customer-profile"
+      }
+    });
+    const evidenceRecords = await repository.listCustomerProfileEvidence(evidence.serviceRequestId);
+
+    expect(evidence).toMatchObject({
+      attributeKey: "residency",
+      evidenceSource: "SIMULATED_PROFILE",
+      verificationStatus: "SIMULATED_VERIFIED",
+      evidenceMetadata: {
+        integrationClaim: "none"
+      }
+    });
+    expect(evidenceRecords).toHaveLength(1);
   });
 
   it("creates, updates and reads customer-owned service request drafts", async () => {
@@ -291,6 +374,7 @@ function catalogueRows(): QueryResultRow[] {
       schema_version: "2026-06-10",
       schema_json: {
         title: "Seniors Card",
+        prefillProfileAttributes: ["residency", "preferred_contact"],
         required: ["dateOfBirth", "residencyStatus"],
         properties: {
           dateOfBirth: {
@@ -319,6 +403,7 @@ function catalogueRows(): QueryResultRow[] {
       schema_version: "2026-06-10",
       schema_json: {
         title: "Rental Security Subsidy",
+        prefillProfileAttributes: ["residency", "preferred_contact"],
         required: ["householdIncome", "rentalBondAmount"],
         properties: {
           householdIncome: {

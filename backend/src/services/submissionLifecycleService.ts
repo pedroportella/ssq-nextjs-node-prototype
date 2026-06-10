@@ -89,6 +89,13 @@ export class SubmissionLifecycleService {
       status: "SUBMITTED",
       payload: validation.payload
     });
+    const capturedEvidence = await this.captureProfileEvidence({
+      customerId: input.customerId,
+      serviceRequestId: serviceRequest.id,
+      transactionKey: transaction.transaction.transactionKey,
+      transactionSchemaVersion: transaction.transaction.schemaVersion,
+      transactionSchema: transaction.transaction.schema
+    });
 
     await this.repository.createServiceRequestEvent({
       serviceRequestId: serviceRequest.id,
@@ -96,6 +103,7 @@ export class SubmissionLifecycleService {
       eventPayload: {
         correlationId: input.correlationId,
         draftId: draft.id,
+        profileEvidenceCount: capturedEvidence.length,
         transactionKey: transaction.transaction.transactionKey
       }
     });
@@ -109,6 +117,43 @@ export class SubmissionLifecycleService {
       fieldErrors: []
     };
   }
+
+  private async captureProfileEvidence(input: {
+    customerId: string;
+    serviceRequestId: string;
+    transactionKey: string;
+    transactionSchemaVersion: string;
+    transactionSchema: Record<string, unknown>;
+  }) {
+    const attributeKeys = getPrefillProfileAttributes(input.transactionSchema);
+    const attributes = await this.repository.listCustomerProfileAttributesByKeys({
+      customerId: input.customerId,
+      attributeKeys
+    });
+
+    return Promise.all(attributes.map((attribute) => {
+      const verified = attribute.attributeValue.verified === true;
+
+      return this.repository.createCustomerProfileEvidence({
+        serviceRequestId: input.serviceRequestId,
+        customerProfileAttributeId: attribute.id,
+        attributeKey: attribute.attributeKey,
+        attributeValue: attribute.attributeValue,
+        verificationStatus: verified ? "SIMULATED_VERIFIED" : "SIMULATED_UNVERIFIED",
+        evidenceMetadata: {
+          integrationClaim: "none",
+          source: "prototype-customer-profile",
+          transactionKey: input.transactionKey,
+          transactionSchemaVersion: input.transactionSchemaVersion,
+          productionNext: [
+            "digital-identity-verification",
+            "authoritative-source-check",
+            "privacy-impact-review"
+          ]
+        }
+      });
+    }));
+  }
 }
 
 function generateReferenceNumber(): string {
@@ -116,4 +161,12 @@ function generateReferenceNumber(): string {
   const suffix = randomUUID().replaceAll("-", "").slice(0, 8).toUpperCase();
 
   return `SSQ-${date}-${suffix}`;
+}
+
+function getPrefillProfileAttributes(schema: Record<string, unknown>): string[] {
+  const value = schema.prefillProfileAttributes;
+
+  return Array.isArray(value)
+    ? value.filter((attribute): attribute is string => typeof attribute === "string")
+    : [];
 }

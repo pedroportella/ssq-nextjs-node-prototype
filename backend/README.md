@@ -48,6 +48,7 @@ The local Docker backend runs migrations and seed data before starting the API. 
 The backend currently owns SQL migrations and seed data for:
 
 - customer profile records;
+- customer profile evidence;
 - transaction definitions;
 - transaction schemas;
 - feature flags;
@@ -58,6 +59,8 @@ The backend currently owns SQL migrations and seed data for:
 The seeded transaction catalogue includes dashboard, Seniors Card and Rental Security Subsidy entries. A transaction is startable only when its definition is enabled and its `transaction.<key>.enabled` feature flag is true.
 
 Draft submission validates the stored payload against the seeded transaction schema subset before creating a submitted service request. Validation returns field-keyed errors for required fields, enum strings, date strings, booleans, numeric minimums and string arrays.
+
+Submitted requests capture simulated profile evidence for transaction-declared prefill attributes. This evidence is marked `SIMULATED_PROFILE` and includes production-next metadata rather than claiming real Digital Identity integration.
 
 ## GraphQL
 
@@ -75,12 +78,13 @@ Current query surface:
 - service request draft by ID;
 - service requests;
 - service request by reference;
+- customer profile evidence by service request ID;
 - activity logs.
 
 Current mutation surface:
 
 - create service request draft;
-- update service request draft.
+- update service request draft;
 - submit service request draft.
 
 GraphQL requests can provide `x-correlation-id` for trace continuity. Local prototype identity defaults to `demo.customer@example.test` and can be overridden with `x-demo-customer-email`.

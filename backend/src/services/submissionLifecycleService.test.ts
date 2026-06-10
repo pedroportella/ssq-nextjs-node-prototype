@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { SubmissionLifecycleService } from "./submissionLifecycleService.js";
 
 import type {
+  CustomerProfileAttributeRecord,
   PrototypeRepository,
   ServiceRequestDraftRecord,
   ServiceRequestRecord,
@@ -51,7 +52,8 @@ function createTransaction(overrides: Partial<TransactionCatalogueRecord> = {}):
         concessionConsent: {
           type: "boolean"
         }
-      }
+      },
+      prefillProfileAttributes: ["residency", "preferred_contact"]
     },
     featureFlagKey: "transaction.seniors-card.enabled",
     featureEnabled: true,
@@ -59,10 +61,16 @@ function createTransaction(overrides: Partial<TransactionCatalogueRecord> = {}):
   };
 }
 
-function createRepository(draft: ServiceRequestDraftRecord | undefined): PrototypeRepository {
+function createRepository(
+  draft: ServiceRequestDraftRecord | undefined,
+  profileAttributes: CustomerProfileAttributeRecord[] = []
+): PrototypeRepository {
   return {
     async getServiceRequestDraftForCustomer() {
       return draft;
+    },
+    async listCustomerProfileAttributesByKeys(input: { attributeKeys: string[] }) {
+      return profileAttributes.filter((attribute) => input.attributeKeys.includes(attribute.attributeKey));
     },
     async createServiceRequest(input: {
       customerId: string;
@@ -86,6 +94,26 @@ function createRepository(draft: ServiceRequestDraftRecord | undefined): Prototy
         serviceRequestId: "30000000-0000-4000-8000-000000000001",
         eventType: "SERVICE_REQUEST_SUBMITTED",
         eventPayload: {},
+        createdAt: "2026-06-10T00:00:00.000Z"
+      };
+    },
+    async createCustomerProfileEvidence(input: {
+      serviceRequestId: string;
+      customerProfileAttributeId?: string;
+      attributeKey: string;
+      attributeValue: Record<string, unknown>;
+      verificationStatus: "SIMULATED_VERIFIED" | "SIMULATED_UNVERIFIED";
+      evidenceMetadata?: Record<string, unknown>;
+    }) {
+      return {
+        id: `80000000-0000-4000-8000-${input.attributeKey.padStart(12, "0").slice(0, 12)}`,
+        serviceRequestId: input.serviceRequestId,
+        customerProfileAttributeId: input.customerProfileAttributeId,
+        attributeKey: input.attributeKey,
+        attributeValue: input.attributeValue,
+        evidenceSource: "SIMULATED_PROFILE",
+        verificationStatus: input.verificationStatus,
+        evidenceMetadata: input.evidenceMetadata ?? {},
         createdAt: "2026-06-10T00:00:00.000Z"
       };
     }
@@ -127,6 +155,86 @@ describe("SubmissionLifecycleService", () => {
         payload: draft.payload
       },
       fieldErrors: []
+    });
+  });
+
+  it("captures simulated profile evidence declared by the transaction schema", async () => {
+    const draft = createDraft();
+    const capturedEvidence: Array<{
+      attributeKey: string;
+      verificationStatus: string;
+      evidenceMetadata?: Record<string, unknown>;
+    }> = [];
+    const repository = {
+      ...createRepository(draft, [
+        {
+          id: "40000000-0000-4000-8000-000000000001",
+          customerId: draft.customerId,
+          attributeKey: "residency",
+          attributeValue: {
+            state: "QLD",
+            verified: true
+          }
+        },
+        {
+          id: "40000000-0000-4000-8000-000000000002",
+          customerId: draft.customerId,
+          attributeKey: "preferred_contact",
+          attributeValue: {
+            channel: "email",
+            verified: false
+          }
+        }
+      ]),
+      async createCustomerProfileEvidence(input: {
+        attributeKey: string;
+        verificationStatus: "SIMULATED_VERIFIED" | "SIMULATED_UNVERIFIED";
+        evidenceMetadata?: Record<string, unknown>;
+      }) {
+        capturedEvidence.push(input);
+
+        return {
+          id: `80000000-0000-4000-8000-00000000000${capturedEvidence.length}`,
+          serviceRequestId: "30000000-0000-4000-8000-000000000001",
+          attributeKey: input.attributeKey,
+          attributeValue: {},
+          evidenceSource: "SIMULATED_PROFILE",
+          verificationStatus: input.verificationStatus,
+          evidenceMetadata: input.evidenceMetadata ?? {},
+          createdAt: "2026-06-10T00:00:00.000Z"
+        };
+      }
+    } as unknown as PrototypeRepository;
+    const service = new SubmissionLifecycleService(
+      repository,
+      createCatalogue(createTransaction()),
+      () => "SSQ-TEST-0006"
+    );
+
+    await expect(service.submitDraft({
+      customerId: draft.customerId,
+      draftId: draft.id,
+      correlationId: "test-correlation"
+    })).resolves.toMatchObject({
+      ok: true
+    });
+
+    expect(capturedEvidence.map((evidence) => evidence.attributeKey)).toEqual([
+      "residency",
+      "preferred_contact"
+    ]);
+    expect(capturedEvidence.map((evidence) => evidence.verificationStatus)).toEqual([
+      "SIMULATED_VERIFIED",
+      "SIMULATED_UNVERIFIED"
+    ]);
+    expect(capturedEvidence[0]?.evidenceMetadata).toMatchObject({
+      integrationClaim: "none",
+      source: "prototype-customer-profile",
+      productionNext: [
+        "digital-identity-verification",
+        "authoritative-source-check",
+        "privacy-impact-review"
+      ]
     });
   });
 

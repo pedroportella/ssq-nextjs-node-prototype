@@ -7,6 +7,7 @@ import type { DatabaseClient } from "../database/client.js";
 import type { QueryResult, QueryResultRow } from "pg";
 
 function createGraphqlTestDatabase(): DatabaseClient {
+  const customerProfileEvidence: QueryResultRow[] = [];
   const serviceRequestEvents: QueryResultRow[] = [];
   const serviceRequests: QueryResultRow[] = [];
   const serviceRequestDrafts: QueryResultRow[] = [];
@@ -33,7 +34,7 @@ function createGraphqlTestDatabase(): DatabaseClient {
         }
 
         if (normalizedSql.includes("FROM customer_profile_attributes")) {
-          return result<T>([
+          const rows = [
             {
               id: "40000000-0000-4000-8000-000000000001",
               customer_id: values[0],
@@ -42,8 +43,23 @@ function createGraphqlTestDatabase(): DatabaseClient {
                 state: "QLD",
                 verified: true
               }
-            } as unknown as T
-          ]);
+            },
+            {
+              id: "40000000-0000-4000-8000-000000000002",
+              customer_id: values[0],
+              attribute_key: "preferred_contact",
+              attribute_value: {
+                channel: "email",
+                verified: false
+              }
+            }
+          ];
+
+          if (normalizedSql.includes("attribute_key = ANY")) {
+            return result<T>(rows.filter((row) => (values[1] as string[]).includes(row.attribute_key)) as unknown as T[]);
+          }
+
+          return result<T>(rows as unknown as T[]);
         }
 
         if (normalizedSql.includes("FROM feature_flags")) {
@@ -109,6 +125,23 @@ function createGraphqlTestDatabase(): DatabaseClient {
           };
 
           serviceRequestEvents.push(row);
+          return result<T>([row as unknown as T]);
+        }
+
+        if (normalizedSql.startsWith("INSERT INTO customer_profile_evidence")) {
+          const row = {
+            id: `80000000-0000-4000-8000-00000000000${customerProfileEvidence.length + 1}`,
+            service_request_id: String(values[0]),
+            customer_profile_attribute_id: values[1] === null ? null : String(values[1]),
+            attribute_key: String(values[2]),
+            attribute_value: JSON.parse(String(values[3])),
+            evidence_source: "SIMULATED_PROFILE",
+            verification_status: String(values[4]),
+            evidence_metadata: JSON.parse(String(values[5])),
+            created_at: "2026-06-10T00:15:00.000Z"
+          };
+
+          customerProfileEvidence.push(row);
           return result<T>([row as unknown as T]);
         }
 
@@ -191,6 +224,10 @@ function createGraphqlTestDatabase(): DatabaseClient {
           return result<T>([...seededRows, ...rows] as unknown as T[]);
         }
 
+        if (normalizedSql.includes("FROM customer_profile_evidence")) {
+          return result<T>(customerProfileEvidence.filter((row) => row.service_request_id === values[0]) as unknown as T[]);
+        }
+
         return result<T>([]);
       }
     },
@@ -264,6 +301,13 @@ describe("GraphQL route", () => {
                 state: "QLD",
                 verified: true
               }
+            },
+            {
+              key: "preferred_contact",
+              value: {
+                channel: "email",
+                verified: false
+              }
             }
           ],
           serviceRequests: [
@@ -294,7 +338,8 @@ describe("GraphQL route", () => {
           transactionKey: "seniors-card",
           schemaVersion: "2026-06-10",
           schema: {
-            title: "Seniors Card"
+            title: "Seniors Card",
+            prefillProfileAttributes: ["residency", "preferred_contact"]
           }
         }
       }
@@ -597,6 +642,7 @@ describe("GraphQL route", () => {
               fieldErrors { field message }
               validationErrors
               serviceRequest {
+                id
                 referenceNumber
                 status
                 transactionKey
@@ -617,9 +663,10 @@ describe("GraphQL route", () => {
           error: null,
           fieldErrors: [],
           validationErrors: {},
-          serviceRequest: {
-            status: "SUBMITTED",
-            transactionKey: "seniors-card",
+              serviceRequest: {
+                id: "30000000-0000-4000-8000-000000000099",
+                status: "SUBMITTED",
+                transactionKey: "seniors-card",
             payload: {
               dateOfBirth: "1960-01-01",
               residencyStatus: "queensland-resident",
@@ -630,6 +677,52 @@ describe("GraphQL route", () => {
       }
     });
     expect(response.json().data.submitServiceRequest.serviceRequest.referenceNumber).toMatch(/^SSQ-\d{8}-[A-F0-9]{8}$/);
+
+    const evidenceResponse = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query SubmittedEvidence {
+            customerProfileEvidence(serviceRequestId: "30000000-0000-4000-8000-000000000099") {
+              attributeKey
+              evidenceSource
+              verificationStatus
+              evidenceMetadata
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(evidenceResponse.statusCode).toBe(200);
+    expect(evidenceResponse.json()).toMatchObject({
+      data: {
+        customerProfileEvidence: [
+          {
+            attributeKey: "residency",
+            evidenceSource: "SIMULATED_PROFILE",
+            verificationStatus: "SIMULATED_VERIFIED",
+            evidenceMetadata: {
+              integrationClaim: "none",
+              source: "prototype-customer-profile"
+            }
+          },
+          {
+            attributeKey: "preferred_contact",
+            evidenceSource: "SIMULATED_PROFILE",
+            verificationStatus: "SIMULATED_UNVERIFIED",
+            evidenceMetadata: {
+              integrationClaim: "none",
+              source: "prototype-customer-profile"
+            }
+          }
+        ]
+      }
+    });
 
     await app.close();
   });
@@ -735,6 +828,7 @@ function catalogueRows(): QueryResultRow[] {
       schema_version: "2026-06-10",
       schema_json: {
         title: "Seniors Card",
+        prefillProfileAttributes: ["residency", "preferred_contact"],
         required: ["dateOfBirth", "residencyStatus"],
         properties: {
           dateOfBirth: {
