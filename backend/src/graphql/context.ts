@@ -1,5 +1,12 @@
 import { randomUUID } from "node:crypto";
 
+import {
+  CORRELATION_HEADER,
+  DEMO_CUSTOMER_EMAIL_HEADER,
+  DEMO_ROLE_HEADER,
+  DEMO_SUBJECT_HEADER,
+  resolveDemoIdentity
+} from "../auth/demoIdentity.js";
 import { PrototypeRepository } from "../repositories/prototypeRepository.js";
 import { DraftLifecycleService } from "../services/draftLifecycleService.js";
 import { ServiceRequestStatusLifecycleService } from "../services/serviceRequestStatusLifecycleService.js";
@@ -7,14 +14,11 @@ import { SubmissionLifecycleService } from "../services/submissionLifecycleServi
 import { TransactionCatalogueService } from "../services/transactionCatalogueService.js";
 
 import type { Queryable } from "../database/types.js";
-
-export const CORRELATION_HEADER = "x-correlation-id";
-export const DEMO_CUSTOMER_EMAIL_HEADER = "x-demo-customer-email";
-export const DEFAULT_DEMO_CUSTOMER_EMAIL = "demo.customer@example.test";
+import type { DemoIdentity } from "../auth/demoIdentity.js";
 
 export interface GraphqlContext {
   correlationId: string;
-  demoCustomerEmail: string;
+  demoIdentity: DemoIdentity;
   repository: PrototypeRepository;
   draftLifecycle: DraftLifecycleService;
   serviceRequestStatusLifecycle: ServiceRequestStatusLifecycleService;
@@ -29,11 +33,15 @@ export function createGraphqlContext(input: {
   const repository = new PrototypeRepository(input.queryable);
   const transactionCatalogue = new TransactionCatalogueService(repository);
   const correlationId = input.headers.get(CORRELATION_HEADER) ?? randomUUID();
-  const demoCustomerEmail = input.headers.get(DEMO_CUSTOMER_EMAIL_HEADER) ?? DEFAULT_DEMO_CUSTOMER_EMAIL;
+  const demoIdentity = resolveDemoIdentity({
+    roleHeader: input.headers.get(DEMO_ROLE_HEADER),
+    subjectHeader: input.headers.get(DEMO_SUBJECT_HEADER),
+    legacyCustomerEmailHeader: input.headers.get(DEMO_CUSTOMER_EMAIL_HEADER)
+  });
 
   return {
     correlationId,
-    demoCustomerEmail,
+    demoIdentity,
     draftLifecycle: new DraftLifecycleService(repository, transactionCatalogue),
     repository,
     serviceRequestStatusLifecycle: new ServiceRequestStatusLifecycleService(repository),

@@ -109,3 +109,10 @@ Current mutation surface:
 - update service request status.
 
 GraphQL requests can provide `x-correlation-id` for trace continuity. Local prototype identity defaults to `demo.customer@example.test` and can be overridden with `x-demo-customer-email`.
+
+Prototype role headers are also supported:
+
+- `X-SSQ-DEMO-ROLE`: `Citizen`, `ServiceOfficer`, `TeamLead` or `Admin`.
+- `X-SSQ-DEMO-SUBJECT`: demo subject identifier. For citizens this is the customer email.
+
+Citizen role access is scoped to owned drafts, requests, uploads and summary downloads. Service officer, team lead and admin roles can read submitted service requests and update request status. Admin role is required for operations endpoints. These headers are local review controls only, not production authentication.

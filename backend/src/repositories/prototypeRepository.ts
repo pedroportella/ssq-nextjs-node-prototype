@@ -547,6 +547,28 @@ export class PrototypeRepository {
     return result.rows.map(mapServiceRequest);
   }
 
+  async listSubmittedServiceRequests(): Promise<ServiceRequestRecord[]> {
+    const result = await this.database.query<ServiceRequestRow>(
+      `
+        SELECT
+          sr.id,
+          sr.customer_id,
+          sr.transaction_definition_id,
+          sr.reference_number,
+          sr.status,
+          sr.payload,
+          td.transaction_key
+        FROM service_requests sr
+        INNER JOIN transaction_definitions td
+          ON td.id = sr.transaction_definition_id
+        WHERE sr.status <> 'DRAFT'
+        ORDER BY sr.created_at DESC
+      `
+    );
+
+    return result.rows.map(mapServiceRequest);
+  }
+
   async getServiceRequestByReference(referenceNumber: string): Promise<ServiceRequestRecord | undefined> {
     const result = await this.database.query<ServiceRequestRow>(
       `

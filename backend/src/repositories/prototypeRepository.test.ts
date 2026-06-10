@@ -233,6 +233,20 @@ class SeededTestDatabase implements Queryable {
     }
 
     if (normalizedSql.includes("FROM service_requests")) {
+      if (normalizedSql.includes("WHERE sr.reference_number = $1 AND sr.customer_id = $2")) {
+        return result<T>(
+          this.serviceRequests.filter((row) => row.reference_number === values[0] && row.customer_id === values[1]) as T[]
+        );
+      }
+
+      if (normalizedSql.includes("WHERE sr.reference_number = $1")) {
+        return result<T>(this.serviceRequests.filter((row) => row.reference_number === values[0]) as T[]);
+      }
+
+      if (normalizedSql.includes("WHERE sr.status <> 'DRAFT'")) {
+        return result<T>(this.serviceRequests.filter((row) => row.status !== "DRAFT") as T[]);
+      }
+
       return result<T>(this.serviceRequests.filter((row) => row.customer_id === values[0]) as T[]);
     }
 
@@ -313,6 +327,29 @@ describe("PrototypeRepository", () => {
     });
     expect(requests).toHaveLength(1);
     expect(requests[0]?.referenceNumber).toBe("SSQ-TEST-0001");
+  });
+
+  it("lists submitted service requests for review roles", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+
+    await repository.createServiceRequest({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      transactionDefinitionId: "20000000-0000-4000-8000-000000000002",
+      referenceNumber: "SSQ-TEST-REVIEW-0001",
+      status: "SUBMITTED",
+      payload: {
+        prototype: true
+      }
+    });
+
+    const requests = await repository.listSubmittedServiceRequests();
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatchObject({
+      referenceNumber: "SSQ-TEST-REVIEW-0001",
+      status: "SUBMITTED"
+    });
   });
 
   it("updates customer-owned service request status", async () => {

@@ -1,6 +1,8 @@
 import { GraphQLScalarType, Kind } from "graphql";
 import { createSchema } from "graphql-yoga";
 
+import { canReadSubmittedRecords, isCitizen } from "../auth/demoIdentity.js";
+
 import type { GraphqlContext } from "./context.js";
 import type { CustomerRecord } from "../repositories/prototypeRepository.js";
 
@@ -199,6 +201,8 @@ export const schema = createSchema<GraphqlContext>({
 
     type PlatformInfo {
       correlationId: String!
+      demoRole: String!
+      demoSubject: String!
     }
 
     type Query {
@@ -212,6 +216,7 @@ export const schema = createSchema<GraphqlContext>({
       serviceRequestDrafts: [ServiceRequestDraft!]!
       serviceRequestDraft(id: ID!): ServiceRequestDraft
       serviceRequests: [ServiceRequest!]!
+      submittedServiceRequests: [ServiceRequest!]!
       serviceRequest(referenceNumber: String!): ServiceRequest
       submissionSummary(referenceNumber: String!): SubmissionSummary
       customerProfileEvidence(serviceRequestId: ID!): [CustomerProfileEvidence!]!
@@ -259,14 +264,22 @@ export const schema = createSchema<GraphqlContext>({
     Query: {
       platform(_parent: unknown, _args: unknown, context: GraphqlContext) {
         return {
-          correlationId: context.correlationId
+          correlationId: context.correlationId,
+          demoRole: context.demoIdentity.role,
+          demoSubject: context.demoIdentity.subject
         };
       },
       viewer(_parent: unknown, _args: unknown, context: GraphqlContext) {
-        return context.repository.getCustomerByEmail(context.demoCustomerEmail);
+        return isCitizen(context.demoIdentity)
+          ? context.repository.getCustomerByEmail(context.demoIdentity.subject)
+          : null;
       },
       async customerProfile(_parent: unknown, _args: unknown, context: GraphqlContext) {
-        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+        if (!isCitizen(context.demoIdentity)) {
+          return null;
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
 
         return customer ? { customer } : null;
       },
@@ -297,17 +310,34 @@ export const schema = createSchema<GraphqlContext>({
         };
       },
       async serviceRequests(_parent: unknown, _args: unknown, context: GraphqlContext) {
-        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+        if (!isCitizen(context.demoIdentity)) {
+          return [];
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
 
         return customer ? context.repository.listServiceRequestsForCustomer(customer.id) : [];
       },
+      submittedServiceRequests(_parent: unknown, _args: unknown, context: GraphqlContext) {
+        return canReadSubmittedRecords(context.demoIdentity)
+          ? context.repository.listSubmittedServiceRequests()
+          : [];
+      },
       async serviceRequestDrafts(_parent: unknown, _args: unknown, context: GraphqlContext) {
-        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+        if (!isCitizen(context.demoIdentity)) {
+          return [];
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
 
         return customer ? context.repository.listServiceRequestDraftsForCustomer(customer.id) : [];
       },
       async serviceRequestDraft(_parent: unknown, args: { id: string }, context: GraphqlContext) {
-        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+        if (!isCitizen(context.demoIdentity)) {
+          return null;
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
 
         return customer
           ? context.repository.getServiceRequestDraftForCustomer({
@@ -316,11 +346,26 @@ export const schema = createSchema<GraphqlContext>({
             })
           : null;
       },
-      serviceRequest(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
-        return context.repository.getServiceRequestByReference(args.referenceNumber);
+      async serviceRequest(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
+        if (canReadSubmittedRecords(context.demoIdentity)) {
+          return context.repository.getServiceRequestByReference(args.referenceNumber);
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
+
+        return customer
+          ? context.repository.getServiceRequestByReferenceForCustomer({
+              customerId: customer.id,
+              referenceNumber: args.referenceNumber
+            })
+          : null;
       },
       async submissionSummary(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
-        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+        if (!isCitizen(context.demoIdentity)) {
+          return null;
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
 
         return customer
           ? context.repository.getSubmissionSummaryForCustomerByReference({
@@ -342,7 +387,11 @@ export const schema = createSchema<GraphqlContext>({
         args: { input: { transactionKey: string; currentStep: string; payload?: Record<string, unknown> | null } },
         context: GraphqlContext
       ) {
-        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+        if (!isCitizen(context.demoIdentity)) {
+          return draftMutationError("FORBIDDEN", "Role cannot manage citizen drafts.");
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
 
         if (!customer) {
           return draftMutationError("CUSTOMER_NOT_FOUND", "Customer was not found.");
@@ -362,7 +411,11 @@ export const schema = createSchema<GraphqlContext>({
         args: { input: { draftId: string; currentStep: string; payload: Record<string, unknown> } },
         context: GraphqlContext
       ) {
-        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+        if (!isCitizen(context.demoIdentity)) {
+          return draftMutationError("FORBIDDEN", "Role cannot manage citizen drafts.");
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
 
         if (!customer) {
           return draftMutationError("CUSTOMER_NOT_FOUND", "Customer was not found.");
@@ -382,7 +435,11 @@ export const schema = createSchema<GraphqlContext>({
         args: { input: { draftId: string } },
         context: GraphqlContext
       ) {
-        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+        if (!isCitizen(context.demoIdentity)) {
+          return submitMutationError("FORBIDDEN", "Role cannot submit citizen drafts.", []);
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
 
         if (!customer) {
           return submitMutationError("CUSTOMER_NOT_FOUND", "Customer was not found.", []);
@@ -403,18 +460,22 @@ export const schema = createSchema<GraphqlContext>({
         args: { input: { referenceNumber: string; status: string; reason?: string | null } },
         context: GraphqlContext
       ) {
-        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
-
-        if (!customer) {
-          return statusMutationError("CUSTOMER_NOT_FOUND", "Customer was not found.");
+        if (!canReadSubmittedRecords(context.demoIdentity)) {
+          return statusMutationError("FORBIDDEN", "Role cannot update service request status.");
         }
+
+        const serviceRequest = await context.repository.getServiceRequestByReference(args.input.referenceNumber);
 
         if (!isServiceRequestStatus(args.input.status)) {
           return statusMutationError("INVALID_STATUS", "Status is not supported.");
         }
 
+        if (!serviceRequest) {
+          return statusMutationError("SERVICE_REQUEST_NOT_FOUND", "Service request was not found.");
+        }
+
         const result = await context.serviceRequestStatusLifecycle.transitionStatus({
-          customerId: customer.id,
+          customerId: serviceRequest.customerId,
           referenceNumber: args.input.referenceNumber,
           nextStatus: args.input.status,
           reason: args.input.reason ?? undefined,

@@ -55,6 +55,10 @@ describe("operations routes", () => {
     });
 
     const response = await app.inject({
+      headers: {
+        "x-ssq-demo-role": "Admin",
+        "x-ssq-demo-subject": "admin@example.test"
+      },
       method: "GET",
       url: "/operations/outbox-events"
     });
@@ -88,6 +92,31 @@ describe("operations routes", () => {
       }
     });
     expect(response.json().generatedAt).toEqual(expect.any(String));
+
+    await app.close();
+  });
+
+  it("blocks citizen access to operations outbox counts", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createOperationsTestDatabase()
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/operations/outbox-events"
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toMatchObject({
+      ok: false,
+      error: {
+        code: "FORBIDDEN"
+      }
+    });
 
     await app.close();
   });

@@ -26,7 +26,9 @@ function createGraphqlTestDatabase(): DatabaseClient {
 
           return result<T>([
             {
-              id: "10000000-0000-4000-8000-000000000001",
+              id: values[0] === "other.customer@example.test"
+                ? "10000000-0000-4000-8000-000000000999"
+                : "10000000-0000-4000-8000-000000000001",
               external_ref: "MYQLD-DEMO-001",
               email: String(values[0]),
               given_name: "Taylor",
@@ -256,10 +258,10 @@ function createGraphqlTestDatabase(): DatabaseClient {
         }
 
         if (normalizedSql.includes("FROM service_requests sr")) {
-          const seededRows = [
+          const seededRows: QueryResultRow[] = [
             {
               id: "30000000-0000-4000-8000-000000000001",
-              customer_id: values[0] === "SSQ-DEMO-0001" ? "10000000-0000-4000-8000-000000000001" : values[0],
+              customer_id: "10000000-0000-4000-8000-000000000001",
               transaction_definition_id: "20000000-0000-4000-8000-000000000002",
               transaction_key: "seniors-card",
               reference_number: "SSQ-DEMO-0001",
@@ -269,12 +271,32 @@ function createGraphqlTestDatabase(): DatabaseClient {
               }
             }
           ];
-          const submittedRows = serviceRequests.map((row) => ({
+          const submittedRows: QueryResultRow[] = serviceRequests.map((row) => ({
             ...row,
             transaction_key: "seniors-card"
           }));
 
-          return result<T>([...seededRows, ...submittedRows] as unknown as T[]);
+          if (normalizedSql.includes("WHERE sr.reference_number = $1 AND sr.customer_id = $2")) {
+            return result<T>(
+              [...seededRows, ...submittedRows].filter((row) => row.reference_number === values[0] && row.customer_id === values[1]) as unknown as T[]
+            );
+          }
+
+          if (normalizedSql.includes("WHERE sr.reference_number = $1")) {
+            return result<T>(
+              [...seededRows, ...submittedRows].filter((row) => row.reference_number === values[0]) as unknown as T[]
+            );
+          }
+
+          if (normalizedSql.includes("WHERE sr.status <> 'DRAFT'")) {
+            return result<T>(
+              [...seededRows, ...submittedRows].filter((row) => row.status !== "DRAFT") as unknown as T[]
+            );
+          }
+
+          return result<T>(
+            [...seededRows, ...submittedRows].filter((row) => row.customer_id === values[0]) as unknown as T[]
+          );
         }
 
         if (normalizedSql.includes("FROM service_request_events")) {
@@ -464,6 +486,100 @@ describe("GraphQL route", () => {
         viewer: null,
         customerProfile: null,
         serviceRequests: []
+      }
+    });
+
+    await app.close();
+  });
+
+  it("does not let a citizen read another customer's service request by reference", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-ssq-demo-subject": "other.customer@example.test"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query OtherCustomerRequest {
+            serviceRequest(referenceNumber: "SSQ-DEMO-0001") {
+              referenceNumber
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        serviceRequest: null
+      }
+    });
+
+    await app.close();
+  });
+
+  it("lets a service officer list submitted service requests", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-ssq-demo-role": "ServiceOfficer",
+        "x-ssq-demo-subject": "officer@example.test"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query SubmittedRequests {
+            platform { demoRole demoSubject }
+            submittedServiceRequests {
+              referenceNumber
+              status
+              transactionKey
+            }
+            serviceRequest(referenceNumber: "SSQ-DEMO-0001") {
+              referenceNumber
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        platform: {
+          demoRole: "ServiceOfficer",
+          demoSubject: "officer@example.test"
+        },
+        submittedServiceRequests: [
+          {
+            referenceNumber: "SSQ-DEMO-0001",
+            status: "SUBMITTED",
+            transactionKey: "seniors-card"
+          }
+        ],
+        serviceRequest: {
+          referenceNumber: "SSQ-DEMO-0001"
+        }
       }
     });
 
@@ -946,7 +1062,8 @@ describe("GraphQL route", () => {
     const response = await app.inject({
       headers: {
         "content-type": "application/json",
-        "x-correlation-id": "status-correlation"
+        "x-correlation-id": "status-correlation",
+        "x-ssq-demo-role": "ServiceOfficer"
       },
       method: "POST",
       payload: {
@@ -985,7 +1102,8 @@ describe("GraphQL route", () => {
 
     const activityResponse = await app.inject({
       headers: {
-        "content-type": "application/json"
+        "content-type": "application/json",
+        "x-ssq-demo-role": "ServiceOfficer"
       },
       method: "POST",
       payload: {
@@ -1023,7 +1141,8 @@ describe("GraphQL route", () => {
 
     const invalidResponse = await app.inject({
       headers: {
-        "content-type": "application/json"
+        "content-type": "application/json",
+        "x-ssq-demo-role": "ServiceOfficer"
       },
       method: "POST",
       payload: {

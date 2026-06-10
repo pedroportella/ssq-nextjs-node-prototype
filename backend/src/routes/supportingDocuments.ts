@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { DEMO_CUSTOMER_EMAIL_HEADER, DEFAULT_DEMO_CUSTOMER_EMAIL } from "../graphql/context.js";
+import { DEMO_CUSTOMER_EMAIL_HEADER, DEMO_ROLE_HEADER, DEMO_SUBJECT_HEADER, headerValue, isCitizen, resolveDemoIdentity } from "../auth/demoIdentity.js";
 import { supportingDocumentUploadPolicy } from "../policies/supportingDocumentPolicy.js";
 import { PrototypeRepository } from "../repositories/prototypeRepository.js";
 import { SupportingDocumentUploadService } from "../services/supportingDocumentUploadService.js";
@@ -12,8 +12,27 @@ export async function registerSupportingDocumentRoutes(app: FastifyInstance, que
   app.post("/uploads/supporting-documents", async (request, reply) => {
     const repository = new PrototypeRepository(queryable);
     const service = new SupportingDocumentUploadService(repository);
-    const demoCustomerEmail = request.headers[DEMO_CUSTOMER_EMAIL_HEADER] ?? DEFAULT_DEMO_CUSTOMER_EMAIL;
-    const customer = await repository.getCustomerByEmail(Array.isArray(demoCustomerEmail) ? demoCustomerEmail[0] : demoCustomerEmail);
+    const identity = resolveDemoIdentity({
+      roleHeader: headerValue(request.headers[DEMO_ROLE_HEADER]),
+      subjectHeader: headerValue(request.headers[DEMO_SUBJECT_HEADER]),
+      legacyCustomerEmailHeader: headerValue(request.headers[DEMO_CUSTOMER_EMAIL_HEADER])
+    });
+
+    if (!isCitizen(identity)) {
+      reply.code(403);
+
+      return {
+        ok: false,
+        error: {
+          code: "FORBIDDEN",
+          message: "Role cannot upload citizen documents."
+        },
+        fieldErrors: [],
+        policy: supportingDocumentUploadPolicy
+      };
+    }
+
+    const customer = await repository.getCustomerByEmail(identity.subject);
 
     if (!customer) {
       reply.code(404);
