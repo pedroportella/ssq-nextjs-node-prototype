@@ -1,8 +1,8 @@
-import { createPrototypeAppSummary } from "@ssq/services";
+import { getRentalSecuritySubsidyShellData } from "@ssq/services/server";
 import { PrototypePageShell } from "@ssq/ui-library";
 
-export function RentalSecuritySubsidyHomeContainer() {
-  const app = createPrototypeAppSummary("rental-security-subsidy");
+export async function RentalSecuritySubsidyHomeContainer() {
+  const { app } = await getRentalSecuritySubsidyShellData();
 
   return (
     <PrototypePageShell title={app.label}>

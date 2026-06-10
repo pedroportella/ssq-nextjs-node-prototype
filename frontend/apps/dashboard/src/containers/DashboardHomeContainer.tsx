@@ -1,8 +1,8 @@
-import { createPrototypeAppSummary } from "@ssq/services";
+import { getDashboardShellData } from "@ssq/services/server";
 import { PrototypePageShell } from "@ssq/ui-library";
 
-export function DashboardHomeContainer() {
-  const app = createPrototypeAppSummary("dashboard");
+export async function DashboardHomeContainer() {
+  const { app } = await getDashboardShellData();
 
   return (
     <PrototypePageShell title={app.label}>

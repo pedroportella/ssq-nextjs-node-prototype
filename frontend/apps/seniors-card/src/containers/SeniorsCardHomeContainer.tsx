@@ -1,8 +1,8 @@
-import { createPrototypeAppSummary } from "@ssq/services";
+import { getSeniorsCardShellData } from "@ssq/services/server";
 import { PrototypePageShell } from "@ssq/ui-library";
 
-export function SeniorsCardHomeContainer() {
-  const app = createPrototypeAppSummary("seniors-card");
+export async function SeniorsCardHomeContainer() {
+  const { app } = await getSeniorsCardShellData();
 
   return (
     <PrototypePageShell title={app.label}>
