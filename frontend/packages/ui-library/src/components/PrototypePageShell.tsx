@@ -1,4 +1,4 @@
-import { prototypeTokens } from "@ssq/ui-tokens";
+import { prototypeAssetManifest } from "@ssq/ui-assets";
 
 import type { ReactNode } from "react";
 
@@ -9,14 +9,12 @@ export interface PrototypePageShellProps {
 
 export function PrototypePageShell({ children, title }: PrototypePageShellProps) {
   return (
-    <main
-      style={{
-        color: prototypeTokens.color.text,
-        padding: prototypeTokens.space.page
-      }}
-    >
-      <section aria-labelledby="page-title">
-        <h1 id="page-title">{title}</h1>
+    <main className="ssq-page-shell">
+      <section aria-labelledby="page-title" className="ssq-page-shell__inner">
+        <p className="ssq-page-shell__brand">{prototypeAssetManifest.logos.prototypeWordmark.text}</p>
+        <h1 className="ssq-page-shell__title" id="page-title">
+          {title}
+        </h1>
         {children}
       </section>
     </main>

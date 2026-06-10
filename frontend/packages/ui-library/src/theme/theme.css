@@ -1,0 +1,47 @@
+@import "@ssq/ui-tokens/styles.css";
+
+html {
+  color-scheme: light;
+  font-family: var(--ssq-font-family-base);
+  font-size: var(--ssq-font-size-base);
+  line-height: var(--ssq-line-height-base);
+}
+
+body {
+  margin: 0;
+  background: var(--ssq-color-background);
+  color: var(--ssq-color-text);
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ssq-color-focus);
+  outline-offset: 3px;
+}
+
+.ssq-page-shell {
+  color: var(--ssq-color-text);
+  padding: var(--ssq-space-8);
+}
+
+.ssq-page-shell__inner {
+  max-width: var(--ssq-content-width);
+}
+
+.ssq-page-shell__brand {
+  color: var(--ssq-color-muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  margin: 0 0 var(--ssq-space-2);
+  text-transform: uppercase;
+}
+
+.ssq-page-shell__title {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin: 0 0 var(--ssq-space-4);
+}

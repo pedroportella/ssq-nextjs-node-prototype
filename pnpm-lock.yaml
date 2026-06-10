@@ -168,6 +168,9 @@ importers:
 
   frontend/packages/ui-library:
     dependencies:
+      '@ssq/ui-assets':
+        specifier: workspace:*
+        version: link:../ui-assets
       '@ssq/ui-tokens':
         specifier: workspace:*
         version: link:../ui-tokens

@@ -4,9 +4,7 @@ import { prototypeAssetManifest } from "./index";
 
 describe("prototypeAssetManifest", () => {
   it("starts with empty asset groups", () => {
-    expect(prototypeAssetManifest).toEqual({
-      logos: {},
-      icons: {}
-    });
+    expect(prototypeAssetManifest.logos.prototypeWordmark.label).toBe("SSQ prototype");
+    expect(prototypeAssetManifest.icons.statusUp.symbol).toBe("check");
   });
 });

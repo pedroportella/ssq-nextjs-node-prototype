@@ -58,6 +58,8 @@ Current shared frontend packages:
 - `frontend/packages/utils`
 - `frontend/packages/web-components`
 
+The three apps import the shared theme through `@ssq/ui-library/theme.css`. The current theme is a prototype foundation for later QHDS/QGDS adapter work.
+
 ## Planned Backend
 
 The backend will be a production-shaped Node.js platform slice with Fastify, GraphQL, PostgreSQL, backend-owned validation, upload policy, activity events, submission summaries, outbox events and safe operations endpoints.

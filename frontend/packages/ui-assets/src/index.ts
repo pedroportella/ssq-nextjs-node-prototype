@@ -1,4 +1,14 @@
 export const prototypeAssetManifest = {
-  logos: {},
-  icons: {}
+  logos: {
+    prototypeWordmark: {
+      label: "SSQ prototype",
+      text: "SSQ"
+    }
+  },
+  icons: {
+    statusUp: {
+      label: "Service available",
+      symbol: "check"
+    }
+  }
 } as const;
