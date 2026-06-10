@@ -17,6 +17,13 @@ export interface TransactionDefinitionRecord {
   owningAgency: string;
 }
 
+export interface TransactionCatalogueRecord extends TransactionDefinitionRecord {
+  schemaVersion: string;
+  schema: Record<string, unknown>;
+  featureFlagKey: string;
+  featureEnabled: boolean;
+}
+
 export interface ServiceRequestRecord {
   id: string;
   customerId: string;
@@ -41,6 +48,13 @@ interface TransactionDefinitionRow {
   description: string;
   status: TransactionDefinitionRecord["status"];
   owning_agency: string;
+}
+
+interface TransactionCatalogueRow extends TransactionDefinitionRow {
+  schema_version: string;
+  schema_json: Record<string, unknown>;
+  feature_flag_key: string;
+  feature_enabled: boolean;
 }
 
 interface ServiceRequestRow {
@@ -76,6 +90,61 @@ export class PrototypeRepository {
     `);
 
     return result.rows.map(mapTransactionDefinition);
+  }
+
+  async listEnabledTransactionCatalogue(): Promise<TransactionCatalogueRecord[]> {
+    const result = await this.database.query<TransactionCatalogueRow>(`
+      SELECT
+        td.id,
+        td.transaction_key,
+        td.label,
+        td.description,
+        td.status,
+        td.owning_agency,
+        ts.schema_version,
+        ts.schema_json,
+        ff.flag_key AS feature_flag_key,
+        ff.enabled AS feature_enabled
+      FROM transaction_definitions td
+      INNER JOIN transaction_schemas ts
+        ON ts.transaction_definition_id = td.id
+      INNER JOIN feature_flags ff
+        ON ff.flag_key = 'transaction.' || td.transaction_key || '.enabled'
+      WHERE td.status = 'ENABLED'
+        AND ff.enabled = true
+      ORDER BY td.transaction_key ASC
+    `);
+
+    return result.rows.map(mapTransactionCatalogue);
+  }
+
+  async getTransactionCatalogueEntry(transactionKey: string): Promise<TransactionCatalogueRecord | undefined> {
+    const result = await this.database.query<TransactionCatalogueRow>(
+      `
+        SELECT
+          td.id,
+          td.transaction_key,
+          td.label,
+          td.description,
+          td.status,
+          td.owning_agency,
+          ts.schema_version,
+          ts.schema_json,
+          ff.flag_key AS feature_flag_key,
+          ff.enabled AS feature_enabled
+        FROM transaction_definitions td
+        LEFT JOIN transaction_schemas ts
+          ON ts.transaction_definition_id = td.id
+        LEFT JOIN feature_flags ff
+          ON ff.flag_key = 'transaction.' || td.transaction_key || '.enabled'
+        WHERE td.transaction_key = $1
+        ORDER BY ts.created_at DESC
+        LIMIT 1
+      `,
+      [transactionKey]
+    );
+
+    return result.rows[0] ? mapTransactionCatalogue(result.rows[0]) : undefined;
   }
 
   async createServiceRequest(input: {
@@ -142,6 +211,16 @@ function mapTransactionDefinition(row: TransactionDefinitionRow): TransactionDef
     description: row.description,
     status: row.status,
     owningAgency: row.owning_agency
+  };
+}
+
+function mapTransactionCatalogue(row: TransactionCatalogueRow): TransactionCatalogueRecord {
+  return {
+    ...mapTransactionDefinition(row),
+    schemaVersion: row.schema_version,
+    schema: row.schema_json,
+    featureFlagKey: row.feature_flag_key,
+    featureEnabled: row.feature_enabled
   };
 }
 

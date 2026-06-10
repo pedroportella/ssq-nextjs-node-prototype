@@ -42,3 +42,16 @@ pnpm docker:up
 - `GET /health/ready`: readiness probe with database reachability.
 
 The local Docker backend runs migrations and seed data before starting the API. When running the backend directly, set `DATABASE_URL`, run `pnpm --dir backend db:migrate`, then run `pnpm --dir backend db:seed`.
+
+## Persistence
+
+The backend currently owns SQL migrations and seed data for:
+
+- customer profile records;
+- transaction definitions;
+- transaction schemas;
+- feature flags;
+- service requests;
+- service request events.
+
+The seeded transaction catalogue includes dashboard, Seniors Card and Rental Security Subsidy entries. A transaction is startable only when its definition is enabled and its `transaction.<key>.enabled` feature flag is true.

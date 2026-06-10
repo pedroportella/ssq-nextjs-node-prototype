@@ -64,7 +64,13 @@ Frontend apps consume backend-facing service helpers through `@ssq/services/serv
 
 ## Planned Backend
 
-The backend is a production-shaped Node.js platform slice with Fastify, PostgreSQL, SQL migrations, prototype seed data, repository helpers, backend-owned readiness and room for GraphQL, validation, upload policy, activity events, submission summaries, outbox events and safe operations endpoints.
+The backend is a production-shaped Node.js platform slice with Fastify, PostgreSQL, SQL migrations, prototype seed data, repository helpers, backend-owned readiness, database-backed transaction catalogue and room for GraphQL, validation, upload policy, activity events, submission summaries, outbox events and safe operations endpoints.
+
+Current seeded backend catalogue:
+
+- dashboard
+- seniors-card
+- rental-security-subsidy
 
 Current backend health endpoints:
 
