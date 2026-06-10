@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# environment
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# build output
+dist/
+build/
+.next/
+out/
+coverage/
+
+# test output
+playwright-report/
+test-results/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# deployment generated from templates
+.do/*.generated.yml
+.do/*.local.yml
+
+# local data
+*.db
+*.sqlite
+*.sqlite3
