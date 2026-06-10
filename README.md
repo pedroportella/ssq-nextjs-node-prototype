@@ -42,6 +42,12 @@ See `docs/local-development.md` for local runtime details.
 - `frontend/apps/seniors-card`
 - `frontend/apps/rental-security-subsidy`
 
+Current app status endpoints:
+
+- `frontend/apps/dashboard`: `GET /status`
+- `frontend/apps/seniors-card`: `GET /status`
+- `frontend/apps/rental-security-subsidy`: `GET /status`
+
 ## Planned Backend
 
 The backend will be a production-shaped Node.js platform slice with Fastify, GraphQL, PostgreSQL, backend-owned validation, upload policy, activity events, submission summaries, outbox events and safe operations endpoints.
