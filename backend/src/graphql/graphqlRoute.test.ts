@@ -76,7 +76,7 @@ function createGraphqlTestDatabase(): DatabaseClient {
           ]);
         }
 
-        if (normalizedSql.includes("FROM transaction_definitions td")) {
+        if (!normalizedSql.startsWith("UPDATE service_requests sr") && normalizedSql.includes("FROM transaction_definitions td")) {
           const rows = catalogueRows();
 
           if (normalizedSql.includes("WHERE td.transaction_key = $1")) {
@@ -157,6 +157,39 @@ function createGraphqlTestDatabase(): DatabaseClient {
           draft.updated_at = "2026-06-10T00:05:00.000Z";
 
           return result<T>([draft as unknown as T]);
+        }
+
+        if (normalizedSql.startsWith("UPDATE service_requests sr")) {
+          const submitted = serviceRequests.find((row) => row.reference_number === values[0] && row.customer_id === values[1]);
+
+          if (submitted) {
+            submitted.status = String(values[2]);
+
+            return result<T>([
+              {
+                ...submitted,
+                transaction_key: "seniors-card"
+              } as unknown as T
+            ]);
+          }
+
+          if (values[0] === "SSQ-DEMO-0001" && values[1] === "10000000-0000-4000-8000-000000000001") {
+            return result<T>([
+              {
+                id: "30000000-0000-4000-8000-000000000001",
+                customer_id: values[1],
+                transaction_definition_id: "20000000-0000-4000-8000-000000000002",
+                transaction_key: "seniors-card",
+                reference_number: values[0],
+                status: values[2],
+                payload: {
+                  prototype: true
+                }
+              } as unknown as T
+            ]);
+          }
+
+          return result<T>([]);
         }
 
         if (normalizedSql.includes("FROM service_request_drafts srd")) {
@@ -807,6 +840,132 @@ describe("GraphQL route", () => {
             dateOfBirth: "Must be a valid date in YYYY-MM-DD format.",
             residencyStatus: "Required",
             concessionConsent: "Expected boolean, received string"
+          }
+        }
+      }
+    });
+
+    await app.close();
+  });
+
+  it("updates service request status and projects activity logs", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-correlation-id": "status-correlation"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation UpdateStatus {
+            updateServiceRequestStatus(input: {
+              referenceNumber: "SSQ-DEMO-0001"
+              status: "UNDER_REVIEW"
+              reason: "Ready for review"
+            }) {
+              ok
+              error { code message }
+              serviceRequest { id referenceNumber status transactionKey }
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        updateServiceRequestStatus: {
+          ok: true,
+          error: null,
+          serviceRequest: {
+            id: "30000000-0000-4000-8000-000000000001",
+            referenceNumber: "SSQ-DEMO-0001",
+            status: "UNDER_REVIEW",
+            transactionKey: "seniors-card"
+          }
+        }
+      }
+    });
+
+    const activityResponse = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query Activity {
+            activityLogs(serviceRequestId: "30000000-0000-4000-8000-000000000001") {
+              eventType
+              eventPayload
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(activityResponse.statusCode).toBe(200);
+    expect(activityResponse.json()).toMatchObject({
+      data: {
+        activityLogs: [
+          {
+            eventType: "SERVICE_REQUEST_SEEDED"
+          },
+          {
+            eventType: "SERVICE_REQUEST_STATUS_CHANGED",
+            eventPayload: {
+              correlationId: "status-correlation",
+              fromStatus: "SUBMITTED",
+              reason: "Ready for review",
+              toStatus: "UNDER_REVIEW"
+            }
+          }
+        ]
+      }
+    });
+
+    const invalidResponse = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation InvalidStatus {
+            updateServiceRequestStatus(input: {
+              referenceNumber: "SSQ-DEMO-0001"
+              status: "COMPLETED"
+            }) {
+              ok
+              serviceRequest { id }
+              error { code message }
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(invalidResponse.statusCode).toBe(200);
+    expect(invalidResponse.json()).toEqual({
+      data: {
+        updateServiceRequestStatus: {
+          ok: false,
+          serviceRequest: null,
+          error: {
+            code: "INVALID_STATUS_TRANSITION",
+            message: "Cannot transition service request from SUBMITTED to COMPLETED."
           }
         }
       }

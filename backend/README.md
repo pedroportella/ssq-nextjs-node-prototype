@@ -65,6 +65,8 @@ Submitted requests capture simulated profile evidence for transaction-declared p
 
 Supporting document uploads are currently metadata-only for local review. The backend validates category, file extension, MIME type, size and target ownership, then records production-next scanning, private storage and retention fields.
 
+Service request status changes are backend-owned. The current lifecycle supports `SUBMITTED -> UNDER_REVIEW`, `SUBMITTED -> WITHDRAWN`, `UNDER_REVIEW -> ACTION_REQUIRED`, `UNDER_REVIEW -> COMPLETED`, and `ACTION_REQUIRED -> UNDER_REVIEW` or `WITHDRAWN`, with each accepted transition recorded as an activity event.
+
 ## REST
 
 Current REST write surface:
@@ -94,6 +96,7 @@ Current mutation surface:
 
 - create service request draft;
 - update service request draft;
-- submit service request draft.
+- submit service request draft;
+- update service request status.
 
 GraphQL requests can provide `x-correlation-id` for trace continuity. Local prototype identity defaults to `demo.customer@example.test` and can be overridden with `x-demo-customer-email`.

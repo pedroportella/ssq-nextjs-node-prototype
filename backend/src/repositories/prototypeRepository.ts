@@ -56,7 +56,7 @@ export interface ServiceRequestRecord {
   customerId: string;
   transactionDefinitionId: string;
   referenceNumber: string;
-  status: "DRAFT" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "DECLINED";
+  status: "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "ACTION_REQUIRED" | "COMPLETED" | "WITHDRAWN";
   payload: Record<string, unknown>;
   transactionKey?: string;
 }
@@ -528,6 +528,35 @@ export class PrototypeRepository {
           AND sr.customer_id = $2
       `,
       [input.referenceNumber, input.customerId]
+    );
+
+    return result.rows[0] ? mapServiceRequest(result.rows[0]) : undefined;
+  }
+
+  async updateServiceRequestStatusForCustomer(input: {
+    customerId: string;
+    referenceNumber: string;
+    status: ServiceRequestRecord["status"];
+  }): Promise<ServiceRequestRecord | undefined> {
+    const result = await this.database.query<ServiceRequestRow>(
+      `
+        UPDATE service_requests sr
+        SET status = $3,
+            updated_at = now()
+        FROM transaction_definitions td
+        WHERE td.id = sr.transaction_definition_id
+          AND sr.reference_number = $1
+          AND sr.customer_id = $2
+        RETURNING
+          sr.id,
+          sr.customer_id,
+          sr.transaction_definition_id,
+          sr.reference_number,
+          sr.status,
+          sr.payload,
+          td.transaction_key
+      `,
+      [input.referenceNumber, input.customerId, input.status]
     );
 
     return result.rows[0] ? mapServiceRequest(result.rows[0]) : undefined;

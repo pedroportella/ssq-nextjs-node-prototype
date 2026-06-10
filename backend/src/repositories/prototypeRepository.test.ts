@@ -14,7 +14,7 @@ class SeededTestDatabase implements Queryable {
   async query<T extends QueryResultRow = QueryResultRow>(sql: string, values: readonly unknown[] = []): Promise<QueryResult<T>> {
     const normalizedSql = sql.replace(/\s+/g, " ").trim();
 
-    if (normalizedSql.includes("FROM transaction_definitions td")) {
+    if (!normalizedSql.startsWith("UPDATE service_requests sr") && normalizedSql.includes("FROM transaction_definitions td")) {
       const rows = catalogueRows();
 
       if (normalizedSql.includes("WHERE td.transaction_key = $1")) {
@@ -65,7 +65,7 @@ class SeededTestDatabase implements Queryable {
       return result<T>(rows as unknown as T[]);
     }
 
-    if (normalizedSql.includes("FROM transaction_definitions")) {
+    if (!normalizedSql.startsWith("UPDATE service_requests sr") && normalizedSql.includes("FROM transaction_definitions")) {
       return result<T>([
         {
           id: "20000000-0000-4000-8000-000000000001",
@@ -159,6 +159,23 @@ class SeededTestDatabase implements Queryable {
       return result<T>([draft as unknown as T]);
     }
 
+    if (normalizedSql.startsWith("UPDATE service_requests sr")) {
+      const request = this.serviceRequests.find((row) => row.reference_number === values[0] && row.customer_id === values[1]);
+
+      if (!request) {
+        return result<T>([]);
+      }
+
+      request.status = String(values[2]);
+
+      return result<T>([
+        {
+          ...request,
+          transaction_key: "seniors-card"
+        } as unknown as T
+      ]);
+    }
+
     if (normalizedSql.includes("FROM service_request_drafts srd")) {
       const rows = this.serviceRequestDrafts
         .filter((row) => normalizedSql.includes("WHERE srd.id = $1")
@@ -226,6 +243,36 @@ describe("PrototypeRepository", () => {
     });
     expect(requests).toHaveLength(1);
     expect(requests[0]?.referenceNumber).toBe("SSQ-TEST-0001");
+  });
+
+  it("updates customer-owned service request status", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+    const serviceRequest = await repository.createServiceRequest({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      transactionDefinitionId: "20000000-0000-4000-8000-000000000002",
+      referenceNumber: "SSQ-TEST-0002",
+      status: "SUBMITTED",
+      payload: {}
+    });
+
+    const updated = await repository.updateServiceRequestStatusForCustomer({
+      customerId: serviceRequest.customerId,
+      referenceNumber: serviceRequest.referenceNumber,
+      status: "UNDER_REVIEW"
+    });
+    const otherCustomerUpdate = await repository.updateServiceRequestStatusForCustomer({
+      customerId: "10000000-0000-4000-8000-000000000999",
+      referenceNumber: serviceRequest.referenceNumber,
+      status: "WITHDRAWN"
+    });
+
+    expect(updated).toMatchObject({
+      referenceNumber: "SSQ-TEST-0002",
+      status: "UNDER_REVIEW",
+      transactionKey: "seniors-card"
+    });
+    expect(otherCustomerUpdate).toBeUndefined();
   });
 
   it("creates and reads service request events", async () => {

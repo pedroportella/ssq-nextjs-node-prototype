@@ -150,6 +150,12 @@ export const schema = createSchema<GraphqlContext>({
       validationErrors: JSON!
     }
 
+    type ServiceRequestStatusMutationResult {
+      ok: Boolean!
+      serviceRequest: ServiceRequest
+      error: DraftMutationError
+    }
+
     input CreateServiceRequestDraftInput {
       transactionKey: String!
       currentStep: String!
@@ -164,6 +170,12 @@ export const schema = createSchema<GraphqlContext>({
 
     input SubmitServiceRequestInput {
       draftId: ID!
+    }
+
+    input UpdateServiceRequestStatusInput {
+      referenceNumber: String!
+      status: String!
+      reason: String
     }
 
     type ActivityLog {
@@ -198,6 +210,7 @@ export const schema = createSchema<GraphqlContext>({
       createServiceRequestDraft(input: CreateServiceRequestDraftInput!): ServiceRequestDraftMutationResult!
       updateServiceRequestDraft(input: UpdateServiceRequestDraftInput!): ServiceRequestDraftMutationResult!
       submitServiceRequest(input: SubmitServiceRequestInput!): SubmitServiceRequestMutationResult!
+      updateServiceRequestStatus(input: UpdateServiceRequestStatusInput!): ServiceRequestStatusMutationResult!
     }
   `,
   resolvers: {
@@ -362,6 +375,33 @@ export const schema = createSchema<GraphqlContext>({
         return result.ok
           ? submitMutationSuccess(result.serviceRequest)
           : submitMutationError(result.code, result.message, result.fieldErrors);
+      },
+      async updateServiceRequestStatus(
+        _parent: unknown,
+        args: { input: { referenceNumber: string; status: string; reason?: string | null } },
+        context: GraphqlContext
+      ) {
+        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+
+        if (!customer) {
+          return statusMutationError("CUSTOMER_NOT_FOUND", "Customer was not found.");
+        }
+
+        if (!isServiceRequestStatus(args.input.status)) {
+          return statusMutationError("INVALID_STATUS", "Status is not supported.");
+        }
+
+        const result = await context.serviceRequestStatusLifecycle.transitionStatus({
+          customerId: customer.id,
+          referenceNumber: args.input.referenceNumber,
+          nextStatus: args.input.status,
+          reason: args.input.reason ?? undefined,
+          correlationId: context.correlationId
+        });
+
+        return result.ok
+          ? statusMutationSuccess(result.serviceRequest)
+          : statusMutationError(result.code, result.message);
       }
     }
   }
@@ -411,4 +451,27 @@ function submitMutationError(
     fieldErrors,
     validationErrors: Object.fromEntries(fieldErrors.map((error) => [error.field, error.message]))
   };
+}
+
+function statusMutationSuccess(serviceRequest: unknown) {
+  return {
+    ok: true,
+    serviceRequest,
+    error: null
+  };
+}
+
+function statusMutationError(code: string, message: string) {
+  return {
+    ok: false,
+    serviceRequest: null,
+    error: {
+      code,
+      message
+    }
+  };
+}
+
+function isServiceRequestStatus(status: string): status is "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "ACTION_REQUIRED" | "COMPLETED" | "WITHDRAWN" {
+  return ["DRAFT", "SUBMITTED", "UNDER_REVIEW", "ACTION_REQUIRED", "COMPLETED", "WITHDRAWN"].includes(status);
 }
