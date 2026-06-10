@@ -49,6 +49,9 @@ jobs:
       - name: Test workspace
         run: pnpm test
 
+      - name: Guard tracked artifacts and frontend source
+        run: pnpm guard:artifacts && pnpm guard:frontend-source
+
       - name: Build backend
         run: pnpm --filter @ssq/backend build
 
@@ -63,6 +66,9 @@ jobs:
 
       - name: Build Rental Security Subsidy app
         run: pnpm --filter @ssq/rental-security-subsidy build
+
+      - name: Guard browser bundles
+        run: pnpm guard:browser-bundles
 
       - name: Validate Docker Compose graph
         run: docker compose config

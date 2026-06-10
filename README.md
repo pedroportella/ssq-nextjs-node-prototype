@@ -24,6 +24,18 @@ This repository currently contains the initial project structure. Application im
 pnpm install
 ```
 
+## Quality Guards
+
+```bash
+pnpm guard:artifacts
+pnpm build
+pnpm guard:browser-bundles
+```
+
+The guard scripts fail when generated artifacts, local env files, local databases, reports or generated DigitalOcean specs are tracked. Browser bundle guards run after app builds and check that frontend static assets do not expose private backend origins, database URLs or backend-only environment variable names.
+
+Private deployment notes and generated DigitalOcean specs stay out of Git. Commit only safe templates and reviewer-facing documentation.
+
 ## Local Infrastructure
 
 ```bash
