@@ -24,6 +24,18 @@ This repository currently contains the initial project structure. Application im
 pnpm install
 ```
 
+## Local Infrastructure
+
+```bash
+pnpm docker:config
+pnpm docker:up
+pnpm docker:down
+```
+
+The local Docker runtime currently starts PostgreSQL. Backend and frontend app containers are declared as placeholders and will be implemented as the application packages are added.
+
+See `docs/local-development.md` for local runtime details.
+
 ## Planned Apps
 
 - `frontend/apps/dashboard`

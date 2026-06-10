@@ -1,0 +1,98 @@
+name: ssq-nextjs-node-prototype
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ssq-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ssq_prototype}
+      POSTGRES_USER: ${POSTGRES_USER:-ssq_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ssq_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-54329}:5432"
+    volumes:
+      - ssq-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ssq-local
+
+  backend:
+    image: node:22-alpine
+    profiles:
+      - app-placeholders
+    working_dir: /workspace/backend
+    volumes:
+      - ./backend:/workspace/backend:delegated
+    environment:
+      NODE_ENV: development
+      PORT: ${BACKEND_PORT:-7001}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ssq_app}:${POSTGRES_PASSWORD:-ssq_dev_password}@postgres:5432/${POSTGRES_DB:-ssq_prototype}
+    command: ["sh", "-c", "echo 'Backend container placeholder: implemented in the backend container chunk.' && sleep infinity"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - ssq-local
+
+  dashboard:
+    image: node:22-alpine
+    profiles:
+      - app-placeholders
+    working_dir: /workspace/frontend/apps/dashboard
+    volumes:
+      - ./frontend:/workspace/frontend:delegated
+    environment:
+      NODE_ENV: development
+      PORT: ${DASHBOARD_PORT:-3000}
+      BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
+    command: ["sh", "-c", "echo 'Dashboard app placeholder: implemented in the frontend app chunks.' && sleep infinity"]
+    depends_on:
+      - backend
+    networks:
+      - ssq-local
+
+  seniors-card:
+    image: node:22-alpine
+    profiles:
+      - app-placeholders
+    working_dir: /workspace/frontend/apps/seniors-card
+    volumes:
+      - ./frontend:/workspace/frontend:delegated
+    environment:
+      NODE_ENV: development
+      PORT: ${SENIORS_CARD_PORT:-3001}
+      BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
+    command: ["sh", "-c", "echo 'Seniors Card app placeholder: implemented in the frontend app chunks.' && sleep infinity"]
+    depends_on:
+      - backend
+    networks:
+      - ssq-local
+
+  rental-security-subsidy:
+    image: node:22-alpine
+    profiles:
+      - app-placeholders
+    working_dir: /workspace/frontend/apps/rental-security-subsidy
+    volumes:
+      - ./frontend:/workspace/frontend:delegated
+    environment:
+      NODE_ENV: development
+      PORT: ${RENTAL_SECURITY_SUBSIDY_PORT:-3002}
+      BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
+    command: ["sh", "-c", "echo 'Rental Security Subsidy app placeholder: implemented in the frontend app chunks.' && sleep infinity"]
+    depends_on:
+      - backend
+    networks:
+      - ssq-local
+
+volumes:
+  ssq-postgres-data:
+
+networks:
+  ssq-local:
+    driver: bridge
