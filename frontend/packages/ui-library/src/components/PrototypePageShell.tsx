@@ -1,22 +1,27 @@
-import { prototypeAssetManifest } from "@ssq/ui-assets";
-
 import type { ReactNode } from "react";
+
+import { QhdsFooter } from "./QhdsFooter";
+import { QhdsHeader } from "./QhdsHeader";
+import { QhdsLayout } from "./QhdsLayout";
 
 export interface PrototypePageShellProps {
   children: ReactNode;
+  lead?: string;
   title: string;
 }
 
-export function PrototypePageShell({ children, title }: PrototypePageShellProps) {
+export function PrototypePageShell({ children, lead, title }: PrototypePageShellProps) {
   return (
-    <main className="ssq-page-shell">
-      <section aria-labelledby="page-title" className="ssq-page-shell__inner">
-        <p className="ssq-page-shell__brand">{prototypeAssetManifest.logos.prototypeWordmark.text}</p>
-        <h1 className="ssq-page-shell__title" id="page-title">
-          {title}
-        </h1>
-        {children}
-      </section>
-    </main>
+    <QhdsLayout footer={<QhdsFooter />} header={<QhdsHeader />}>
+      <main className="ssq-page-shell">
+        <section aria-labelledby="page-title" className="ssq-page-shell__inner">
+          <h1 className="ssq-page-shell__title" id="page-title">
+            {title}
+          </h1>
+          {lead ? <p className="ssq-page-shell__lead">{lead}</p> : null}
+          {children}
+        </section>
+      </main>
+    </QhdsLayout>
   );
 }

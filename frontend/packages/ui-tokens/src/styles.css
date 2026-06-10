@@ -5,7 +5,17 @@
   --ssq-color-muted: #4b5563;
   --ssq-color-border: #d6d9de;
   --ssq-color-action: #005eb8;
+  --ssq-color-action-text: #ffffff;
   --ssq-color-focus: #f9c642;
+  --ssq-color-header-accent: #78ba00;
+  --ssq-color-header-background: #05325f;
+  --ssq-color-header-text: #ffffff;
+  --ssq-color-info-background: #e8f2fb;
+  --ssq-color-info-border: #2f80c3;
+  --ssq-color-success-background: #eaf7ed;
+  --ssq-color-success-border: #2e8540;
+  --ssq-color-warning-background: #fff4d8;
+  --ssq-color-warning-border: #d9822b;
   --ssq-space-1: 0.25rem;
   --ssq-space-2: 0.5rem;
   --ssq-space-3: 0.75rem;
