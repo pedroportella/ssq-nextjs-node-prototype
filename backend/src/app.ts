@@ -4,6 +4,8 @@ import Fastify from "fastify";
 import { loadConfig } from "./config.js";
 import { createDatabaseClient } from "./database/client.js";
 import { createLoggerOptions } from "./logger.js";
+import { registerObservability } from "./plugins/observability.js";
+import { registerDebugRoutes } from "./routes/debug.js";
 import { registerGraphqlRoute } from "./routes/graphql.js";
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerOperationsRoutes } from "./routes/operations.js";
@@ -27,6 +29,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await app.register(cors, {
     origin: false
   });
+  await registerObservability(app);
 
   const database = options.database ?? createDatabaseClient(config);
 
@@ -35,6 +38,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   });
 
   await registerHealthRoutes(app, config, database);
+  await registerDebugRoutes(app, config);
   await registerGraphqlRoute(app, database.queryable);
   await registerOperationsRoutes(app, database.queryable);
   await registerSubmissionSummaryRoutes(app, database.queryable);

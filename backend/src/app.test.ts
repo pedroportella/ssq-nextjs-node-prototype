@@ -56,6 +56,7 @@ describe("backend health service", () => {
     });
 
     expect(response.statusCode).toBe(200);
+    expect(response.headers["x-correlation-id"]).toEqual(expect.any(String));
     expect(response.json()).toEqual({
       status: "UP",
       service: "ssq-node-api",
@@ -67,6 +68,100 @@ describe("backend health service", () => {
     });
 
     await app.close();
+  });
+
+  it("preserves supplied correlation IDs on responses", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      })
+    });
+
+    const response = await app.inject({
+      headers: {
+        "x-correlation-id": "supplied-correlation"
+      },
+      method: "GET",
+      url: "/health/live"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["x-correlation-id"]).toBe("supplied-correlation");
+
+    await app.close();
+  });
+
+  it("returns safe not-found errors with correlation IDs", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      })
+    });
+
+    const response = await app.inject({
+      headers: {
+        "x-correlation-id": "missing-route-correlation"
+      },
+      method: "GET",
+      url: "/missing-route"
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toEqual({
+      ok: false,
+      error: {
+        code: "NOT_FOUND",
+        message: "Route was not found.",
+        correlationId: "missing-route-correlation"
+      }
+    });
+
+    await app.close();
+  });
+
+  it("keeps debug routes unavailable unless explicitly enabled outside production", async () => {
+    const disabledApp = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      })
+    });
+
+    const disabledResponse = await disabledApp.inject({
+      method: "GET",
+      url: "/debug/request"
+    });
+
+    expect(disabledResponse.statusCode).toBe(404);
+    await disabledApp.close();
+
+    const enabledApp = await buildApp({
+      config: loadConfig({
+        DEBUG_ROUTES_ENABLED: "true",
+        NODE_ENV: "test",
+        PORT: "7001"
+      })
+    });
+
+    const enabledResponse = await enabledApp.inject({
+      headers: {
+        "x-correlation-id": "debug-correlation"
+      },
+      method: "GET",
+      url: "/debug/request"
+    });
+
+    expect(enabledResponse.statusCode).toBe(200);
+    expect(enabledResponse.json()).toMatchObject({
+      ok: true,
+      correlationId: "debug-correlation",
+      method: "GET",
+      url: "/debug/request"
+    });
+
+    await enabledApp.close();
   });
 
   it("returns liveness and readiness probes", async () => {

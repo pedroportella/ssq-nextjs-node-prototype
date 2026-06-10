@@ -6,6 +6,18 @@ export function createLoggerOptions(config: Pick<AppConfig, "LOG_LEVEL" | "NODE_
   }
 
   return {
-    level: config.LOG_LEVEL
+    level: config.LOG_LEVEL,
+    redact: {
+      paths: [
+        "req.headers.authorization",
+        "req.headers.cookie",
+        "req.headers['x-api-key']",
+        "request.headers.authorization",
+        "request.headers.cookie",
+        "payload",
+        "body"
+      ],
+      censor: "[redacted]"
+    }
   };
 }

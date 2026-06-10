@@ -69,7 +69,7 @@ Frontend apps consume backend-facing service helpers through `@ssq/services/serv
 
 ## Planned Backend
 
-The backend is a production-shaped Node.js platform slice with Fastify, PostgreSQL, SQL migrations, prototype seed data, repository helpers, backend-owned readiness, database-backed transaction catalogue, GraphQL platform API, service request drafts, submission validation, simulated profile evidence, supporting document upload policy, request activity lifecycle, submission summary downloads, persisted outbox events, demo identity role boundaries and room for broader safe operations endpoints.
+The backend is a production-shaped Node.js platform slice with Fastify, PostgreSQL, SQL migrations, prototype seed data, repository helpers, backend-owned readiness, database-backed transaction catalogue, GraphQL platform API, service request drafts, submission validation, simulated profile evidence, supporting document upload policy, request activity lifecycle, submission summary downloads, persisted outbox events, demo identity role boundaries, correlation/safe-error observability and room for broader safe operations endpoints.
 
 Current seeded backend catalogue:
 
@@ -91,3 +91,5 @@ Current backend API endpoints:
 - `GET /operations/outbox-events`: prototype operations endpoint that summarises pending, processed and failed backend outbox events.
 
 Local prototype identity can be selected with `X-SSQ-DEMO-ROLE` (`Citizen`, `ServiceOfficer`, `TeamLead` or `Admin`) and `X-SSQ-DEMO-SUBJECT`. Citizen identity defaults to `demo.customer@example.test`.
+
+Backend responses preserve or generate `x-correlation-id`. Safe error responses include the correlation ID without exposing stack traces or raw exception details. Debug routes remain unavailable unless explicitly enabled outside production.

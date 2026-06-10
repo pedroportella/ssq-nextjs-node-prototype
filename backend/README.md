@@ -21,6 +21,12 @@ pnpm --dir backend test
 pnpm --dir backend build
 ```
 
+Optional local debug route:
+
+```bash
+DEBUG_ROUTES_ENABLED=true pnpm --dir backend dev
+```
+
 ## Docker
 
 Build the backend container from the repository root:
@@ -116,3 +122,7 @@ Prototype role headers are also supported:
 - `X-SSQ-DEMO-SUBJECT`: demo subject identifier. For citizens this is the customer email.
 
 Citizen role access is scoped to owned drafts, requests, uploads and summary downloads. Service officer, team lead and admin roles can read submitted service requests and update request status. Admin role is required for operations endpoints. These headers are local review controls only, not production authentication.
+
+All backend responses preserve a supplied `x-correlation-id` or generate one when absent. Safe not-found and unhandled-error responses include the correlation ID and avoid stack traces or raw infrastructure details. Runtime logs redact common secret-bearing headers and payload/body fields.
+
+`GET /debug/request` is available only when `DEBUG_ROUTES_ENABLED=true` and `NODE_ENV` is not `production`; it is unavailable by default.
