@@ -32,7 +32,8 @@ pnpm docker:up
 pnpm docker:down
 ```
 
-The local Docker runtime currently starts PostgreSQL. Backend and frontend app containers are declared as placeholders and will be implemented as the application packages are added.
+The local Docker runtime currently starts PostgreSQL and the backend API. Frontend app containers are still placeholders and will be implemented as the application packages are containerised.
+The backend API is available on `http://localhost:7001` once the local runtime is up.
 
 See `docs/local-development.md` for local runtime details.
 

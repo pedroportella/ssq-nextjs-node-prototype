@@ -14,9 +14,9 @@ Safe local defaults are defined in `docker-compose.yml`.
 
 Copy `.env.example` to `.env` only when you need to override local ports or database credentials. Do not commit `.env`.
 
-## PostgreSQL
+## Local Runtime
 
-Start the database:
+Start PostgreSQL and the backend API:
 
 ```bash
 pnpm docker:up
@@ -34,6 +34,12 @@ Stop the local runtime:
 pnpm docker:down
 ```
 
+The backend is exposed on host port `7001` by default:
+
+```bash
+curl -i http://localhost:7001/health
+```
+
 The database is exposed on host port `54329` by default to avoid clashing with a local PostgreSQL install.
 
 Connection details:
@@ -49,7 +55,7 @@ The `ssq-postgres-data` Docker volume persists database state across container r
 
 ## App Placeholders
 
-The backend and three frontend apps are declared as Compose placeholders under the `app-placeholders` profile. They are not used by the default database-only runtime yet.
+The three frontend apps are declared as Compose placeholders under the `app-placeholders` profile. They are not used by the default backend/database runtime yet.
 
 Preview the full future service graph:
 
@@ -57,4 +63,4 @@ Preview the full future service graph:
 docker compose --profile app-placeholders config
 ```
 
-The real backend and frontend containers will replace these placeholders as those packages are implemented.
+The frontend placeholders will be replaced by real app containers as those packages are containerised.

@@ -19,6 +19,20 @@ pnpm --dir backend test
 pnpm --dir backend build
 ```
 
+## Docker
+
+Build the backend container from the repository root:
+
+```bash
+pnpm docker:build
+```
+
+Start PostgreSQL and the backend API:
+
+```bash
+pnpm docker:up
+```
+
 ## Health Endpoints
 
 - `GET /health`: runtime health summary.

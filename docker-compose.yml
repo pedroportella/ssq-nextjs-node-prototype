@@ -22,17 +22,30 @@ services:
       - ssq-local
 
   backend:
-    image: node:22-alpine
-    profiles:
-      - app-placeholders
-    working_dir: /workspace/backend
-    volumes:
-      - ./backend:/workspace/backend:delegated
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: ssq-node-api:local
     environment:
-      NODE_ENV: development
+      NODE_ENV: ${BACKEND_NODE_ENV:-production}
+      HOST: 0.0.0.0
       PORT: ${BACKEND_PORT:-7001}
+      LOG_LEVEL: ${BACKEND_LOG_LEVEL:-info}
+      APP_NAME: ssq-node-api
+      APP_VERSION: ${APP_VERSION:-0.0.0}
       DATABASE_URL: postgresql://${POSTGRES_USER:-ssq_app}:${POSTGRES_PASSWORD:-ssq_dev_password}@postgres:5432/${POSTGRES_DB:-ssq_prototype}
-    command: ["sh", "-c", "echo 'Backend container placeholder: implemented in the backend container chunk.' && sleep infinity"]
+    ports:
+      - "${BACKEND_PORT:-7001}:${BACKEND_PORT:-7001}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:' + (process.env.PORT || 7001) + '/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,7 +65,8 @@ services:
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
     command: ["sh", "-c", "echo 'Dashboard app placeholder: implemented in the frontend app chunks.' && sleep infinity"]
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - ssq-local
 
@@ -69,7 +83,8 @@ services:
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
     command: ["sh", "-c", "echo 'Seniors Card app placeholder: implemented in the frontend app chunks.' && sleep infinity"]
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - ssq-local
 
@@ -86,7 +101,8 @@ services:
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
     command: ["sh", "-c", "echo 'Rental Security Subsidy app placeholder: implemented in the frontend app chunks.' && sleep infinity"]
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - ssq-local
 
