@@ -49,6 +49,17 @@ export interface ServiceRequestRecord {
   transactionKey?: string;
 }
 
+export interface ServiceRequestDraftRecord {
+  id: string;
+  customerId: string;
+  transactionDefinitionId: string;
+  transactionKey?: string;
+  currentStep: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ServiceRequestEventRecord {
   id: string;
   serviceRequestId: string;
@@ -104,6 +115,17 @@ interface ServiceRequestRow {
   status: ServiceRequestRecord["status"];
   payload: Record<string, unknown>;
   transaction_key?: string;
+}
+
+interface ServiceRequestDraftRow {
+  id: string;
+  customer_id: string;
+  transaction_definition_id: string;
+  transaction_key?: string;
+  current_step: string;
+  payload: Record<string, unknown>;
+  created_at: Date | string;
+  updated_at: Date | string;
 }
 
 interface ServiceRequestEventRow {
@@ -250,6 +272,112 @@ export class PrototypeRepository {
     return mapServiceRequest(result.rows[0]);
   }
 
+  async createServiceRequestDraft(input: {
+    customerId: string;
+    transactionDefinitionId: string;
+    currentStep: string;
+    payload?: Record<string, unknown>;
+  }): Promise<ServiceRequestDraftRecord> {
+    const result = await this.database.query<ServiceRequestDraftRow>(
+      `
+        INSERT INTO service_request_drafts (
+          customer_id,
+          transaction_definition_id,
+          current_step,
+          payload
+        )
+        VALUES ($1, $2, $3, $4::jsonb)
+        RETURNING id, customer_id, transaction_definition_id, current_step, payload, created_at, updated_at
+      `,
+      [
+        input.customerId,
+        input.transactionDefinitionId,
+        input.currentStep,
+        JSON.stringify(input.payload ?? {})
+      ]
+    );
+
+    return mapServiceRequestDraft(result.rows[0]);
+  }
+
+  async updateServiceRequestDraftForCustomer(input: {
+    draftId: string;
+    customerId: string;
+    currentStep: string;
+    payload: Record<string, unknown>;
+  }): Promise<ServiceRequestDraftRecord | undefined> {
+    const result = await this.database.query<ServiceRequestDraftRow>(
+      `
+        UPDATE service_request_drafts
+        SET current_step = $3,
+            payload = $4::jsonb,
+            updated_at = now()
+        WHERE id = $1
+          AND customer_id = $2
+        RETURNING id, customer_id, transaction_definition_id, current_step, payload, created_at, updated_at
+      `,
+      [
+        input.draftId,
+        input.customerId,
+        input.currentStep,
+        JSON.stringify(input.payload)
+      ]
+    );
+
+    return result.rows[0] ? mapServiceRequestDraft(result.rows[0]) : undefined;
+  }
+
+  async getServiceRequestDraftForCustomer(input: {
+    draftId: string;
+    customerId: string;
+  }): Promise<ServiceRequestDraftRecord | undefined> {
+    const result = await this.database.query<ServiceRequestDraftRow>(
+      `
+        SELECT
+          srd.id,
+          srd.customer_id,
+          srd.transaction_definition_id,
+          td.transaction_key,
+          srd.current_step,
+          srd.payload,
+          srd.created_at,
+          srd.updated_at
+        FROM service_request_drafts srd
+        INNER JOIN transaction_definitions td
+          ON td.id = srd.transaction_definition_id
+        WHERE srd.id = $1
+          AND srd.customer_id = $2
+      `,
+      [input.draftId, input.customerId]
+    );
+
+    return result.rows[0] ? mapServiceRequestDraft(result.rows[0]) : undefined;
+  }
+
+  async listServiceRequestDraftsForCustomer(customerId: string): Promise<ServiceRequestDraftRecord[]> {
+    const result = await this.database.query<ServiceRequestDraftRow>(
+      `
+        SELECT
+          srd.id,
+          srd.customer_id,
+          srd.transaction_definition_id,
+          td.transaction_key,
+          srd.current_step,
+          srd.payload,
+          srd.created_at,
+          srd.updated_at
+        FROM service_request_drafts srd
+        INNER JOIN transaction_definitions td
+          ON td.id = srd.transaction_definition_id
+        WHERE srd.customer_id = $1
+        ORDER BY srd.updated_at DESC
+      `,
+      [customerId]
+    );
+
+    return result.rows.map(mapServiceRequestDraft);
+  }
+
   async listServiceRequestsForCustomer(customerId: string): Promise<ServiceRequestRecord[]> {
     const result = await this.database.query<ServiceRequestRow>(
       `
@@ -369,6 +497,19 @@ function mapServiceRequest(row: ServiceRequestRow): ServiceRequestRecord {
     status: row.status,
     payload: row.payload,
     transactionKey: row.transaction_key
+  };
+}
+
+function mapServiceRequestDraft(row: ServiceRequestDraftRow): ServiceRequestDraftRecord {
+  return {
+    id: row.id,
+    customerId: row.customer_id,
+    transactionDefinitionId: row.transaction_definition_id,
+    transactionKey: row.transaction_key,
+    currentStep: row.current_step,
+    payload: row.payload,
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+    updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at
   };
 }
 

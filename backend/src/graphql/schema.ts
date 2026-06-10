@@ -103,6 +103,40 @@ export const schema = createSchema<GraphqlContext>({
       payload: JSON!
     }
 
+    type ServiceRequestDraft {
+      id: ID!
+      customerId: ID!
+      transactionDefinitionId: ID!
+      transactionKey: String
+      currentStep: String!
+      payload: JSON!
+      createdAt: String!
+      updatedAt: String!
+    }
+
+    type DraftMutationError {
+      code: String!
+      message: String!
+    }
+
+    type ServiceRequestDraftMutationResult {
+      ok: Boolean!
+      draft: ServiceRequestDraft
+      error: DraftMutationError
+    }
+
+    input CreateServiceRequestDraftInput {
+      transactionKey: String!
+      currentStep: String!
+      payload: JSON
+    }
+
+    input UpdateServiceRequestDraftInput {
+      draftId: ID!
+      currentStep: String!
+      payload: JSON!
+    }
+
     type ActivityLog {
       id: ID!
       serviceRequestId: ID!
@@ -123,9 +157,16 @@ export const schema = createSchema<GraphqlContext>({
       transactionDefinitions: [TransactionDefinition!]!
       transactionCatalogue: [TransactionCatalogueEntry!]!
       transactionSchema(transactionKey: String!): TransactionSchema
+      serviceRequestDrafts: [ServiceRequestDraft!]!
+      serviceRequestDraft(id: ID!): ServiceRequestDraft
       serviceRequests: [ServiceRequest!]!
       serviceRequest(referenceNumber: String!): ServiceRequest
       activityLogs(serviceRequestId: ID!): [ActivityLog!]!
+    }
+
+    type Mutation {
+      createServiceRequestDraft(input: CreateServiceRequestDraftInput!): ServiceRequestDraftMutationResult!
+      updateServiceRequestDraft(input: UpdateServiceRequestDraftInput!): ServiceRequestDraftMutationResult!
     }
   `,
   resolvers: {
@@ -204,12 +245,88 @@ export const schema = createSchema<GraphqlContext>({
 
         return customer ? context.repository.listServiceRequestsForCustomer(customer.id) : [];
       },
+      async serviceRequestDrafts(_parent: unknown, _args: unknown, context: GraphqlContext) {
+        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+
+        return customer ? context.repository.listServiceRequestDraftsForCustomer(customer.id) : [];
+      },
+      async serviceRequestDraft(_parent: unknown, args: { id: string }, context: GraphqlContext) {
+        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+
+        return customer
+          ? context.repository.getServiceRequestDraftForCustomer({
+              draftId: args.id,
+              customerId: customer.id
+            })
+          : null;
+      },
       serviceRequest(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
         return context.repository.getServiceRequestByReference(args.referenceNumber);
       },
       activityLogs(_parent: unknown, args: { serviceRequestId: string }, context: GraphqlContext) {
         return context.repository.listActivityLogs(args.serviceRequestId);
       }
+    },
+    Mutation: {
+      async createServiceRequestDraft(
+        _parent: unknown,
+        args: { input: { transactionKey: string; currentStep: string; payload?: Record<string, unknown> | null } },
+        context: GraphqlContext
+      ) {
+        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+
+        if (!customer) {
+          return draftMutationError("CUSTOMER_NOT_FOUND", "Customer was not found.");
+        }
+
+        const result = await context.draftLifecycle.createDraft({
+          customerId: customer.id,
+          transactionKey: args.input.transactionKey,
+          currentStep: args.input.currentStep,
+          payload: args.input.payload ?? {}
+        });
+
+        return result.ok ? draftMutationSuccess(result.draft) : draftMutationError(result.code, result.message);
+      },
+      async updateServiceRequestDraft(
+        _parent: unknown,
+        args: { input: { draftId: string; currentStep: string; payload: Record<string, unknown> } },
+        context: GraphqlContext
+      ) {
+        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+
+        if (!customer) {
+          return draftMutationError("CUSTOMER_NOT_FOUND", "Customer was not found.");
+        }
+
+        const result = await context.draftLifecycle.updateDraft({
+          draftId: args.input.draftId,
+          customerId: customer.id,
+          currentStep: args.input.currentStep,
+          payload: args.input.payload
+        });
+
+        return result.ok ? draftMutationSuccess(result.draft) : draftMutationError(result.code, result.message);
+      }
     }
   }
 });
+
+function draftMutationSuccess(draft: unknown) {
+  return {
+    ok: true,
+    draft,
+    error: null
+  };
+}
+
+function draftMutationError(code: string, message: string) {
+  return {
+    ok: false,
+    draft: null,
+    error: {
+      code,
+      message
+    }
+  };
+}

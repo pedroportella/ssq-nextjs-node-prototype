@@ -7,6 +7,7 @@ import type { Queryable } from "../database/types.js";
 
 class SeededTestDatabase implements Queryable {
   private readonly serviceRequests: QueryResultRow[] = [];
+  private readonly serviceRequestDrafts: QueryResultRow[] = [];
 
   async query<T extends QueryResultRow = QueryResultRow>(sql: string, values: readonly unknown[] = []): Promise<QueryResult<T>> {
     const normalizedSql = sql.replace(/\s+/g, " ").trim();
@@ -68,6 +69,48 @@ class SeededTestDatabase implements Queryable {
       return result<T>([row as unknown as T]);
     }
 
+    if (normalizedSql.startsWith("INSERT INTO service_request_drafts")) {
+      const row = {
+        id: "70000000-0000-4000-8000-000000000001",
+        customer_id: String(values[0]),
+        transaction_definition_id: String(values[1]),
+        current_step: String(values[2]),
+        payload: JSON.parse(String(values[3])),
+        created_at: "2026-06-10T00:00:00.000Z",
+        updated_at: "2026-06-10T00:00:00.000Z"
+      };
+
+      this.serviceRequestDrafts.push(row);
+      return result<T>([row as unknown as T]);
+    }
+
+    if (normalizedSql.startsWith("UPDATE service_request_drafts")) {
+      const draft = this.serviceRequestDrafts.find((row) => row.id === values[0] && row.customer_id === values[1]);
+
+      if (!draft) {
+        return result<T>([]);
+      }
+
+      draft.current_step = String(values[2]);
+      draft.payload = JSON.parse(String(values[3]));
+      draft.updated_at = "2026-06-10T00:05:00.000Z";
+
+      return result<T>([draft as unknown as T]);
+    }
+
+    if (normalizedSql.includes("FROM service_request_drafts srd")) {
+      const rows = this.serviceRequestDrafts
+        .filter((row) => normalizedSql.includes("WHERE srd.id = $1")
+          ? row.id === values[0] && row.customer_id === values[1]
+          : row.customer_id === values[0])
+        .map((row) => ({
+          ...row,
+          transaction_key: "seniors-card"
+        }));
+
+      return result<T>(rows as unknown as T[]);
+    }
+
     if (normalizedSql.includes("FROM service_requests")) {
       return result<T>(this.serviceRequests.filter((row) => row.customer_id === values[0]) as T[]);
     }
@@ -114,6 +157,53 @@ describe("PrototypeRepository", () => {
     });
     expect(requests).toHaveLength(1);
     expect(requests[0]?.referenceNumber).toBe("SSQ-TEST-0001");
+  });
+
+  it("creates, updates and reads customer-owned service request drafts", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+
+    const draft = await repository.createServiceRequestDraft({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      transactionDefinitionId: "20000000-0000-4000-8000-000000000002",
+      currentStep: "eligibility",
+      payload: {
+        consent: true
+      }
+    });
+    const updated = await repository.updateServiceRequestDraftForCustomer({
+      draftId: draft.id,
+      customerId: draft.customerId,
+      currentStep: "details",
+      payload: {
+        consent: true,
+        cardType: "seniors-card"
+      }
+    });
+    const otherCustomerUpdate = await repository.updateServiceRequestDraftForCustomer({
+      draftId: draft.id,
+      customerId: "10000000-0000-4000-8000-000000000999",
+      currentStep: "details",
+      payload: {}
+    });
+    const drafts = await repository.listServiceRequestDraftsForCustomer(draft.customerId);
+    const resumed = await repository.getServiceRequestDraftForCustomer({
+      draftId: draft.id,
+      customerId: draft.customerId
+    });
+
+    expect(updated).toMatchObject({
+      id: draft.id,
+      currentStep: "details",
+      payload: {
+        consent: true,
+        cardType: "seniors-card"
+      }
+    });
+    expect(otherCustomerUpdate).toBeUndefined();
+    expect(drafts).toHaveLength(1);
+    expect(drafts[0]?.transactionKey).toBe("seniors-card");
+    expect(resumed?.id).toBe(draft.id);
   });
 
   it("reads enabled transaction catalogue records with schemas and flags", async () => {

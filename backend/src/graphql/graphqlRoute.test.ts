@@ -7,6 +7,8 @@ import type { DatabaseClient } from "../database/client.js";
 import type { QueryResult, QueryResultRow } from "pg";
 
 function createGraphqlTestDatabase(): DatabaseClient {
+  const serviceRequestDrafts: QueryResultRow[] = [];
+
   return {
     queryable: {
       async query<T extends QueryResultRow = QueryResultRow>(sql: string, values: readonly unknown[] = []): Promise<QueryResult<T>> {
@@ -63,7 +65,49 @@ function createGraphqlTestDatabase(): DatabaseClient {
             return result<T>(rows.filter((row) => row.transaction_key === values[0]) as T[]);
           }
 
-          return result<T>(rows as T[]);
+          return result<T>(rows as unknown as T[]);
+        }
+
+        if (normalizedSql.startsWith("INSERT INTO service_request_drafts")) {
+          const row = {
+            id: "70000000-0000-4000-8000-000000000001",
+            customer_id: String(values[0]),
+            transaction_definition_id: String(values[1]),
+            current_step: String(values[2]),
+            payload: JSON.parse(String(values[3])),
+            created_at: "2026-06-10T00:00:00.000Z",
+            updated_at: "2026-06-10T00:00:00.000Z"
+          };
+
+          serviceRequestDrafts.push(row);
+          return result<T>([row as unknown as T]);
+        }
+
+        if (normalizedSql.startsWith("UPDATE service_request_drafts")) {
+          const draft = serviceRequestDrafts.find((row) => row.id === values[0] && row.customer_id === values[1]);
+
+          if (!draft) {
+            return result<T>([]);
+          }
+
+          draft.current_step = String(values[2]);
+          draft.payload = JSON.parse(String(values[3]));
+          draft.updated_at = "2026-06-10T00:05:00.000Z";
+
+          return result<T>([draft as unknown as T]);
+        }
+
+        if (normalizedSql.includes("FROM service_request_drafts srd")) {
+          const rows = serviceRequestDrafts
+            .filter((row) => normalizedSql.includes("WHERE srd.id = $1")
+              ? row.id === values[0] && row.customer_id === values[1]
+              : row.customer_id === values[0])
+            .map((row) => ({
+              ...row,
+              transaction_key: "seniors-card"
+            }));
+
+          return result<T>(rows as unknown as T[]);
         }
 
         if (normalizedSql.includes("FROM transaction_definitions")) {
@@ -254,6 +298,210 @@ describe("GraphQL route", () => {
         viewer: null,
         customerProfile: null,
         serviceRequests: []
+      }
+    });
+
+    await app.close();
+  });
+
+  it("creates, updates and resumes service request drafts for the demo customer", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const createResponse = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation CreateDraft($input: CreateServiceRequestDraftInput!) {
+            createServiceRequestDraft(input: $input) {
+              ok
+              error { code message }
+              draft {
+                id
+                transactionKey
+                currentStep
+                payload
+              }
+            }
+          }
+        `,
+        variables: {
+          input: {
+            transactionKey: "seniors-card",
+            currentStep: "eligibility",
+            payload: {
+              consent: true
+            }
+          }
+        }
+      },
+      url: "/graphql"
+    });
+
+    expect(createResponse.statusCode).toBe(200);
+    expect(createResponse.json()).toMatchObject({
+      data: {
+        createServiceRequestDraft: {
+          ok: true,
+          error: null,
+          draft: {
+            id: "70000000-0000-4000-8000-000000000001",
+            transactionKey: "seniors-card",
+            currentStep: "eligibility",
+            payload: {
+              consent: true
+            }
+          }
+        }
+      }
+    });
+
+    const updateResponse = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation UpdateDraft($input: UpdateServiceRequestDraftInput!) {
+            updateServiceRequestDraft(input: $input) {
+              ok
+              error { code }
+              draft {
+                id
+                currentStep
+                payload
+              }
+            }
+          }
+        `,
+        variables: {
+          input: {
+            draftId: "70000000-0000-4000-8000-000000000001",
+            currentStep: "details",
+            payload: {
+              consent: true,
+              cardType: "seniors-card"
+            }
+          }
+        }
+      },
+      url: "/graphql"
+    });
+
+    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse.json()).toMatchObject({
+      data: {
+        updateServiceRequestDraft: {
+          ok: true,
+          error: null,
+          draft: {
+            id: "70000000-0000-4000-8000-000000000001",
+            currentStep: "details",
+            payload: {
+              cardType: "seniors-card",
+              consent: true
+            }
+          }
+        }
+      }
+    });
+
+    const resumeResponse = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query ResumeDraft {
+            serviceRequestDrafts { id currentStep transactionKey }
+            serviceRequestDraft(id: "70000000-0000-4000-8000-000000000001") {
+              id
+              currentStep
+              payload
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(resumeResponse.statusCode).toBe(200);
+    expect(resumeResponse.json()).toMatchObject({
+      data: {
+        serviceRequestDrafts: [
+          {
+            id: "70000000-0000-4000-8000-000000000001",
+            currentStep: "details",
+            transactionKey: "seniors-card"
+          }
+        ],
+        serviceRequestDraft: {
+          id: "70000000-0000-4000-8000-000000000001",
+          currentStep: "details",
+          payload: {
+            cardType: "seniors-card",
+            consent: true
+          }
+        }
+      }
+    });
+
+    await app.close();
+  });
+
+  it("returns safe draft mutation errors for invalid transaction keys", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation CreateInvalidDraft {
+            createServiceRequestDraft(input: {
+              transactionKey: "missing"
+              currentStep: "eligibility"
+              payload: {}
+            }) {
+              ok
+              draft { id }
+              error { code message }
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      data: {
+        createServiceRequestDraft: {
+          ok: false,
+          draft: null,
+          error: {
+            code: "TRANSACTION_NOT_FOUND",
+            message: "Transaction was not found."
+          }
+        }
       }
     });
 

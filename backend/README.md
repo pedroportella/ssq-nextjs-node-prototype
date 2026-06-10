@@ -51,6 +51,7 @@ The backend currently owns SQL migrations and seed data for:
 - transaction definitions;
 - transaction schemas;
 - feature flags;
+- service request drafts;
 - service requests;
 - service request events.
 
@@ -68,8 +69,15 @@ Current query surface:
 - transaction definitions;
 - enabled transaction catalogue;
 - transaction schema by key;
+- service request drafts;
+- service request draft by ID;
 - service requests;
 - service request by reference;
 - activity logs.
+
+Current mutation surface:
+
+- create service request draft;
+- update service request draft.
 
 GraphQL requests can provide `x-correlation-id` for trace continuity. Local prototype identity defaults to `demo.customer@example.test` and can be overridden with `x-demo-customer-email`.
