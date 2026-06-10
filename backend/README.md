@@ -102,6 +102,7 @@ Current query surface:
 - service request drafts;
 - service request draft by ID;
 - service requests;
+- paged service request connection with status/search/page/sort inputs and status counts;
 - service request by reference;
 - customer profile evidence by service request ID;
 - submission summary by reference number;
@@ -126,3 +127,5 @@ Citizen role access is scoped to owned drafts, requests, uploads and summary dow
 All backend responses preserve a supplied `x-correlation-id` or generate one when absent. Safe not-found and unhandled-error responses include the correlation ID and avoid stack traces or raw infrastructure details. Runtime logs redact common secret-bearing headers and payload/body fields.
 
 `GET /debug/request` is available only when `DEBUG_ROUTES_ENABLED=true` and `NODE_ENV` is not `production`; it is unavailable by default.
+
+Service request connection queries validate paging and sort inputs before reaching SQL. Supported sort fields are `createdAt`, `referenceNumber`, `status` and `transactionKey`; page size is capped at 50 for the prototype.

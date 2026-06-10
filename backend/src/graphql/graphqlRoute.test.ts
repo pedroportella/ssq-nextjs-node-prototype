@@ -275,27 +275,59 @@ function createGraphqlTestDatabase(): DatabaseClient {
             ...row,
             transaction_key: "seniors-card"
           }));
+          const allRows = [...seededRows, ...submittedRows];
+
+          if (normalizedSql.startsWith("SELECT count(*) AS total_count")) {
+            const rows = filterServiceRequestRows(allRows, normalizedSql, values);
+
+            return result<T>([
+              {
+                total_count: rows.length
+              } as unknown as T
+            ]);
+          }
+
+          if (normalizedSql.startsWith("SELECT sr.status, count(*) AS status_count")) {
+            const counts = new Map<string, number>();
+
+            for (const row of filterServiceRequestRows(allRows, normalizedSql, values)) {
+              counts.set(String(row.status), (counts.get(String(row.status)) ?? 0) + 1);
+            }
+
+            return result<T>([...counts.entries()].map(([status, count]) => ({
+              status,
+              status_count: count
+            })) as unknown as T[]);
+          }
+
+          if (normalizedSql.includes("LIMIT")) {
+            const rows = filterServiceRequestRows(allRows, normalizedSql, values);
+            const pageSize = Number(values.at(-2));
+            const offset = Number(values.at(-1));
+
+            return result<T>(rows.slice(offset, offset + pageSize) as unknown as T[]);
+          }
 
           if (normalizedSql.includes("WHERE sr.reference_number = $1 AND sr.customer_id = $2")) {
             return result<T>(
-              [...seededRows, ...submittedRows].filter((row) => row.reference_number === values[0] && row.customer_id === values[1]) as unknown as T[]
+              allRows.filter((row) => row.reference_number === values[0] && row.customer_id === values[1]) as unknown as T[]
             );
           }
 
           if (normalizedSql.includes("WHERE sr.reference_number = $1")) {
             return result<T>(
-              [...seededRows, ...submittedRows].filter((row) => row.reference_number === values[0]) as unknown as T[]
+              allRows.filter((row) => row.reference_number === values[0]) as unknown as T[]
             );
           }
 
           if (normalizedSql.includes("WHERE sr.status <> 'DRAFT'")) {
             return result<T>(
-              [...seededRows, ...submittedRows].filter((row) => row.status !== "DRAFT") as unknown as T[]
+              allRows.filter((row) => row.status !== "DRAFT") as unknown as T[]
             );
           }
 
           return result<T>(
-            [...seededRows, ...submittedRows].filter((row) => row.customer_id === values[0]) as unknown as T[]
+            allRows.filter((row) => row.customer_id === values[0]) as unknown as T[]
           );
         }
 
@@ -579,6 +611,127 @@ describe("GraphQL route", () => {
         ],
         serviceRequest: {
           referenceNumber: "SSQ-DEMO-0001"
+        }
+      }
+    });
+
+    await app.close();
+  });
+
+  it("returns submitted service request query contracts with paging filters and counts", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-ssq-demo-role": "ServiceOfficer"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query SubmittedConnection {
+            submittedServiceRequestConnection(input: {
+              status: "SUBMITTED"
+              page: 1
+              pageSize: 1
+              sortBy: "referenceNumber"
+              sortDirection: "ASC"
+            }) {
+              ok
+              error { code message }
+              connection {
+                items { referenceNumber status transactionKey }
+                pageInfo { page pageSize totalItems totalPages }
+                statusCounts { status count }
+              }
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        submittedServiceRequestConnection: {
+          ok: true,
+          error: null,
+          connection: {
+            items: [
+              {
+                referenceNumber: "SSQ-DEMO-0001",
+                status: "SUBMITTED",
+                transactionKey: "seniors-card"
+              }
+            ],
+            pageInfo: {
+              page: 1,
+              pageSize: 1,
+              totalItems: 1,
+              totalPages: 1
+            },
+            statusCounts: [
+              {
+                status: "SUBMITTED",
+                count: 1
+              }
+            ]
+          }
+        }
+      }
+    });
+
+    await app.close();
+  });
+
+  it("returns safe validation errors for invalid service request query contracts", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-ssq-demo-role": "ServiceOfficer"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query InvalidConnection {
+            submittedServiceRequestConnection(input: {
+              sortBy: "payload"
+            }) {
+              ok
+              connection { pageInfo { totalItems } }
+              error { code message }
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      data: {
+        submittedServiceRequestConnection: {
+          ok: false,
+          connection: null,
+          error: {
+            code: "INVALID_SORT",
+            message: "Sort field is not supported."
+          }
         }
       }
     });
@@ -1222,4 +1375,41 @@ function result<T extends QueryResultRow>(rows: T[]): QueryResult<T> {
     rowCount: rows.length,
     rows
   };
+}
+
+function filterServiceRequestRows(rows: QueryResultRow[], normalizedSql: string, values: readonly unknown[]): QueryResultRow[] {
+  return rows.filter((row) => {
+    if (normalizedSql.includes("sr.customer_id = $1") && row.customer_id !== values[0]) {
+      return false;
+    }
+
+    if (normalizedSql.includes("sr.status <> 'DRAFT'") && row.status === "DRAFT") {
+      return false;
+    }
+
+    const statusIndex = values.findIndex((value) => value === "DRAFT"
+      || value === "SUBMITTED"
+      || value === "UNDER_REVIEW"
+      || value === "ACTION_REQUIRED"
+      || value === "COMPLETED"
+      || value === "WITHDRAWN");
+
+    if (normalizedSql.includes("sr.status = $") && statusIndex >= 0 && row.status !== values[statusIndex]) {
+      return false;
+    }
+
+    const searchValue = values.find((value) => typeof value === "string" && value.startsWith("%") && value.endsWith("%"));
+
+    if (searchValue) {
+      const needle = String(searchValue).replaceAll("%", "").toLowerCase();
+      const referenceNumber = String(row.reference_number).toLowerCase();
+      const transactionKey = String(row.transaction_key ?? "").toLowerCase();
+
+      if (!referenceNumber.includes(needle) && !transactionKey.includes(needle)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 }

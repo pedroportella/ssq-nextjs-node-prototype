@@ -85,7 +85,7 @@ Current backend health endpoints:
 
 Current backend API endpoints:
 
-- `POST /graphql`: platform data API for viewer/profile, feature flags, transaction catalogue, transaction schemas, service request drafts, validated draft submission, simulated profile evidence, service request status lifecycle, submitted-record review lists, submission summary metadata, service requests and activity logs.
+- `POST /graphql`: platform data API for viewer/profile, feature flags, transaction catalogue, transaction schemas, service request drafts, validated draft submission, simulated profile evidence, service request status lifecycle, submitted-record review lists, paged service request query contracts, submission summary metadata, service requests and activity logs.
 - `POST /uploads/supporting-documents`: metadata-only supporting document upload policy endpoint with size/type/category/ownership validation and production-next scanning/retention fields.
 - `GET /service-requests/:referenceNumber/summary/download`: text submission summary download endpoint with owner checks, content type and `content-disposition`.
 - `GET /operations/outbox-events`: prototype operations endpoint that summarises pending, processed and failed backend outbox events.

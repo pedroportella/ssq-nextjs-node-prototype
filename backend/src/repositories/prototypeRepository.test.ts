@@ -233,6 +233,37 @@ class SeededTestDatabase implements Queryable {
     }
 
     if (normalizedSql.includes("FROM service_requests")) {
+      if (normalizedSql.startsWith("SELECT count(*) AS total_count")) {
+        const rows = filterServiceRequestRows(this.serviceRequests, normalizedSql, values);
+
+        return result<T>([
+          {
+            total_count: rows.length
+          } as unknown as T
+        ]);
+      }
+
+      if (normalizedSql.startsWith("SELECT sr.status, count(*) AS status_count")) {
+        const counts = new Map<string, number>();
+
+        for (const row of filterServiceRequestRows(this.serviceRequests, normalizedSql, values)) {
+          counts.set(String(row.status), (counts.get(String(row.status)) ?? 0) + 1);
+        }
+
+        return result<T>([...counts.entries()].map(([status, count]) => ({
+          status,
+          status_count: count
+        })) as unknown as T[]);
+      }
+
+      if (normalizedSql.includes("LIMIT")) {
+        const rows = filterServiceRequestRows(this.serviceRequests, normalizedSql, values);
+        const pageSize = Number(values.at(-2));
+        const offset = Number(values.at(-1));
+
+        return result<T>(rows.slice(offset, offset + pageSize) as T[]);
+      }
+
       if (normalizedSql.includes("WHERE sr.reference_number = $1 AND sr.customer_id = $2")) {
         return result<T>(
           this.serviceRequests.filter((row) => row.reference_number === values[0] && row.customer_id === values[1]) as T[]
@@ -350,6 +381,52 @@ describe("PrototypeRepository", () => {
       referenceNumber: "SSQ-TEST-REVIEW-0001",
       status: "SUBMITTED"
     });
+  });
+
+  it("returns paged service request query contracts with status counts", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+
+    await repository.createServiceRequest({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      transactionDefinitionId: "20000000-0000-4000-8000-000000000002",
+      referenceNumber: "SSQ-TEST-CONTRACT-0001",
+      status: "SUBMITTED",
+      payload: {}
+    });
+    await repository.createServiceRequest({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      transactionDefinitionId: "20000000-0000-4000-8000-000000000002",
+      referenceNumber: "SSQ-TEST-CONTRACT-0002",
+      status: "UNDER_REVIEW",
+      payload: {}
+    });
+
+    const result = await repository.listServiceRequestConnection({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      page: 1,
+      pageSize: 1,
+      sortBy: "referenceNumber",
+      sortDirection: "ASC"
+    });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.pageInfo).toEqual({
+      page: 1,
+      pageSize: 1,
+      totalItems: 2,
+      totalPages: 2
+    });
+    expect(result.statusCounts).toEqual([
+      {
+        status: "SUBMITTED",
+        count: 1
+      },
+      {
+        status: "UNDER_REVIEW",
+        count: 1
+      }
+    ]);
   });
 
   it("updates customer-owned service request status", async () => {
@@ -661,4 +738,41 @@ function result<T extends QueryResultRow>(rows: T[]): QueryResult<T> {
     rowCount: rows.length,
     rows
   };
+}
+
+function filterServiceRequestRows(rows: QueryResultRow[], normalizedSql: string, values: readonly unknown[]): QueryResultRow[] {
+  return rows.filter((row) => {
+    if (normalizedSql.includes("sr.customer_id = $1") && row.customer_id !== values[0]) {
+      return false;
+    }
+
+    if (normalizedSql.includes("sr.status <> 'DRAFT'") && row.status === "DRAFT") {
+      return false;
+    }
+
+    const statusIndex = values.findIndex((value) => value === "DRAFT"
+      || value === "SUBMITTED"
+      || value === "UNDER_REVIEW"
+      || value === "ACTION_REQUIRED"
+      || value === "COMPLETED"
+      || value === "WITHDRAWN");
+
+    if (normalizedSql.includes("sr.status = $") && statusIndex >= 0 && row.status !== values[statusIndex]) {
+      return false;
+    }
+
+    const searchValue = values.find((value) => typeof value === "string" && value.startsWith("%") && value.endsWith("%"));
+
+    if (searchValue) {
+      const needle = String(searchValue).replaceAll("%", "").toLowerCase();
+      const referenceNumber = String(row.reference_number).toLowerCase();
+      const transactionKey = String(row.transaction_key ?? "").toLowerCase();
+
+      if (!referenceNumber.includes(needle) && !transactionKey.includes(needle)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 }

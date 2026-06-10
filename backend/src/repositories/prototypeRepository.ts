@@ -61,6 +61,33 @@ export interface ServiceRequestRecord {
   transactionKey?: string;
 }
 
+export interface ServiceRequestListInput {
+  customerId?: string;
+  submittedOnly?: boolean;
+  status?: ServiceRequestRecord["status"];
+  search?: string;
+  page: number;
+  pageSize: number;
+  sortBy: "createdAt" | "referenceNumber" | "status" | "transactionKey";
+  sortDirection: "ASC" | "DESC";
+}
+
+export interface ServiceRequestStatusCountRecord {
+  status: ServiceRequestRecord["status"];
+  count: number;
+}
+
+export interface ServiceRequestListResult {
+  items: ServiceRequestRecord[];
+  pageInfo: {
+    page: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  };
+  statusCounts: ServiceRequestStatusCountRecord[];
+}
+
 export interface ServiceRequestDraftRecord {
   id: string;
   customerId: string;
@@ -189,6 +216,15 @@ interface ServiceRequestRow {
   status: ServiceRequestRecord["status"];
   payload: Record<string, unknown>;
   transaction_key?: string;
+}
+
+interface ServiceRequestCountRow {
+  total_count: string | number;
+}
+
+interface ServiceRequestStatusCountRow {
+  status: ServiceRequestRecord["status"];
+  status_count: string | number;
 }
 
 interface ServiceRequestDraftRow {
@@ -567,6 +603,90 @@ export class PrototypeRepository {
     );
 
     return result.rows.map(mapServiceRequest);
+  }
+
+  async listServiceRequestConnection(input: ServiceRequestListInput): Promise<ServiceRequestListResult> {
+    const whereParts: string[] = [];
+    const values: unknown[] = [];
+
+    if (input.customerId) {
+      values.push(input.customerId);
+      whereParts.push(`sr.customer_id = $${values.length}`);
+    }
+
+    if (input.submittedOnly) {
+      whereParts.push("sr.status <> 'DRAFT'");
+    }
+
+    if (input.status) {
+      values.push(input.status);
+      whereParts.push(`sr.status = $${values.length}`);
+    }
+
+    if (input.search) {
+      values.push(`%${input.search}%`);
+      whereParts.push(`(sr.reference_number ILIKE $${values.length} OR td.transaction_key ILIKE $${values.length})`);
+    }
+
+    const whereClause = whereParts.length > 0 ? `WHERE ${whereParts.join(" AND ")}` : "";
+    const orderBy = serviceRequestOrderBy(input.sortBy);
+    const offset = (input.page - 1) * input.pageSize;
+    const pageValues = [...values, input.pageSize, offset];
+
+    const items = await this.database.query<ServiceRequestRow>(
+      `
+        SELECT
+          sr.id,
+          sr.customer_id,
+          sr.transaction_definition_id,
+          sr.reference_number,
+          sr.status,
+          sr.payload,
+          td.transaction_key
+        FROM service_requests sr
+        INNER JOIN transaction_definitions td
+          ON td.id = sr.transaction_definition_id
+        ${whereClause}
+        ORDER BY ${orderBy} ${input.sortDirection}, sr.created_at DESC
+        LIMIT $${values.length + 1}
+        OFFSET $${values.length + 2}
+      `,
+      pageValues
+    );
+    const total = await this.database.query<ServiceRequestCountRow>(
+      `
+        SELECT count(*) AS total_count
+        FROM service_requests sr
+        INNER JOIN transaction_definitions td
+          ON td.id = sr.transaction_definition_id
+        ${whereClause}
+      `,
+      values
+    );
+    const statusCounts = await this.database.query<ServiceRequestStatusCountRow>(
+      `
+        SELECT sr.status, count(*) AS status_count
+        FROM service_requests sr
+        INNER JOIN transaction_definitions td
+          ON td.id = sr.transaction_definition_id
+        ${whereClause}
+        GROUP BY sr.status
+        ORDER BY sr.status ASC
+      `,
+      values
+    );
+    const totalItems = Number(total.rows[0]?.total_count ?? 0);
+
+    return {
+      items: items.rows.map(mapServiceRequest),
+      pageInfo: {
+        page: input.page,
+        pageSize: input.pageSize,
+        totalItems,
+        totalPages: Math.ceil(totalItems / input.pageSize)
+      },
+      statusCounts: statusCounts.rows.map(mapServiceRequestStatusCount)
+    };
   }
 
   async getServiceRequestByReference(referenceNumber: string): Promise<ServiceRequestRecord | undefined> {
@@ -1027,6 +1147,26 @@ function mapServiceRequest(row: ServiceRequestRow): ServiceRequestRecord {
     payload: row.payload,
     transactionKey: row.transaction_key
   };
+}
+
+function mapServiceRequestStatusCount(row: ServiceRequestStatusCountRow): ServiceRequestStatusCountRecord {
+  return {
+    status: row.status,
+    count: Number(row.status_count)
+  };
+}
+
+function serviceRequestOrderBy(sortBy: ServiceRequestListInput["sortBy"]): string {
+  switch (sortBy) {
+    case "referenceNumber":
+      return "sr.reference_number";
+    case "status":
+      return "sr.status";
+    case "transactionKey":
+      return "td.transaction_key";
+    case "createdAt":
+      return "sr.created_at";
+  }
 }
 
 function mapServiceRequestDraft(row: ServiceRequestDraftRow): ServiceRequestDraftRecord {
