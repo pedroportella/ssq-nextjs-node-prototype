@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+  NODE_VERSION: "22.22.3"
+  PNPM_VERSION: "10.18.3"
+
+jobs:
+  quality:
+    name: Workspace quality gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@${PNPM_VERSION} --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint workspace
+        run: pnpm lint
+
+      - name: Typecheck workspace
+        run: pnpm typecheck
+
+      - name: Test workspace
+        run: pnpm test
+
+      - name: Build backend
+        run: pnpm --filter @ssq/backend build
+
+      - name: Build shared frontend packages
+        run: pnpm --filter @ssq/services --filter @ssq/ui-library --filter @ssq/ui-tokens --filter @ssq/ui-assets --filter @ssq/utils --filter @ssq/web-components build
+
+      - name: Build dashboard app
+        run: pnpm --filter @ssq/dashboard build
+
+      - name: Build Seniors Card app
+        run: pnpm --filter @ssq/seniors-card build
+
+      - name: Build Rental Security Subsidy app
+        run: pnpm --filter @ssq/rental-security-subsidy build
+
+      - name: Validate Docker Compose graph
+        run: docker compose config
+
+      - name: Build backend Docker image
+        run: docker compose build backend
+
+      - name: Build dashboard Docker image
+        run: docker compose build dashboard
+
+      - name: Build Seniors Card Docker image
+        run: docker compose build seniors-card
+
+      - name: Build Rental Security Subsidy Docker image
+        run: docker compose build rental-security-subsidy
