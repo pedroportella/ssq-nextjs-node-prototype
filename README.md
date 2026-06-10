@@ -1,0 +1,1 @@
+# ssq-nextjs-node-prototype
