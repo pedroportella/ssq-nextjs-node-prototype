@@ -6,6 +6,7 @@ import type { QueryResult, QueryResultRow } from "pg";
 import type { Queryable } from "../database/types.js";
 
 class SeededTestDatabase implements Queryable {
+  private readonly serviceRequestEvents: QueryResultRow[] = [];
   private readonly serviceRequests: QueryResultRow[] = [];
   private readonly serviceRequestDrafts: QueryResultRow[] = [];
 
@@ -84,6 +85,19 @@ class SeededTestDatabase implements Queryable {
       return result<T>([row as unknown as T]);
     }
 
+    if (normalizedSql.startsWith("INSERT INTO service_request_events")) {
+      const row = {
+        id: "60000000-0000-4000-8000-000000000099",
+        service_request_id: String(values[0]),
+        event_type: String(values[1]),
+        event_payload: JSON.parse(String(values[2])),
+        created_at: "2026-06-10T00:10:00.000Z"
+      };
+
+      this.serviceRequestEvents.push(row);
+      return result<T>([row as unknown as T]);
+    }
+
     if (normalizedSql.startsWith("UPDATE service_request_drafts")) {
       const draft = this.serviceRequestDrafts.find((row) => row.id === values[0] && row.customer_id === values[1]);
 
@@ -113,6 +127,10 @@ class SeededTestDatabase implements Queryable {
 
     if (normalizedSql.includes("FROM service_requests")) {
       return result<T>(this.serviceRequests.filter((row) => row.customer_id === values[0]) as T[]);
+    }
+
+    if (normalizedSql.includes("FROM service_request_events")) {
+      return result<T>(this.serviceRequestEvents.filter((row) => row.service_request_id === values[0]) as T[]);
     }
 
     return result<T>([]);
@@ -157,6 +175,28 @@ describe("PrototypeRepository", () => {
     });
     expect(requests).toHaveLength(1);
     expect(requests[0]?.referenceNumber).toBe("SSQ-TEST-0001");
+  });
+
+  it("creates and reads service request events", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+
+    const event = await repository.createServiceRequestEvent({
+      serviceRequestId: "30000000-0000-4000-8000-000000000099",
+      eventType: "SERVICE_REQUEST_SUBMITTED",
+      eventPayload: {
+        correlationId: "test-correlation"
+      }
+    });
+    const activityLogs = await repository.listActivityLogs(event.serviceRequestId);
+
+    expect(event).toMatchObject({
+      eventType: "SERVICE_REQUEST_SUBMITTED",
+      eventPayload: {
+        correlationId: "test-correlation"
+      }
+    });
+    expect(activityLogs).toHaveLength(1);
   });
 
   it("creates, updates and reads customer-owned service request drafts", async () => {
@@ -250,7 +290,21 @@ function catalogueRows(): QueryResultRow[] {
       owning_agency: "Smart Service Queensland",
       schema_version: "2026-06-10",
       schema_json: {
-        title: "Seniors Card"
+        title: "Seniors Card",
+        required: ["dateOfBirth", "residencyStatus"],
+        properties: {
+          dateOfBirth: {
+            type: "string",
+            format: "date"
+          },
+          residencyStatus: {
+            type: "string",
+            enum: ["queensland-resident", "moving-to-queensland"]
+          },
+          concessionConsent: {
+            type: "boolean"
+          }
+        }
       },
       feature_flag_key: "transaction.seniors-card.enabled",
       feature_enabled: true
@@ -264,7 +318,24 @@ function catalogueRows(): QueryResultRow[] {
       owning_agency: "Smart Service Queensland",
       schema_version: "2026-06-10",
       schema_json: {
-        title: "Rental Security Subsidy"
+        title: "Rental Security Subsidy",
+        required: ["householdIncome", "rentalBondAmount"],
+        properties: {
+          householdIncome: {
+            type: "number",
+            minimum: 0
+          },
+          rentalBondAmount: {
+            type: "number",
+            minimum: 0
+          },
+          supportingDocuments: {
+            type: "array",
+            items: {
+              type: "string"
+            }
+          }
+        }
       },
       feature_flag_key: "transaction.rental-security-subsidy.enabled",
       feature_enabled: false

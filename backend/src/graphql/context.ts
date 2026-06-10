@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { PrototypeRepository } from "../repositories/prototypeRepository.js";
 import { DraftLifecycleService } from "../services/draftLifecycleService.js";
+import { SubmissionLifecycleService } from "../services/submissionLifecycleService.js";
 import { TransactionCatalogueService } from "../services/transactionCatalogueService.js";
 
 import type { Queryable } from "../database/types.js";
@@ -15,6 +16,7 @@ export interface GraphqlContext {
   demoCustomerEmail: string;
   repository: PrototypeRepository;
   draftLifecycle: DraftLifecycleService;
+  submissionLifecycle: SubmissionLifecycleService;
   transactionCatalogue: TransactionCatalogueService;
 }
 
@@ -32,6 +34,7 @@ export function createGraphqlContext(input: {
     demoCustomerEmail,
     draftLifecycle: new DraftLifecycleService(repository, transactionCatalogue),
     repository,
+    submissionLifecycle: new SubmissionLifecycleService(repository, transactionCatalogue),
     transactionCatalogue
   };
 }

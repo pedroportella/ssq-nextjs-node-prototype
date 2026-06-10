@@ -145,6 +145,7 @@ Commit message handoff:
 - Use lowercase scopes with hyphens where needed.
 - Allowed types are `feat`, `fix`, `refactor`, `chore`, `perf`, `ci`, `ops`, `build`, `docs`, `style`, `revert` and `test`.
 - Do not include private planning labels in commit messages.
+- Format suggested commit messages in final user wrap-ups as copyable code blocks.
 
 Step handoff:
 

@@ -7,6 +7,8 @@ import type { DatabaseClient } from "../database/client.js";
 import type { QueryResult, QueryResultRow } from "pg";
 
 function createGraphqlTestDatabase(): DatabaseClient {
+  const serviceRequestEvents: QueryResultRow[] = [];
+  const serviceRequests: QueryResultRow[] = [];
   const serviceRequestDrafts: QueryResultRow[] = [];
 
   return {
@@ -83,6 +85,33 @@ function createGraphqlTestDatabase(): DatabaseClient {
           return result<T>([row as unknown as T]);
         }
 
+        if (normalizedSql.startsWith("INSERT INTO service_requests")) {
+          const row = {
+            id: "30000000-0000-4000-8000-000000000099",
+            customer_id: String(values[0]),
+            transaction_definition_id: String(values[1]),
+            reference_number: String(values[2]),
+            status: String(values[3]),
+            payload: JSON.parse(String(values[4]))
+          };
+
+          serviceRequests.push(row);
+          return result<T>([row as unknown as T]);
+        }
+
+        if (normalizedSql.startsWith("INSERT INTO service_request_events")) {
+          const row = {
+            id: "60000000-0000-4000-8000-000000000099",
+            service_request_id: String(values[0]),
+            event_type: String(values[1]),
+            event_payload: JSON.parse(String(values[2])),
+            created_at: "2026-06-10T00:10:00.000Z"
+          };
+
+          serviceRequestEvents.push(row);
+          return result<T>([row as unknown as T]);
+        }
+
         if (normalizedSql.startsWith("UPDATE service_request_drafts")) {
           const draft = serviceRequestDrafts.find((row) => row.id === values[0] && row.customer_id === values[1]);
 
@@ -124,7 +153,7 @@ function createGraphqlTestDatabase(): DatabaseClient {
         }
 
         if (normalizedSql.includes("FROM service_requests sr")) {
-          return result<T>([
+          const seededRows = [
             {
               id: "30000000-0000-4000-8000-000000000001",
               customer_id: values[0] === "SSQ-DEMO-0001" ? "10000000-0000-4000-8000-000000000001" : values[0],
@@ -135,12 +164,18 @@ function createGraphqlTestDatabase(): DatabaseClient {
               payload: {
                 prototype: true
               }
-            } as unknown as T
-          ]);
+            }
+          ];
+          const submittedRows = serviceRequests.map((row) => ({
+            ...row,
+            transaction_key: "seniors-card"
+          }));
+
+          return result<T>([...seededRows, ...submittedRows] as unknown as T[]);
         }
 
         if (normalizedSql.includes("FROM service_request_events")) {
-          return result<T>([
+          const seededRows = [
             {
               id: "60000000-0000-4000-8000-000000000001",
               service_request_id: values[0],
@@ -149,8 +184,11 @@ function createGraphqlTestDatabase(): DatabaseClient {
                 source: "test"
               },
               created_at: "2026-06-10T00:00:00.000Z"
-            } as unknown as T
-          ]);
+            }
+          ];
+          const rows = serviceRequestEvents.filter((row) => row.service_request_id === values[0]);
+
+          return result<T>([...seededRows, ...rows] as unknown as T[]);
         }
 
         return result<T>([]);
@@ -507,6 +545,182 @@ describe("GraphQL route", () => {
 
     await app.close();
   });
+
+  it("submits a valid draft and returns a submitted service request", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-correlation-id": "submit-correlation"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation CreateDraft($input: CreateServiceRequestDraftInput!) {
+            createServiceRequestDraft(input: $input) { ok }
+          }
+        `,
+        variables: {
+          input: {
+            transactionKey: "seniors-card",
+            currentStep: "review",
+            payload: {
+              dateOfBirth: "1960-01-01",
+              residencyStatus: "queensland-resident",
+              concessionConsent: true
+            }
+          }
+        }
+      },
+      url: "/graphql"
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-correlation-id": "submit-correlation"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation SubmitDraft {
+            submitServiceRequest(input: { draftId: "70000000-0000-4000-8000-000000000001" }) {
+              ok
+              error { code message }
+              fieldErrors { field message }
+              validationErrors
+              serviceRequest {
+                referenceNumber
+                status
+                transactionKey
+                payload
+              }
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        submitServiceRequest: {
+          ok: true,
+          error: null,
+          fieldErrors: [],
+          validationErrors: {},
+          serviceRequest: {
+            status: "SUBMITTED",
+            transactionKey: "seniors-card",
+            payload: {
+              dateOfBirth: "1960-01-01",
+              residencyStatus: "queensland-resident",
+              concessionConsent: true
+            }
+          }
+        }
+      }
+    });
+    expect(response.json().data.submitServiceRequest.serviceRequest.referenceNumber).toMatch(/^SSQ-\d{8}-[A-F0-9]{8}$/);
+
+    await app.close();
+  });
+
+  it("returns field-keyed validation errors when submitting an invalid draft", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation CreateDraft($input: CreateServiceRequestDraftInput!) {
+            createServiceRequestDraft(input: $input) { ok }
+          }
+        `,
+        variables: {
+          input: {
+            transactionKey: "seniors-card",
+            currentStep: "review",
+            payload: {
+              dateOfBirth: "not-a-date",
+              concessionConsent: "yes"
+            }
+          }
+        }
+      },
+      url: "/graphql"
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation SubmitInvalidDraft {
+            submitServiceRequest(input: { draftId: "70000000-0000-4000-8000-000000000001" }) {
+              ok
+              serviceRequest { id }
+              error { code message }
+              fieldErrors { field message }
+              validationErrors
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        submitServiceRequest: {
+          ok: false,
+          serviceRequest: null,
+          error: {
+            code: "VALIDATION_FAILED",
+            message: "Draft payload failed validation."
+          },
+          fieldErrors: [
+            {
+              field: "dateOfBirth"
+            },
+            {
+              field: "residencyStatus"
+            },
+            {
+              field: "concessionConsent"
+            }
+          ],
+          validationErrors: {
+            dateOfBirth: "Must be a valid date in YYYY-MM-DD format.",
+            residencyStatus: "Required",
+            concessionConsent: "Expected boolean, received string"
+          }
+        }
+      }
+    });
+
+    await app.close();
+  });
 });
 
 function catalogueRows(): QueryResultRow[] {
@@ -520,7 +734,21 @@ function catalogueRows(): QueryResultRow[] {
       owning_agency: "Smart Service Queensland",
       schema_version: "2026-06-10",
       schema_json: {
-        title: "Seniors Card"
+        title: "Seniors Card",
+        required: ["dateOfBirth", "residencyStatus"],
+        properties: {
+          dateOfBirth: {
+            type: "string",
+            format: "date"
+          },
+          residencyStatus: {
+            type: "string",
+            enum: ["queensland-resident", "moving-to-queensland"]
+          },
+          concessionConsent: {
+            type: "boolean"
+          }
+        }
       },
       feature_flag_key: "transaction.seniors-card.enabled",
       feature_enabled: true

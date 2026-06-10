@@ -436,6 +436,31 @@ export class PrototypeRepository {
 
     return result.rows.map(mapServiceRequestEvent);
   }
+
+  async createServiceRequestEvent(input: {
+    serviceRequestId: string;
+    eventType: string;
+    eventPayload?: Record<string, unknown>;
+  }): Promise<ServiceRequestEventRecord> {
+    const result = await this.database.query<ServiceRequestEventRow>(
+      `
+        INSERT INTO service_request_events (
+          service_request_id,
+          event_type,
+          event_payload
+        )
+        VALUES ($1, $2, $3::jsonb)
+        RETURNING id, service_request_id, event_type, event_payload, created_at
+      `,
+      [
+        input.serviceRequestId,
+        input.eventType,
+        JSON.stringify(input.eventPayload ?? {})
+      ]
+    );
+
+    return mapServiceRequestEvent(result.rows[0]);
+  }
 }
 
 function mapCustomer(row: CustomerRow): CustomerRecord {

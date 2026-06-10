@@ -69,7 +69,7 @@ Frontend apps consume backend-facing service helpers through `@ssq/services/serv
 
 ## Planned Backend
 
-The backend is a production-shaped Node.js platform slice with Fastify, PostgreSQL, SQL migrations, prototype seed data, repository helpers, backend-owned readiness, database-backed transaction catalogue, GraphQL platform API, service request drafts and room for validation, upload policy, activity events, submission summaries, outbox events and safe operations endpoints.
+The backend is a production-shaped Node.js platform slice with Fastify, PostgreSQL, SQL migrations, prototype seed data, repository helpers, backend-owned readiness, database-backed transaction catalogue, GraphQL platform API, service request drafts, submission validation and room for upload policy, activity events, submission summaries, outbox events and safe operations endpoints.
 
 Current seeded backend catalogue:
 
@@ -85,4 +85,4 @@ Current backend health endpoints:
 
 Current backend API endpoint:
 
-- `POST /graphql`: platform data API for viewer/profile, feature flags, transaction catalogue, transaction schemas, service request drafts, service requests and activity logs.
+- `POST /graphql`: platform data API for viewer/profile, feature flags, transaction catalogue, transaction schemas, service request drafts, validated draft submission, service requests and activity logs.

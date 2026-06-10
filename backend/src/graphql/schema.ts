@@ -119,10 +119,23 @@ export const schema = createSchema<GraphqlContext>({
       message: String!
     }
 
+    type FieldValidationError {
+      field: String!
+      message: String!
+    }
+
     type ServiceRequestDraftMutationResult {
       ok: Boolean!
       draft: ServiceRequestDraft
       error: DraftMutationError
+    }
+
+    type SubmitServiceRequestMutationResult {
+      ok: Boolean!
+      serviceRequest: ServiceRequest
+      error: DraftMutationError
+      fieldErrors: [FieldValidationError!]!
+      validationErrors: JSON!
     }
 
     input CreateServiceRequestDraftInput {
@@ -135,6 +148,10 @@ export const schema = createSchema<GraphqlContext>({
       draftId: ID!
       currentStep: String!
       payload: JSON!
+    }
+
+    input SubmitServiceRequestInput {
+      draftId: ID!
     }
 
     type ActivityLog {
@@ -167,6 +184,7 @@ export const schema = createSchema<GraphqlContext>({
     type Mutation {
       createServiceRequestDraft(input: CreateServiceRequestDraftInput!): ServiceRequestDraftMutationResult!
       updateServiceRequestDraft(input: UpdateServiceRequestDraftInput!): ServiceRequestDraftMutationResult!
+      submitServiceRequest(input: SubmitServiceRequestInput!): SubmitServiceRequestMutationResult!
     }
   `,
   resolvers: {
@@ -307,6 +325,27 @@ export const schema = createSchema<GraphqlContext>({
         });
 
         return result.ok ? draftMutationSuccess(result.draft) : draftMutationError(result.code, result.message);
+      },
+      async submitServiceRequest(
+        _parent: unknown,
+        args: { input: { draftId: string } },
+        context: GraphqlContext
+      ) {
+        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+
+        if (!customer) {
+          return submitMutationError("CUSTOMER_NOT_FOUND", "Customer was not found.", []);
+        }
+
+        const result = await context.submissionLifecycle.submitDraft({
+          customerId: customer.id,
+          draftId: args.input.draftId,
+          correlationId: context.correlationId
+        });
+
+        return result.ok
+          ? submitMutationSuccess(result.serviceRequest)
+          : submitMutationError(result.code, result.message, result.fieldErrors);
       }
     }
   }
@@ -328,5 +367,32 @@ function draftMutationError(code: string, message: string) {
       code,
       message
     }
+  };
+}
+
+function submitMutationSuccess(serviceRequest: unknown) {
+  return {
+    ok: true,
+    serviceRequest,
+    error: null,
+    fieldErrors: [],
+    validationErrors: {}
+  };
+}
+
+function submitMutationError(
+  code: string,
+  message: string,
+  fieldErrors: Array<{ field: string; message: string }>
+) {
+  return {
+    ok: false,
+    serviceRequest: null,
+    error: {
+      code,
+      message
+    },
+    fieldErrors,
+    validationErrors: Object.fromEntries(fieldErrors.map((error) => [error.field, error.message]))
   };
 }
