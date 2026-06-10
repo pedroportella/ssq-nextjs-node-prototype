@@ -14,6 +14,8 @@ Node.js/TypeScript API for the SSQ digital transaction prototype.
 
 ```bash
 pnpm --dir backend dev
+pnpm --dir backend db:migrate
+pnpm --dir backend db:seed
 pnpm --dir backend typecheck
 pnpm --dir backend test
 pnpm --dir backend build
@@ -37,6 +39,6 @@ pnpm docker:up
 
 - `GET /health`: runtime health summary.
 - `GET /health/live`: liveness probe.
-- `GET /health/ready`: readiness probe.
+- `GET /health/ready`: readiness probe with database reachability.
 
-The current readiness probe confirms the API runtime is configured and bootable. Database readiness will be added with the persistence foundation.
+The local Docker backend runs migrations and seed data before starting the API. When running the backend directly, set `DATABASE_URL`, run `pnpm --dir backend db:migrate`, then run `pnpm --dir backend db:seed`.

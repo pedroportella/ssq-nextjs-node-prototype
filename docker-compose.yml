@@ -34,13 +34,14 @@ services:
       APP_NAME: ssq-node-api
       APP_VERSION: ${APP_VERSION:-0.0.0}
       DATABASE_URL: postgresql://${POSTGRES_USER:-ssq_app}:${POSTGRES_PASSWORD:-ssq_dev_password}@postgres:5432/${POSTGRES_DB:-ssq_prototype}
+    command: ["sh", "-c", "cd backend && pnpm db:migrate && pnpm db:seed && pnpm start"]
     ports:
       - "${BACKEND_PORT:-7001}:${BACKEND_PORT:-7001}"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "node -e \"fetch('http://127.0.0.1:' + (process.env.PORT || 7001) + '/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""
+          "node -e \"fetch('http://127.0.0.1:' + (process.env.PORT || 7001) + '/health/ready').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""
         ]
       interval: 10s
       timeout: 5s
@@ -63,7 +64,7 @@ services:
       NODE_ENV: development
       PORT: ${DASHBOARD_PORT:-3000}
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
-    command: ["sh", "-c", "echo 'Dashboard app placeholder: implemented in the frontend app chunks.' && sleep infinity"]
+    command: ["sh", "-c", "echo 'Dashboard app placeholder: implemented as the frontend package matures.' && sleep infinity"]
     depends_on:
       backend:
         condition: service_healthy
@@ -81,7 +82,7 @@ services:
       NODE_ENV: development
       PORT: ${SENIORS_CARD_PORT:-3001}
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
-    command: ["sh", "-c", "echo 'Seniors Card app placeholder: implemented in the frontend app chunks.' && sleep infinity"]
+    command: ["sh", "-c", "echo 'Seniors Card app placeholder: implemented as the frontend package matures.' && sleep infinity"]
     depends_on:
       backend:
         condition: service_healthy
@@ -99,7 +100,7 @@ services:
       NODE_ENV: development
       PORT: ${RENTAL_SECURITY_SUBSIDY_PORT:-3002}
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
-    command: ["sh", "-c", "echo 'Rental Security Subsidy app placeholder: implemented in the frontend app chunks.' && sleep infinity"]
+    command: ["sh", "-c", "echo 'Rental Security Subsidy app placeholder: implemented as the frontend package matures.' && sleep infinity"]
     depends_on:
       backend:
         condition: service_healthy

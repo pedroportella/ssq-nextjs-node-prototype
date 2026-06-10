@@ -2,13 +2,16 @@ import cors from "@fastify/cors";
 import Fastify from "fastify";
 
 import { loadConfig } from "./config.js";
+import { createDatabaseClient } from "./database/client.js";
 import { createLoggerOptions } from "./logger.js";
 import { registerHealthRoutes } from "./routes/health.js";
 
 import type { AppConfig } from "./config.js";
+import type { DatabaseClient } from "./database/client.js";
 
 export interface BuildAppOptions {
   config?: AppConfig;
+  database?: DatabaseClient;
 }
 
 export async function buildApp(options: BuildAppOptions = {}) {
@@ -21,7 +24,13 @@ export async function buildApp(options: BuildAppOptions = {}) {
     origin: false
   });
 
-  await registerHealthRoutes(app, config);
+  const database = options.database ?? createDatabaseClient(config);
+
+  app.addHook("onClose", async () => {
+    await database.close();
+  });
+
+  await registerHealthRoutes(app, config, database);
 
   return app;
 }

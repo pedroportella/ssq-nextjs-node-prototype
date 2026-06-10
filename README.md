@@ -32,7 +32,7 @@ pnpm docker:up
 pnpm docker:down
 ```
 
-The local Docker runtime currently starts PostgreSQL and the backend API. Frontend app containers are still placeholders and will be implemented as the application packages are containerised.
+The local Docker runtime currently starts PostgreSQL and the backend API. The backend applies database migrations and prototype seed data before starting. Frontend app containers are still placeholders and will be implemented as the application packages are containerised.
 The backend API is available on `http://localhost:7001` once the local runtime is up.
 
 See `docs/local-development.md` for local runtime details.
@@ -64,10 +64,10 @@ Frontend apps consume backend-facing service helpers through `@ssq/services/serv
 
 ## Planned Backend
 
-The backend will be a production-shaped Node.js platform slice with Fastify, GraphQL, PostgreSQL, backend-owned validation, upload policy, activity events, submission summaries, outbox events and safe operations endpoints.
+The backend is a production-shaped Node.js platform slice with Fastify, PostgreSQL, SQL migrations, prototype seed data, repository helpers, backend-owned readiness and room for GraphQL, validation, upload policy, activity events, submission summaries, outbox events and safe operations endpoints.
 
 Current backend health endpoints:
 
 - `GET /health`
 - `GET /health/live`
-- `GET /health/ready`
+- `GET /health/ready`: includes database reachability.

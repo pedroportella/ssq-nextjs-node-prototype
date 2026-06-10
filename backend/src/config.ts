@@ -6,7 +6,8 @@ const configSchema = z.object({
   HOST: z.string().min(1).default("0.0.0.0"),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   APP_NAME: z.string().min(1).default("ssq-node-api"),
-  APP_VERSION: z.string().min(1).default("0.0.0")
+  APP_VERSION: z.string().min(1).default("0.0.0"),
+  DATABASE_URL: z.string().url().optional()
 });
 
 export type AppConfig = z.infer<typeof configSchema>;
