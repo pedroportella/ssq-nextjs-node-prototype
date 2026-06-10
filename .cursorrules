@@ -146,6 +146,12 @@ Commit message handoff:
 - Allowed types are `feat`, `fix`, `refactor`, `chore`, `perf`, `ci`, `ops`, `build`, `docs`, `style`, `revert` and `test`.
 - Do not include private planning labels in commit messages.
 
+Step handoff:
+
+- After completing a meaningful chunk, update the private planning notes with what was implemented, how it was verified, any remaining gaps and the recommended next work.
+- Public docs should receive professional system documentation only, not private implementation diary notes.
+- Final user wrap-ups should mention the important files changed, verification run, known caveats and suggested commit message.
+
 Docs and reviewer handoff:
 
 - Keep docs technical and reviewer-friendly, not marketing copy.
