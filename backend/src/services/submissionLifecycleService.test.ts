@@ -117,6 +117,24 @@ function createRepository(
         updatedAt: "2026-06-10T00:00:00.000Z"
       };
     },
+    async createOutboxEvent(input: {
+      eventType: string;
+      aggregateType: string;
+      aggregateId: string;
+      eventPayload?: Record<string, unknown>;
+    }) {
+      return {
+        id: `92000000-0000-4000-8000-${input.eventType.padStart(12, "0").slice(0, 12)}`,
+        eventType: input.eventType,
+        aggregateType: input.aggregateType,
+        aggregateId: input.aggregateId,
+        eventPayload: input.eventPayload ?? {},
+        status: "PENDING",
+        availableAt: "2026-06-10T00:00:00.000Z",
+        createdAt: "2026-06-10T00:00:00.000Z",
+        updatedAt: "2026-06-10T00:00:00.000Z"
+      };
+    },
     async createCustomerProfileEvidence(input: {
       serviceRequestId: string;
       customerProfileAttributeId?: string;
@@ -223,6 +241,68 @@ describe("SubmissionLifecycleService", () => {
       }
     });
     expect(createdSummaries[0]?.summaryText).toContain("Reference: SSQ-TEST-0007");
+  });
+
+  it("creates submission outbox events with correlation metadata", async () => {
+    const draft = createDraft();
+    const createdOutboxEvents: Array<{
+      eventType: string;
+      aggregateType: string;
+      aggregateId: string;
+      eventPayload?: Record<string, unknown>;
+    }> = [];
+    const repository = {
+      ...createRepository(draft),
+      async createOutboxEvent(input: {
+        eventType: string;
+        aggregateType: string;
+        aggregateId: string;
+        eventPayload?: Record<string, unknown>;
+      }) {
+        createdOutboxEvents.push(input);
+
+        return {
+          id: `92000000-0000-4000-8000-00000000000${createdOutboxEvents.length}`,
+          eventType: input.eventType,
+          aggregateType: input.aggregateType,
+          aggregateId: input.aggregateId,
+          eventPayload: input.eventPayload ?? {},
+          status: "PENDING",
+          availableAt: "2026-06-10T00:00:00.000Z",
+          createdAt: "2026-06-10T00:00:00.000Z",
+          updatedAt: "2026-06-10T00:00:00.000Z"
+        };
+      }
+    } as unknown as PrototypeRepository;
+    const service = new SubmissionLifecycleService(
+      repository,
+      createCatalogue(createTransaction()),
+      () => "SSQ-TEST-0008"
+    );
+
+    await expect(service.submitDraft({
+      customerId: draft.customerId,
+      draftId: draft.id,
+      correlationId: "test-correlation"
+    })).resolves.toMatchObject({
+      ok: true
+    });
+
+    expect(createdOutboxEvents.map((event) => event.eventType)).toEqual([
+      "ServiceRequestSubmitted",
+      "SubmissionSummaryCreated",
+      "NotificationRequested",
+      "AgencyReviewRequested"
+    ]);
+    expect(createdOutboxEvents.every((event) => event.eventPayload?.correlationId === "test-correlation")).toBe(true);
+    expect(createdOutboxEvents[0]).toMatchObject({
+      aggregateType: "ServiceRequest",
+      aggregateId: "30000000-0000-4000-8000-000000000001",
+      eventPayload: {
+        referenceNumber: "SSQ-TEST-0008",
+        transactionKey: "seniors-card"
+      }
+    });
   });
 
   it("captures simulated profile evidence declared by the transaction schema", async () => {

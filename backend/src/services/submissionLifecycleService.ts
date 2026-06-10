@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { OutboxEventService } from "./outboxEventService.js";
 import { validatePayloadAgainstSchema } from "./submissionValidation.js";
 import { SubmissionSummaryService } from "./submissionSummaryService.js";
 
@@ -112,10 +113,23 @@ export class SubmissionLifecycleService {
       eventPayload: {
         correlationId: input.correlationId,
         draftId: draft.id,
+        outboxEventTypes: [
+          "ServiceRequestSubmitted",
+          "SubmissionSummaryCreated",
+          "NotificationRequested",
+          "AgencyReviewRequested"
+        ],
         profileEvidenceCount: capturedEvidence.length,
         summaryId: summary.id,
         transactionKey: transaction.transaction.transactionKey
       }
+    });
+    await new OutboxEventService(this.repository).createSubmissionEvents({
+      serviceRequest: enrichedServiceRequest,
+      summary,
+      correlationId: input.correlationId,
+      transactionKey: transaction.transaction.transactionKey,
+      transactionLabel: transaction.transaction.label
     });
 
     return {

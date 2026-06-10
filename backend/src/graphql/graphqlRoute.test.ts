@@ -8,6 +8,7 @@ import type { QueryResult, QueryResultRow } from "pg";
 
 function createGraphqlTestDatabase(): DatabaseClient {
   const customerProfileEvidence: QueryResultRow[] = [];
+  const outboxEvents: QueryResultRow[] = [];
   const serviceRequestEvents: QueryResultRow[] = [];
   const serviceRequests: QueryResultRow[] = [];
   const serviceRequestDrafts: QueryResultRow[] = [];
@@ -126,6 +127,24 @@ function createGraphqlTestDatabase(): DatabaseClient {
           };
 
           serviceRequestEvents.push(row);
+          return result<T>([row as unknown as T]);
+        }
+
+        if (normalizedSql.startsWith("INSERT INTO outbox_events")) {
+          const row = {
+            id: `92000000-0000-4000-8000-00000000000${outboxEvents.length + 1}`,
+            event_type: String(values[0]),
+            aggregate_type: String(values[1]),
+            aggregate_id: String(values[2]),
+            event_payload: JSON.parse(String(values[3])),
+            status: "PENDING",
+            available_at: "2026-06-10T00:25:00.000Z",
+            processed_at: null,
+            created_at: "2026-06-10T00:25:00.000Z",
+            updated_at: "2026-06-10T00:25:00.000Z"
+          };
+
+          outboxEvents.push(row);
           return result<T>([row as unknown as T]);
         }
 

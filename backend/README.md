@@ -56,6 +56,7 @@ The backend currently owns SQL migrations and seed data for:
 - service requests;
 - service request events;
 - submission summaries;
+- outbox events;
 - supporting document metadata.
 
 The seeded transaction catalogue includes dashboard, Seniors Card and Rental Security Subsidy entries. A transaction is startable only when its definition is enabled and its `transaction.<key>.enabled` feature flag is true.
@@ -70,12 +71,15 @@ Service request status changes are backend-owned. The current lifecycle supports
 
 Draft submission also generates a text submission summary for the submitted request. The summary is a prototype review artifact with metadata and payload context, not an official receipt or production document store.
 
+Successful submission records pending outbox events for submitted request, summary-created, notification-requested and agency-review-requested integration seams. The outbox demonstrates persisted event-driven handoff points for review; it does not publish to a production queue.
+
 ## REST
 
 Current REST surface:
 
 - `POST /uploads/supporting-documents`: records validated supporting document metadata for a customer-owned draft or service request.
 - `GET /service-requests/:referenceNumber/summary/download`: downloads the generated text submission summary for a customer-owned submitted request with `content-type` and `content-disposition` headers.
+- `GET /operations/outbox-events`: summarises outbox event counts by event type and status for local operations review.
 
 ## GraphQL
 

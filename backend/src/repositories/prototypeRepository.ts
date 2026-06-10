@@ -111,6 +111,25 @@ export interface SubmissionSummaryRecord {
   updatedAt: string;
 }
 
+export interface OutboxEventRecord {
+  id: string;
+  eventType: string;
+  aggregateType: string;
+  aggregateId: string;
+  eventPayload: Record<string, unknown>;
+  status: "PENDING" | "PROCESSED" | "FAILED";
+  availableAt: string;
+  processedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OutboxEventSummaryRecord {
+  eventType: string;
+  status: OutboxEventRecord["status"];
+  eventCount: number;
+}
+
 interface CustomerRow {
   id: string;
   external_ref: string;
@@ -220,6 +239,25 @@ interface SubmissionSummaryRow {
   summary_text: string;
   created_at: Date | string;
   updated_at: Date | string;
+}
+
+interface OutboxEventRow {
+  id: string;
+  event_type: string;
+  aggregate_type: string;
+  aggregate_id: string;
+  event_payload: Record<string, unknown>;
+  status: OutboxEventRecord["status"];
+  available_at: Date | string;
+  processed_at?: Date | string | null;
+  created_at: Date | string;
+  updated_at: Date | string;
+}
+
+interface OutboxEventSummaryRow {
+  event_type: string;
+  status: OutboxEventRecord["status"];
+  event_count: string | number;
 }
 
 export class PrototypeRepository {
@@ -840,6 +878,57 @@ export class PrototypeRepository {
 
     return result.rows[0] ? mapSubmissionSummary(result.rows[0]) : undefined;
   }
+
+  async createOutboxEvent(input: {
+    eventType: string;
+    aggregateType: string;
+    aggregateId: string;
+    eventPayload?: Record<string, unknown>;
+  }): Promise<OutboxEventRecord> {
+    const result = await this.database.query<OutboxEventRow>(
+      `
+        INSERT INTO outbox_events (
+          event_type,
+          aggregate_type,
+          aggregate_id,
+          event_payload
+        )
+        VALUES ($1, $2, $3, $4::jsonb)
+        RETURNING
+          id,
+          event_type,
+          aggregate_type,
+          aggregate_id,
+          event_payload,
+          status,
+          available_at,
+          processed_at,
+          created_at,
+          updated_at
+      `,
+      [
+        input.eventType,
+        input.aggregateType,
+        input.aggregateId,
+        JSON.stringify(input.eventPayload ?? {})
+      ]
+    );
+
+    return mapOutboxEvent(result.rows[0]);
+  }
+
+  async listOutboxEventSummaries(): Promise<OutboxEventSummaryRecord[]> {
+    const result = await this.database.query<OutboxEventSummaryRow>(
+      `
+        SELECT event_type, status, count(*) AS event_count
+        FROM outbox_events
+        GROUP BY event_type, status
+        ORDER BY event_type ASC, status ASC
+      `
+    );
+
+    return result.rows.map(mapOutboxEventSummary);
+  }
 }
 
 function mapCustomer(row: CustomerRow): CustomerRecord {
@@ -973,5 +1062,32 @@ function mapSubmissionSummary(row: SubmissionSummaryRow): SubmissionSummaryRecor
     summaryText: row.summary_text,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at
+  };
+}
+
+function mapOutboxEvent(row: OutboxEventRow): OutboxEventRecord {
+  return {
+    id: row.id,
+    eventType: row.event_type,
+    aggregateType: row.aggregate_type,
+    aggregateId: row.aggregate_id,
+    eventPayload: row.event_payload,
+    status: row.status,
+    availableAt: row.available_at instanceof Date ? row.available_at.toISOString() : row.available_at,
+    processedAt: row.processed_at
+      ? row.processed_at instanceof Date
+        ? row.processed_at.toISOString()
+        : row.processed_at
+      : undefined,
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+    updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at
+  };
+}
+
+function mapOutboxEventSummary(row: OutboxEventSummaryRow): OutboxEventSummaryRecord {
+  return {
+    eventType: row.event_type,
+    status: row.status,
+    eventCount: Number(row.event_count)
   };
 }

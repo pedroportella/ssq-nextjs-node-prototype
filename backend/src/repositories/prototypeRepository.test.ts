@@ -7,6 +7,7 @@ import type { Queryable } from "../database/types.js";
 
 class SeededTestDatabase implements Queryable {
   private readonly customerProfileEvidence: QueryResultRow[] = [];
+  private readonly outboxEvents: QueryResultRow[] = [];
   private readonly serviceRequestEvents: QueryResultRow[] = [];
   private readonly serviceRequests: QueryResultRow[] = [];
   private readonly serviceRequestDrafts: QueryResultRow[] = [];
@@ -129,6 +130,24 @@ class SeededTestDatabase implements Queryable {
       return result<T>([row as unknown as T]);
     }
 
+    if (normalizedSql.startsWith("INSERT INTO outbox_events")) {
+      const row = {
+        id: `92000000-0000-4000-8000-00000000000${this.outboxEvents.length + 1}`,
+        event_type: String(values[0]),
+        aggregate_type: String(values[1]),
+        aggregate_id: String(values[2]),
+        event_payload: JSON.parse(String(values[3])),
+        status: "PENDING",
+        available_at: "2026-06-10T00:25:00.000Z",
+        processed_at: null,
+        created_at: "2026-06-10T00:25:00.000Z",
+        updated_at: "2026-06-10T00:25:00.000Z"
+      };
+
+      this.outboxEvents.push(row);
+      return result<T>([row as unknown as T]);
+    }
+
     if (normalizedSql.startsWith("INSERT INTO submission_summaries")) {
       const existing = this.submissionSummaries.find((row) => row.service_request_id === values[0]);
       const row = {
@@ -219,6 +238,24 @@ class SeededTestDatabase implements Queryable {
 
     if (normalizedSql.includes("FROM service_request_events")) {
       return result<T>(this.serviceRequestEvents.filter((row) => row.service_request_id === values[0]) as T[]);
+    }
+
+    if (normalizedSql.includes("FROM outbox_events")) {
+      const counts = new Map<string, { event_type: string; status: string; event_count: number }>();
+
+      for (const event of this.outboxEvents) {
+        const key = `${event.event_type}:${event.status}`;
+        const count = counts.get(key) ?? {
+          event_type: String(event.event_type),
+          status: String(event.status),
+          event_count: 0
+        };
+
+        count.event_count += 1;
+        counts.set(key, count);
+      }
+
+      return result<T>([...counts.values()] as unknown as T[]);
     }
 
     if (normalizedSql.includes("FROM customer_profile_evidence")) {
@@ -328,6 +365,37 @@ describe("PrototypeRepository", () => {
       }
     });
     expect(activityLogs).toHaveLength(1);
+  });
+
+  it("creates and summarises outbox events", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+
+    const event = await repository.createOutboxEvent({
+      eventType: "ServiceRequestSubmitted",
+      aggregateType: "ServiceRequest",
+      aggregateId: "30000000-0000-4000-8000-000000000099",
+      eventPayload: {
+        correlationId: "test-correlation"
+      }
+    });
+    const summaries = await repository.listOutboxEventSummaries();
+
+    expect(event).toMatchObject({
+      eventType: "ServiceRequestSubmitted",
+      aggregateType: "ServiceRequest",
+      status: "PENDING",
+      eventPayload: {
+        correlationId: "test-correlation"
+      }
+    });
+    expect(summaries).toEqual([
+      {
+        eventType: "ServiceRequestSubmitted",
+        status: "PENDING",
+        eventCount: 1
+      }
+    ]);
   });
 
   it("creates and reads submission summaries for customer-owned requests", async () => {
