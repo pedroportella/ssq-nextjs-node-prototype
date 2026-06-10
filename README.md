@@ -77,3 +77,7 @@ Current backend health endpoints:
 - `GET /health`
 - `GET /health/live`
 - `GET /health/ready`: includes database reachability.
+
+Current backend API endpoint:
+
+- `POST /graphql`: platform data API for viewer/profile, feature flags, transaction catalogue, transaction schemas, service requests and activity logs.

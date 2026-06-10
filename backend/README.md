@@ -55,3 +55,21 @@ The backend currently owns SQL migrations and seed data for:
 - service request events.
 
 The seeded transaction catalogue includes dashboard, Seniors Card and Rental Security Subsidy entries. A transaction is startable only when its definition is enabled and its `transaction.<key>.enabled` feature flag is true.
+
+## GraphQL
+
+The platform API is exposed at `POST /graphql`.
+
+Current query surface:
+
+- viewer;
+- customer profile;
+- feature flags;
+- transaction definitions;
+- enabled transaction catalogue;
+- transaction schema by key;
+- service requests;
+- service request by reference;
+- activity logs.
+
+GraphQL requests can provide `x-correlation-id` for trace continuity. Local prototype identity defaults to `demo.customer@example.test` and can be overridden with `x-demo-customer-email`.

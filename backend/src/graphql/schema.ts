@@ -1,0 +1,215 @@
+import { GraphQLScalarType, Kind } from "graphql";
+import { createSchema } from "graphql-yoga";
+
+import type { GraphqlContext } from "./context.js";
+import type { CustomerRecord } from "../repositories/prototypeRepository.js";
+
+type JsonValue = boolean | number | string | null | JsonValue[] | { [key: string]: JsonValue };
+
+const jsonScalar: GraphQLScalarType = new GraphQLScalarType({
+  name: "JSON",
+  parseLiteral(ast) {
+    return parseJsonLiteral(ast);
+  },
+  parseValue(value) {
+    return value;
+  },
+  serialize(value) {
+    return value;
+  }
+});
+
+function parseJsonLiteral(ast: Parameters<GraphQLScalarType["parseLiteral"]>[0]): JsonValue | undefined {
+  switch (ast.kind) {
+    case Kind.STRING:
+    case Kind.BOOLEAN:
+      return ast.value;
+    case Kind.INT:
+    case Kind.FLOAT:
+      return Number(ast.value);
+    case Kind.OBJECT:
+      return Object.fromEntries(ast.fields.map((field) => [field.name.value, parseJsonLiteral(field.value) ?? null]));
+    case Kind.LIST:
+      return ast.values.map((value) => parseJsonLiteral(value) ?? null);
+    case Kind.NULL:
+      return null;
+    default:
+      return undefined;
+  }
+}
+
+export const schema = createSchema<GraphqlContext>({
+  typeDefs: /* GraphQL */ `
+    scalar JSON
+
+    type Viewer {
+      id: ID!
+      externalRef: String!
+      email: String!
+      givenName: String!
+      familyName: String!
+    }
+
+    type ProfileAttribute {
+      id: ID!
+      key: String!
+      value: JSON!
+    }
+
+    type CustomerProfile {
+      customer: Viewer!
+      attributes: [ProfileAttribute!]!
+      serviceRequests: [ServiceRequest!]!
+    }
+
+    type FeatureFlag {
+      id: ID!
+      key: String!
+      description: String!
+      enabled: Boolean!
+      metadata: JSON!
+    }
+
+    type TransactionDefinition {
+      id: ID!
+      key: String!
+      label: String!
+      description: String!
+      status: String!
+      owningAgency: String!
+    }
+
+    type TransactionSchema {
+      transactionKey: String!
+      schemaVersion: String!
+      schema: JSON!
+    }
+
+    type TransactionCatalogueEntry {
+      definition: TransactionDefinition!
+      schemaVersion: String!
+      schema: JSON!
+      featureFlagKey: String!
+      featureEnabled: Boolean!
+    }
+
+    type ServiceRequest {
+      id: ID!
+      customerId: ID!
+      transactionDefinitionId: ID!
+      transactionKey: String
+      referenceNumber: String!
+      status: String!
+      payload: JSON!
+    }
+
+    type ActivityLog {
+      id: ID!
+      serviceRequestId: ID!
+      eventType: String!
+      eventPayload: JSON!
+      createdAt: String!
+    }
+
+    type PlatformInfo {
+      correlationId: String!
+    }
+
+    type Query {
+      platform: PlatformInfo!
+      viewer: Viewer
+      customerProfile: CustomerProfile
+      featureFlags: [FeatureFlag!]!
+      transactionDefinitions: [TransactionDefinition!]!
+      transactionCatalogue: [TransactionCatalogueEntry!]!
+      transactionSchema(transactionKey: String!): TransactionSchema
+      serviceRequests: [ServiceRequest!]!
+      serviceRequest(referenceNumber: String!): ServiceRequest
+      activityLogs(serviceRequestId: ID!): [ActivityLog!]!
+    }
+  `,
+  resolvers: {
+    JSON: jsonScalar,
+    CustomerProfile: {
+      async attributes(parent: { customer: CustomerRecord }, _args: unknown, context: GraphqlContext) {
+        const attributes = await context.repository.listCustomerProfileAttributes(parent.customer.id);
+
+        return attributes.map((attribute) => ({
+          id: attribute.id,
+          key: attribute.attributeKey,
+          value: attribute.attributeValue
+        }));
+      },
+      async serviceRequests(parent: { customer: CustomerRecord }, _args: unknown, context: GraphqlContext) {
+        return context.repository.listServiceRequestsForCustomer(parent.customer.id);
+      }
+    },
+    FeatureFlag: {
+      key(parent: { flagKey: string }) {
+        return parent.flagKey;
+      }
+    },
+    TransactionDefinition: {
+      key(parent: { transactionKey: string }) {
+        return parent.transactionKey;
+      }
+    },
+    TransactionCatalogueEntry: {
+      definition(parent: Record<string, unknown>) {
+        return parent;
+      }
+    },
+    Query: {
+      platform(_parent: unknown, _args: unknown, context: GraphqlContext) {
+        return {
+          correlationId: context.correlationId
+        };
+      },
+      viewer(_parent: unknown, _args: unknown, context: GraphqlContext) {
+        return context.repository.getCustomerByEmail(context.demoCustomerEmail);
+      },
+      async customerProfile(_parent: unknown, _args: unknown, context: GraphqlContext) {
+        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+
+        return customer ? { customer } : null;
+      },
+      featureFlags(_parent: unknown, _args: unknown, context: GraphqlContext) {
+        return context.repository.listFeatureFlags();
+      },
+      transactionDefinitions(_parent: unknown, _args: unknown, context: GraphqlContext) {
+        return context.repository.listTransactionDefinitions();
+      },
+      transactionCatalogue(_parent: unknown, _args: unknown, context: GraphqlContext) {
+        return context.transactionCatalogue.listEnabledTransactions();
+      },
+      async transactionSchema(
+        _parent: unknown,
+        args: { transactionKey: string },
+        context: GraphqlContext
+      ) {
+        const result = await context.transactionCatalogue.getStartableTransaction(args.transactionKey);
+
+        if (!result.ok) {
+          return null;
+        }
+
+        return {
+          transactionKey: result.transaction.transactionKey,
+          schemaVersion: result.transaction.schemaVersion,
+          schema: result.transaction.schema
+        };
+      },
+      async serviceRequests(_parent: unknown, _args: unknown, context: GraphqlContext) {
+        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+
+        return customer ? context.repository.listServiceRequestsForCustomer(customer.id) : [];
+      },
+      serviceRequest(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
+        return context.repository.getServiceRequestByReference(args.referenceNumber);
+      },
+      activityLogs(_parent: unknown, args: { serviceRequestId: string }, context: GraphqlContext) {
+        return context.repository.listActivityLogs(args.serviceRequestId);
+      }
+    }
+  }
+});

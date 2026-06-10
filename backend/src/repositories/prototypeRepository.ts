@@ -8,6 +8,13 @@ export interface CustomerRecord {
   familyName: string;
 }
 
+export interface CustomerProfileAttributeRecord {
+  id: string;
+  customerId: string;
+  attributeKey: string;
+  attributeValue: Record<string, unknown>;
+}
+
 export interface TransactionDefinitionRecord {
   id: string;
   transactionKey: string;
@@ -24,6 +31,14 @@ export interface TransactionCatalogueRecord extends TransactionDefinitionRecord 
   featureEnabled: boolean;
 }
 
+export interface FeatureFlagRecord {
+  id: string;
+  flagKey: string;
+  description: string;
+  enabled: boolean;
+  metadata: Record<string, unknown>;
+}
+
 export interface ServiceRequestRecord {
   id: string;
   customerId: string;
@@ -31,6 +46,15 @@ export interface ServiceRequestRecord {
   referenceNumber: string;
   status: "DRAFT" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "DECLINED";
   payload: Record<string, unknown>;
+  transactionKey?: string;
+}
+
+export interface ServiceRequestEventRecord {
+  id: string;
+  serviceRequestId: string;
+  eventType: string;
+  eventPayload: Record<string, unknown>;
+  createdAt: string;
 }
 
 interface CustomerRow {
@@ -41,6 +65,13 @@ interface CustomerRow {
   family_name: string;
 }
 
+interface CustomerProfileAttributeRow {
+  id: string;
+  customer_id: string;
+  attribute_key: string;
+  attribute_value: Record<string, unknown>;
+}
+
 interface TransactionDefinitionRow {
   id: string;
   transaction_key: string;
@@ -48,6 +79,14 @@ interface TransactionDefinitionRow {
   description: string;
   status: TransactionDefinitionRecord["status"];
   owning_agency: string;
+}
+
+interface FeatureFlagRow {
+  id: string;
+  flag_key: string;
+  description: string;
+  enabled: boolean;
+  metadata: Record<string, unknown>;
 }
 
 interface TransactionCatalogueRow extends TransactionDefinitionRow {
@@ -64,6 +103,15 @@ interface ServiceRequestRow {
   reference_number: string;
   status: ServiceRequestRecord["status"];
   payload: Record<string, unknown>;
+  transaction_key?: string;
+}
+
+interface ServiceRequestEventRow {
+  id: string;
+  service_request_id: string;
+  event_type: string;
+  event_payload: Record<string, unknown>;
+  created_at: Date | string;
 }
 
 export class PrototypeRepository {
@@ -82,6 +130,20 @@ export class PrototypeRepository {
     return result.rows[0] ? mapCustomer(result.rows[0]) : undefined;
   }
 
+  async listCustomerProfileAttributes(customerId: string): Promise<CustomerProfileAttributeRecord[]> {
+    const result = await this.database.query<CustomerProfileAttributeRow>(
+      `
+        SELECT id, customer_id, attribute_key, attribute_value
+        FROM customer_profile_attributes
+        WHERE customer_id = $1
+        ORDER BY attribute_key ASC
+      `,
+      [customerId]
+    );
+
+    return result.rows.map(mapCustomerProfileAttribute);
+  }
+
   async listTransactionDefinitions(): Promise<TransactionDefinitionRecord[]> {
     const result = await this.database.query<TransactionDefinitionRow>(`
       SELECT id, transaction_key, label, description, status, owning_agency
@@ -90,6 +152,16 @@ export class PrototypeRepository {
     `);
 
     return result.rows.map(mapTransactionDefinition);
+  }
+
+  async listFeatureFlags(): Promise<FeatureFlagRecord[]> {
+    const result = await this.database.query<FeatureFlagRow>(`
+      SELECT id, flag_key, description, enabled, metadata
+      FROM feature_flags
+      ORDER BY flag_key ASC
+    `);
+
+    return result.rows.map(mapFeatureFlag);
   }
 
   async listEnabledTransactionCatalogue(): Promise<TransactionCatalogueRecord[]> {
@@ -181,15 +253,60 @@ export class PrototypeRepository {
   async listServiceRequestsForCustomer(customerId: string): Promise<ServiceRequestRecord[]> {
     const result = await this.database.query<ServiceRequestRow>(
       `
-        SELECT id, customer_id, transaction_definition_id, reference_number, status, payload
-        FROM service_requests
-        WHERE customer_id = $1
-        ORDER BY created_at DESC
+        SELECT
+          sr.id,
+          sr.customer_id,
+          sr.transaction_definition_id,
+          sr.reference_number,
+          sr.status,
+          sr.payload,
+          td.transaction_key
+        FROM service_requests sr
+        INNER JOIN transaction_definitions td
+          ON td.id = sr.transaction_definition_id
+        WHERE sr.customer_id = $1
+        ORDER BY sr.created_at DESC
       `,
       [customerId]
     );
 
     return result.rows.map(mapServiceRequest);
+  }
+
+  async getServiceRequestByReference(referenceNumber: string): Promise<ServiceRequestRecord | undefined> {
+    const result = await this.database.query<ServiceRequestRow>(
+      `
+        SELECT
+          sr.id,
+          sr.customer_id,
+          sr.transaction_definition_id,
+          sr.reference_number,
+          sr.status,
+          sr.payload,
+          td.transaction_key
+        FROM service_requests sr
+        INNER JOIN transaction_definitions td
+          ON td.id = sr.transaction_definition_id
+        WHERE sr.reference_number = $1
+      `,
+      [referenceNumber]
+    );
+
+    return result.rows[0] ? mapServiceRequest(result.rows[0]) : undefined;
+  }
+
+  async listActivityLogs(serviceRequestId: string): Promise<ServiceRequestEventRecord[]> {
+    const result = await this.database.query<ServiceRequestEventRow>(
+      `
+        SELECT id, service_request_id, event_type, event_payload, created_at
+        FROM service_request_events
+        WHERE service_request_id = $1
+        ORDER BY created_at ASC
+      `,
+      [serviceRequestId]
+    );
+
+    return result.rows.map(mapServiceRequestEvent);
   }
 }
 
@@ -203,6 +320,15 @@ function mapCustomer(row: CustomerRow): CustomerRecord {
   };
 }
 
+function mapCustomerProfileAttribute(row: CustomerProfileAttributeRow): CustomerProfileAttributeRecord {
+  return {
+    id: row.id,
+    customerId: row.customer_id,
+    attributeKey: row.attribute_key,
+    attributeValue: row.attribute_value
+  };
+}
+
 function mapTransactionDefinition(row: TransactionDefinitionRow): TransactionDefinitionRecord {
   return {
     id: row.id,
@@ -211,6 +337,16 @@ function mapTransactionDefinition(row: TransactionDefinitionRow): TransactionDef
     description: row.description,
     status: row.status,
     owningAgency: row.owning_agency
+  };
+}
+
+function mapFeatureFlag(row: FeatureFlagRow): FeatureFlagRecord {
+  return {
+    id: row.id,
+    flagKey: row.flag_key,
+    description: row.description,
+    enabled: row.enabled,
+    metadata: row.metadata
   };
 }
 
@@ -231,6 +367,17 @@ function mapServiceRequest(row: ServiceRequestRow): ServiceRequestRecord {
     transactionDefinitionId: row.transaction_definition_id,
     referenceNumber: row.reference_number,
     status: row.status,
-    payload: row.payload
+    payload: row.payload,
+    transactionKey: row.transaction_key
+  };
+}
+
+function mapServiceRequestEvent(row: ServiceRequestEventRow): ServiceRequestEventRecord {
+  return {
+    id: row.id,
+    serviceRequestId: row.service_request_id,
+    eventType: row.event_type,
+    eventPayload: row.event_payload,
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at
   };
 }

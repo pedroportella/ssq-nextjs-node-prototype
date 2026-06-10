@@ -4,6 +4,7 @@ import Fastify from "fastify";
 import { loadConfig } from "./config.js";
 import { createDatabaseClient } from "./database/client.js";
 import { createLoggerOptions } from "./logger.js";
+import { registerGraphqlRoute } from "./routes/graphql.js";
 import { registerHealthRoutes } from "./routes/health.js";
 
 import type { AppConfig } from "./config.js";
@@ -31,6 +32,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   });
 
   await registerHealthRoutes(app, config, database);
+  await registerGraphqlRoute(app, database.queryable);
 
   return app;
 }
