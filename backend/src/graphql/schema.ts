@@ -126,6 +126,17 @@ export const schema = createSchema<GraphqlContext>({
       updatedAt: String!
     }
 
+    type SubmissionSummary {
+      id: ID!
+      serviceRequestId: ID!
+      summaryFormat: String!
+      contentType: String!
+      fileName: String!
+      summaryPayload: JSON!
+      createdAt: String!
+      updatedAt: String!
+    }
+
     type DraftMutationError {
       code: String!
       message: String!
@@ -202,6 +213,7 @@ export const schema = createSchema<GraphqlContext>({
       serviceRequestDraft(id: ID!): ServiceRequestDraft
       serviceRequests: [ServiceRequest!]!
       serviceRequest(referenceNumber: String!): ServiceRequest
+      submissionSummary(referenceNumber: String!): SubmissionSummary
       customerProfileEvidence(serviceRequestId: ID!): [CustomerProfileEvidence!]!
       activityLogs(serviceRequestId: ID!): [ActivityLog!]!
     }
@@ -306,6 +318,16 @@ export const schema = createSchema<GraphqlContext>({
       },
       serviceRequest(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
         return context.repository.getServiceRequestByReference(args.referenceNumber);
+      },
+      async submissionSummary(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
+        const customer = await context.repository.getCustomerByEmail(context.demoCustomerEmail);
+
+        return customer
+          ? context.repository.getSubmissionSummaryForCustomerByReference({
+              customerId: customer.id,
+              referenceNumber: args.referenceNumber
+            })
+          : null;
       },
       customerProfileEvidence(_parent: unknown, args: { serviceRequestId: string }, context: GraphqlContext) {
         return context.repository.listCustomerProfileEvidence(args.serviceRequestId);

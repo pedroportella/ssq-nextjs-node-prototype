@@ -97,6 +97,26 @@ function createRepository(
         createdAt: "2026-06-10T00:00:00.000Z"
       };
     },
+    async createSubmissionSummary(input: {
+      serviceRequestId: string;
+      summaryFormat: "TEXT";
+      contentType: string;
+      fileName: string;
+      summaryPayload: Record<string, unknown>;
+      summaryText: string;
+    }) {
+      return {
+        id: "91000000-0000-4000-8000-000000000001",
+        serviceRequestId: input.serviceRequestId,
+        summaryFormat: input.summaryFormat,
+        contentType: input.contentType,
+        fileName: input.fileName,
+        summaryPayload: input.summaryPayload,
+        summaryText: input.summaryText,
+        createdAt: "2026-06-10T00:00:00.000Z",
+        updatedAt: "2026-06-10T00:00:00.000Z"
+      };
+    },
     async createCustomerProfileEvidence(input: {
       serviceRequestId: string;
       customerProfileAttributeId?: string;
@@ -156,6 +176,53 @@ describe("SubmissionLifecycleService", () => {
       },
       fieldErrors: []
     });
+  });
+
+  it("creates submission summary metadata when a draft submits", async () => {
+    const draft = createDraft();
+    const createdSummaries: Array<{ fileName: string; summaryText: string; summaryPayload: Record<string, unknown> }> = [];
+    const repository = {
+      ...createRepository(draft),
+      async createSubmissionSummary(input: { fileName: string; summaryText: string; summaryPayload: Record<string, unknown> }) {
+        createdSummaries.push(input);
+
+        return {
+          id: "91000000-0000-4000-8000-000000000001",
+          serviceRequestId: "30000000-0000-4000-8000-000000000001",
+          summaryFormat: "TEXT",
+          contentType: "text/plain; charset=utf-8",
+          fileName: input.fileName,
+          summaryPayload: input.summaryPayload,
+          summaryText: input.summaryText,
+          createdAt: "2026-06-10T00:00:00.000Z",
+          updatedAt: "2026-06-10T00:00:00.000Z"
+        };
+      }
+    } as unknown as PrototypeRepository;
+    const service = new SubmissionLifecycleService(
+      repository,
+      createCatalogue(createTransaction()),
+      () => "SSQ-TEST-0007"
+    );
+
+    await expect(service.submitDraft({
+      customerId: draft.customerId,
+      draftId: draft.id,
+      correlationId: "test-correlation"
+    })).resolves.toMatchObject({
+      ok: true
+    });
+
+    expect(createdSummaries).toHaveLength(1);
+    expect(createdSummaries[0]).toMatchObject({
+      fileName: "SSQ-TEST-0007-summary.txt",
+      summaryPayload: {
+        referenceNumber: "SSQ-TEST-0007",
+        transactionKey: "seniors-card",
+        transactionLabel: "Seniors Card"
+      }
+    });
+    expect(createdSummaries[0]?.summaryText).toContain("Reference: SSQ-TEST-0007");
   });
 
   it("captures simulated profile evidence declared by the transaction schema", async () => {

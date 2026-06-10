@@ -11,6 +11,7 @@ function createGraphqlTestDatabase(): DatabaseClient {
   const serviceRequestEvents: QueryResultRow[] = [];
   const serviceRequests: QueryResultRow[] = [];
   const serviceRequestDrafts: QueryResultRow[] = [];
+  const submissionSummaries: QueryResultRow[] = [];
 
   return {
     queryable: {
@@ -125,6 +126,23 @@ function createGraphqlTestDatabase(): DatabaseClient {
           };
 
           serviceRequestEvents.push(row);
+          return result<T>([row as unknown as T]);
+        }
+
+        if (normalizedSql.startsWith("INSERT INTO submission_summaries")) {
+          const row = {
+            id: "91000000-0000-4000-8000-000000000001",
+            service_request_id: String(values[0]),
+            summary_format: String(values[1]),
+            content_type: String(values[2]),
+            file_name: String(values[3]),
+            summary_payload: JSON.parse(String(values[4])),
+            summary_text: String(values[5]),
+            created_at: "2026-06-10T00:20:00.000Z",
+            updated_at: "2026-06-10T00:20:00.000Z"
+          };
+
+          submissionSummaries.push(row);
           return result<T>([row as unknown as T]);
         }
 
@@ -259,6 +277,19 @@ function createGraphqlTestDatabase(): DatabaseClient {
 
         if (normalizedSql.includes("FROM customer_profile_evidence")) {
           return result<T>(customerProfileEvidence.filter((row) => row.service_request_id === values[0]) as unknown as T[]);
+        }
+
+        if (normalizedSql.includes("FROM submission_summaries ss")) {
+          const serviceRequest = [...serviceRequests, {
+            id: "30000000-0000-4000-8000-000000000001",
+            customer_id: "10000000-0000-4000-8000-000000000001",
+            reference_number: "SSQ-DEMO-0001"
+          }].find((row) => row.customer_id === values[0] && row.reference_number === values[1]);
+          const rows = serviceRequest
+            ? submissionSummaries.filter((row) => row.service_request_id === serviceRequest.id)
+            : [];
+
+          return result<T>(rows as unknown as T[]);
         }
 
         return result<T>([]);
@@ -709,7 +740,9 @@ describe("GraphQL route", () => {
         }
       }
     });
-    expect(response.json().data.submitServiceRequest.serviceRequest.referenceNumber).toMatch(/^SSQ-\d{8}-[A-F0-9]{8}$/);
+    const submittedReference = response.json().data.submitServiceRequest.serviceRequest.referenceNumber;
+
+    expect(submittedReference).toMatch(/^SSQ-\d{8}-[A-F0-9]{8}$/);
 
     const evidenceResponse = await app.inject({
       headers: {
@@ -754,6 +787,40 @@ describe("GraphQL route", () => {
             }
           }
         ]
+      }
+    });
+
+    const summaryResponse = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query Summary {
+            submissionSummary(referenceNumber: "${submittedReference}") {
+              fileName
+              contentType
+              summaryPayload
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(summaryResponse.statusCode).toBe(200);
+    expect(summaryResponse.json()).toMatchObject({
+      data: {
+        submissionSummary: {
+          fileName: `${submittedReference}-summary.txt`,
+          contentType: "text/plain; charset=utf-8",
+          summaryPayload: {
+            referenceNumber: submittedReference,
+            transactionKey: "seniors-card",
+            transactionLabel: "Seniors Card"
+          }
+        }
       }
     });
 

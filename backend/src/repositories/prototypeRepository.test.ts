@@ -10,6 +10,7 @@ class SeededTestDatabase implements Queryable {
   private readonly serviceRequestEvents: QueryResultRow[] = [];
   private readonly serviceRequests: QueryResultRow[] = [];
   private readonly serviceRequestDrafts: QueryResultRow[] = [];
+  private readonly submissionSummaries: QueryResultRow[] = [];
 
   async query<T extends QueryResultRow = QueryResultRow>(sql: string, values: readonly unknown[] = []): Promise<QueryResult<T>> {
     const normalizedSql = sql.replace(/\s+/g, " ").trim();
@@ -128,6 +129,29 @@ class SeededTestDatabase implements Queryable {
       return result<T>([row as unknown as T]);
     }
 
+    if (normalizedSql.startsWith("INSERT INTO submission_summaries")) {
+      const existing = this.submissionSummaries.find((row) => row.service_request_id === values[0]);
+      const row = {
+        id: existing?.id ?? "91000000-0000-4000-8000-000000000001",
+        service_request_id: String(values[0]),
+        summary_format: String(values[1]),
+        content_type: String(values[2]),
+        file_name: String(values[3]),
+        summary_payload: JSON.parse(String(values[4])),
+        summary_text: String(values[5]),
+        created_at: "2026-06-10T00:20:00.000Z",
+        updated_at: "2026-06-10T00:20:00.000Z"
+      };
+
+      if (existing) {
+        Object.assign(existing, row);
+      } else {
+        this.submissionSummaries.push(row);
+      }
+
+      return result<T>([row as unknown as T]);
+    }
+
     if (normalizedSql.startsWith("INSERT INTO customer_profile_evidence")) {
       const row = {
         id: "80000000-0000-4000-8000-000000000001",
@@ -199,6 +223,15 @@ class SeededTestDatabase implements Queryable {
 
     if (normalizedSql.includes("FROM customer_profile_evidence")) {
       return result<T>(this.customerProfileEvidence.filter((row) => row.service_request_id === values[0]) as T[]);
+    }
+
+    if (normalizedSql.includes("FROM submission_summaries ss")) {
+      const serviceRequest = this.serviceRequests.find((row) => row.customer_id === values[0] && row.reference_number === values[1]);
+      const rows = serviceRequest
+        ? this.submissionSummaries.filter((row) => row.service_request_id === serviceRequest.id)
+        : [];
+
+      return result<T>(rows as T[]);
     }
 
     return result<T>([]);
@@ -295,6 +328,46 @@ describe("PrototypeRepository", () => {
       }
     });
     expect(activityLogs).toHaveLength(1);
+  });
+
+  it("creates and reads submission summaries for customer-owned requests", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+    const serviceRequest = await repository.createServiceRequest({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      transactionDefinitionId: "20000000-0000-4000-8000-000000000002",
+      referenceNumber: "SSQ-TEST-0003",
+      status: "SUBMITTED",
+      payload: {
+        prototype: true
+      }
+    });
+
+    const summary = await repository.createSubmissionSummary({
+      serviceRequestId: serviceRequest.id,
+      summaryFormat: "TEXT",
+      contentType: "text/plain; charset=utf-8",
+      fileName: "SSQ-TEST-0003-summary.txt",
+      summaryPayload: {
+        referenceNumber: serviceRequest.referenceNumber
+      },
+      summaryText: "Reference: SSQ-TEST-0003"
+    });
+    const ownedSummary = await repository.getSubmissionSummaryForCustomerByReference({
+      customerId: serviceRequest.customerId,
+      referenceNumber: serviceRequest.referenceNumber
+    });
+    const otherCustomerSummary = await repository.getSubmissionSummaryForCustomerByReference({
+      customerId: "10000000-0000-4000-8000-000000000999",
+      referenceNumber: serviceRequest.referenceNumber
+    });
+
+    expect(summary).toMatchObject({
+      fileName: "SSQ-TEST-0003-summary.txt",
+      summaryText: "Reference: SSQ-TEST-0003"
+    });
+    expect(ownedSummary?.id).toBe(summary.id);
+    expect(otherCustomerSummary).toBeUndefined();
   });
 
   it("creates and reads simulated customer profile evidence", async () => {

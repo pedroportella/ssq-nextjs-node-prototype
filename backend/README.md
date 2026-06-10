@@ -54,7 +54,8 @@ The backend currently owns SQL migrations and seed data for:
 - feature flags;
 - service request drafts;
 - service requests;
-- service request events.
+- service request events;
+- submission summaries;
 - supporting document metadata.
 
 The seeded transaction catalogue includes dashboard, Seniors Card and Rental Security Subsidy entries. A transaction is startable only when its definition is enabled and its `transaction.<key>.enabled` feature flag is true.
@@ -67,11 +68,14 @@ Supporting document uploads are currently metadata-only for local review. The ba
 
 Service request status changes are backend-owned. The current lifecycle supports `SUBMITTED -> UNDER_REVIEW`, `SUBMITTED -> WITHDRAWN`, `UNDER_REVIEW -> ACTION_REQUIRED`, `UNDER_REVIEW -> COMPLETED`, and `ACTION_REQUIRED -> UNDER_REVIEW` or `WITHDRAWN`, with each accepted transition recorded as an activity event.
 
+Draft submission also generates a text submission summary for the submitted request. The summary is a prototype review artifact with metadata and payload context, not an official receipt or production document store.
+
 ## REST
 
-Current REST write surface:
+Current REST surface:
 
 - `POST /uploads/supporting-documents`: records validated supporting document metadata for a customer-owned draft or service request.
+- `GET /service-requests/:referenceNumber/summary/download`: downloads the generated text submission summary for a customer-owned submitted request with `content-type` and `content-disposition` headers.
 
 ## GraphQL
 
@@ -90,6 +94,7 @@ Current query surface:
 - service requests;
 - service request by reference;
 - customer profile evidence by service request ID;
+- submission summary by reference number;
 - activity logs.
 
 Current mutation surface:

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { validatePayloadAgainstSchema } from "./submissionValidation.js";
+import { SubmissionSummaryService } from "./submissionSummaryService.js";
 
 import type { PrototypeRepository, ServiceRequestRecord } from "../repositories/prototypeRepository.js";
 import type { FieldValidationError } from "./submissionValidation.js";
@@ -89,6 +90,14 @@ export class SubmissionLifecycleService {
       status: "SUBMITTED",
       payload: validation.payload
     });
+    const enrichedServiceRequest = {
+      ...serviceRequest,
+      transactionKey: transaction.transaction.transactionKey
+    };
+    const summary = await new SubmissionSummaryService(this.repository).createSummary({
+      serviceRequest: enrichedServiceRequest,
+      transactionLabel: transaction.transaction.label
+    });
     const capturedEvidence = await this.captureProfileEvidence({
       customerId: input.customerId,
       serviceRequestId: serviceRequest.id,
@@ -104,16 +113,14 @@ export class SubmissionLifecycleService {
         correlationId: input.correlationId,
         draftId: draft.id,
         profileEvidenceCount: capturedEvidence.length,
+        summaryId: summary.id,
         transactionKey: transaction.transaction.transactionKey
       }
     });
 
     return {
       ok: true,
-      serviceRequest: {
-        ...serviceRequest,
-        transactionKey: transaction.transaction.transactionKey
-      },
+      serviceRequest: enrichedServiceRequest,
       fieldErrors: []
     };
   }

@@ -99,6 +99,18 @@ export interface SupportingDocumentRecord {
   updatedAt: string;
 }
 
+export interface SubmissionSummaryRecord {
+  id: string;
+  serviceRequestId: string;
+  summaryFormat: "TEXT";
+  contentType: string;
+  fileName: string;
+  summaryPayload: Record<string, unknown>;
+  summaryText: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface CustomerRow {
   id: string;
   external_ref: string;
@@ -194,6 +206,18 @@ interface SupportingDocumentRow {
   scan_status: string;
   retention_policy: string;
   metadata: Record<string, unknown>;
+  created_at: Date | string;
+  updated_at: Date | string;
+}
+
+interface SubmissionSummaryRow {
+  id: string;
+  service_request_id: string;
+  summary_format: SubmissionSummaryRecord["summaryFormat"];
+  content_type: string;
+  file_name: string;
+  summary_payload: Record<string, unknown>;
+  summary_text: string;
   created_at: Date | string;
   updated_at: Date | string;
 }
@@ -738,6 +762,84 @@ export class PrototypeRepository {
 
     return mapSupportingDocument(result.rows[0]);
   }
+
+  async createSubmissionSummary(input: {
+    serviceRequestId: string;
+    summaryFormat: SubmissionSummaryRecord["summaryFormat"];
+    contentType: string;
+    fileName: string;
+    summaryPayload: Record<string, unknown>;
+    summaryText: string;
+  }): Promise<SubmissionSummaryRecord> {
+    const result = await this.database.query<SubmissionSummaryRow>(
+      `
+        INSERT INTO submission_summaries (
+          service_request_id,
+          summary_format,
+          content_type,
+          file_name,
+          summary_payload,
+          summary_text
+        )
+        VALUES ($1, $2, $3, $4, $5::jsonb, $6)
+        ON CONFLICT (service_request_id) DO UPDATE
+        SET summary_format = EXCLUDED.summary_format,
+            content_type = EXCLUDED.content_type,
+            file_name = EXCLUDED.file_name,
+            summary_payload = EXCLUDED.summary_payload,
+            summary_text = EXCLUDED.summary_text,
+            updated_at = now()
+        RETURNING
+          id,
+          service_request_id,
+          summary_format,
+          content_type,
+          file_name,
+          summary_payload,
+          summary_text,
+          created_at,
+          updated_at
+      `,
+      [
+        input.serviceRequestId,
+        input.summaryFormat,
+        input.contentType,
+        input.fileName,
+        JSON.stringify(input.summaryPayload),
+        input.summaryText
+      ]
+    );
+
+    return mapSubmissionSummary(result.rows[0]);
+  }
+
+  async getSubmissionSummaryForCustomerByReference(input: {
+    customerId: string;
+    referenceNumber: string;
+  }): Promise<SubmissionSummaryRecord | undefined> {
+    const result = await this.database.query<SubmissionSummaryRow>(
+      `
+        SELECT
+          ss.id,
+          ss.service_request_id,
+          ss.summary_format,
+          ss.content_type,
+          ss.file_name,
+          ss.summary_payload,
+          ss.summary_text,
+          ss.created_at,
+          ss.updated_at
+        FROM submission_summaries ss
+        INNER JOIN service_requests sr
+          ON sr.id = ss.service_request_id
+        WHERE sr.customer_id = $1
+          AND sr.reference_number = $2
+      `,
+      [input.customerId, input.referenceNumber]
+    );
+
+    return result.rows[0] ? mapSubmissionSummary(result.rows[0]) : undefined;
+  }
 }
 
 function mapCustomer(row: CustomerRow): CustomerRecord {
@@ -855,6 +957,20 @@ function mapSupportingDocument(row: SupportingDocumentRow): SupportingDocumentRe
     scanStatus: row.scan_status,
     retentionPolicy: row.retention_policy,
     metadata: row.metadata,
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+    updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at
+  };
+}
+
+function mapSubmissionSummary(row: SubmissionSummaryRow): SubmissionSummaryRecord {
+  return {
+    id: row.id,
+    serviceRequestId: row.service_request_id,
+    summaryFormat: row.summary_format,
+    contentType: row.content_type,
+    fileName: row.file_name,
+    summaryPayload: row.summary_payload,
+    summaryText: row.summary_text,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at
   };
