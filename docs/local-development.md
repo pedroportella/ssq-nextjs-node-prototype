@@ -16,10 +16,16 @@ Copy `.env.example` to `.env` only when you need to override local ports or data
 
 ## Local Runtime
 
-Start PostgreSQL and the backend API:
+Start PostgreSQL, the backend API and the three frontend apps:
 
 ```bash
 pnpm docker:up
+```
+
+Start only PostgreSQL and the backend API:
+
+```bash
+pnpm docker:up:core
 ```
 
 Check the Compose configuration:
@@ -40,6 +46,16 @@ The backend is exposed on host port `7001` by default:
 curl -i http://localhost:7001/health
 ```
 
+The frontend apps expose `/status` on separate host ports:
+
+```bash
+curl -i http://localhost:3000/status
+curl -i http://localhost:3001/status
+curl -i http://localhost:3002/status
+```
+
+Frontend app containers receive `BACKEND_INTERNAL_URL` as a server-side environment variable pointing at the Compose backend service. Do not add `NEXT_PUBLIC_BACKEND_URL` or browser-visible backend URL values.
+
 The database is exposed on host port `54329` by default to avoid clashing with a local PostgreSQL install.
 
 Connection details:
@@ -53,14 +69,12 @@ Connection details:
 
 The `ssq-postgres-data` Docker volume persists database state across container restarts.
 
-## App Placeholders
+## App Containers
 
-The three frontend apps are declared as Compose placeholders under the `app-placeholders` profile. They are not used by the default backend/database runtime yet.
+The three frontend apps are built with app-local Dockerfiles:
 
-Preview the full future service graph:
+- `frontend/apps/dashboard/Dockerfile`
+- `frontend/apps/seniors-card/Dockerfile`
+- `frontend/apps/rental-security-subsidy/Dockerfile`
 
-```bash
-docker compose --profile app-placeholders config
-```
-
-The frontend placeholders will be replaced by real app containers as those packages are containerised.
+Each Dockerfile builds from the workspace root, runs the relevant app build and copies the Next.js standalone output into a smaller runtime image.

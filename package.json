@@ -14,9 +14,13 @@
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
     "docker:config": "docker compose config",
-    "docker:up": "docker compose up -d postgres backend",
-    "docker:build": "docker compose build backend",
+    "docker:up": "docker compose up -d postgres backend dashboard seniors-card rental-security-subsidy",
+    "docker:up:core": "docker compose up -d postgres backend",
+    "docker:build": "docker compose build backend dashboard seniors-card rental-security-subsidy",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f"
+  },
+  "volta": {
+    "node": "22.22.3"
   }
 }

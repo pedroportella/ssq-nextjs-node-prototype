@@ -32,8 +32,13 @@ pnpm docker:up
 pnpm docker:down
 ```
 
-The local Docker runtime currently starts PostgreSQL and the backend API. The backend applies database migrations and prototype seed data before starting. Frontend app containers are still placeholders and will be implemented as the application packages are containerised.
+The local Docker runtime starts PostgreSQL, the backend API and the three Next.js app containers. The backend applies database migrations and prototype seed data before starting. Each frontend app is built as a standalone Next.js container and receives the backend URL through server-side environment only.
 The backend API is available on `http://localhost:7001` once the local runtime is up.
+The frontend apps are available on:
+
+- Dashboard: `http://localhost:3000`
+- Seniors Card: `http://localhost:3001`
+- Rental Security Subsidy: `http://localhost:3002`
 
 See `docs/local-development.md` for local runtime details.
 
@@ -45,9 +50,9 @@ See `docs/local-development.md` for local runtime details.
 
 Current app status endpoints:
 
-- `frontend/apps/dashboard`: `GET /status`
-- `frontend/apps/seniors-card`: `GET /status`
-- `frontend/apps/rental-security-subsidy`: `GET /status`
+- `frontend/apps/dashboard`: `GET http://localhost:3000/status`
+- `frontend/apps/seniors-card`: `GET http://localhost:3001/status`
+- `frontend/apps/rental-security-subsidy`: `GET http://localhost:3002/status`
 
 Current shared frontend packages:
 

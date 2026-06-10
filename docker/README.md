@@ -6,9 +6,9 @@ Current services:
 
 - `postgres`: local PostgreSQL 16 database with a persistent `ssq-postgres-data` volume.
 - `backend`: Node.js API container built from `backend/Dockerfile`.
-- `dashboard`: placeholder service under the `app-placeholders` profile.
-- `seniors-card`: placeholder service under the `app-placeholders` profile.
-- `rental-security-subsidy`: placeholder service under the `app-placeholders` profile.
+- `dashboard`: Next.js app container built from `frontend/apps/dashboard/Dockerfile`.
+- `seniors-card`: Next.js app container built from `frontend/apps/seniors-card/Dockerfile`.
+- `rental-security-subsidy`: Next.js app container built from `frontend/apps/rental-security-subsidy/Dockerfile`.
 
 Common commands:
 
@@ -18,5 +18,7 @@ pnpm docker:build
 pnpm docker:up
 pnpm docker:down
 ```
+
+Use `pnpm docker:up:core` when you only need PostgreSQL and the backend API.
 
 This is local review infrastructure only. It is not Queensland Government production hosting.

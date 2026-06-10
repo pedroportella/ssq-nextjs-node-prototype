@@ -54,17 +54,27 @@ services:
       - ssq-local
 
   dashboard:
-    image: node:22-alpine
-    profiles:
-      - app-placeholders
-    working_dir: /workspace/frontend/apps/dashboard
-    volumes:
-      - ./frontend:/workspace/frontend:delegated
+    build:
+      context: .
+      dockerfile: frontend/apps/dashboard/Dockerfile
+    image: ssq-dashboard:local
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: ${DASHBOARD_PORT:-3000}
+      HOSTNAME: 0.0.0.0
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
-    command: ["sh", "-c", "echo 'Dashboard app placeholder: implemented as the frontend package matures.' && sleep infinity"]
+    ports:
+      - "${DASHBOARD_PORT:-3000}:${DASHBOARD_PORT:-3000}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/status').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       backend:
         condition: service_healthy
@@ -72,17 +82,27 @@ services:
       - ssq-local
 
   seniors-card:
-    image: node:22-alpine
-    profiles:
-      - app-placeholders
-    working_dir: /workspace/frontend/apps/seniors-card
-    volumes:
-      - ./frontend:/workspace/frontend:delegated
+    build:
+      context: .
+      dockerfile: frontend/apps/seniors-card/Dockerfile
+    image: ssq-seniors-card:local
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: ${SENIORS_CARD_PORT:-3001}
+      HOSTNAME: 0.0.0.0
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
-    command: ["sh", "-c", "echo 'Seniors Card app placeholder: implemented as the frontend package matures.' && sleep infinity"]
+    ports:
+      - "${SENIORS_CARD_PORT:-3001}:${SENIORS_CARD_PORT:-3001}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:' + (process.env.PORT || 3001) + '/status').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       backend:
         condition: service_healthy
@@ -90,17 +110,27 @@ services:
       - ssq-local
 
   rental-security-subsidy:
-    image: node:22-alpine
-    profiles:
-      - app-placeholders
-    working_dir: /workspace/frontend/apps/rental-security-subsidy
-    volumes:
-      - ./frontend:/workspace/frontend:delegated
+    build:
+      context: .
+      dockerfile: frontend/apps/rental-security-subsidy/Dockerfile
+    image: ssq-rental-security-subsidy:local
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
       PORT: ${RENTAL_SECURITY_SUBSIDY_PORT:-3002}
+      HOSTNAME: 0.0.0.0
       BACKEND_INTERNAL_URL: http://backend:${BACKEND_PORT:-7001}
-    command: ["sh", "-c", "echo 'Rental Security Subsidy app placeholder: implemented as the frontend package matures.' && sleep infinity"]
+    ports:
+      - "${RENTAL_SECURITY_SUBSIDY_PORT:-3002}:${RENTAL_SECURITY_SUBSIDY_PORT:-3002}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:' + (process.env.PORT || 3002) + '/status').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       backend:
         condition: service_healthy
