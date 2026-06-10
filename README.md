@@ -49,6 +49,15 @@ Current app status endpoints:
 - `frontend/apps/seniors-card`: `GET /status`
 - `frontend/apps/rental-security-subsidy`: `GET /status`
 
+Current shared frontend packages:
+
+- `frontend/packages/services`
+- `frontend/packages/ui-library`
+- `frontend/packages/ui-tokens`
+- `frontend/packages/ui-assets`
+- `frontend/packages/utils`
+- `frontend/packages/web-components`
+
 ## Planned Backend
 
 The backend will be a production-shaped Node.js platform slice with Fastify, GraphQL, PostgreSQL, backend-owned validation, upload policy, activity events, submission summaries, outbox events and safe operations endpoints.

@@ -13,6 +13,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@ssq/services": "workspace:*",
+    "@ssq/ui-library": "workspace:*",
     "next": "16.2.9",
     "react": "19.1.1",
     "react-dom": "19.1.1"

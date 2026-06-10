@@ -1,29 +1,31 @@
 {
-  "name": "@ssq/seniors-card",
+  "name": "@ssq/ui-library",
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
   "scripts": {
-    "build": "next build",
+    "build": "tsc -p tsconfig.json --noEmit",
     "check": "pnpm typecheck && pnpm test",
-    "dev": "next dev -p 3001",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "start": "next start -p 3001",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@ssq/services": "workspace:*",
-    "@ssq/ui-library": "workspace:*",
-    "next": "16.2.9",
-    "react": "19.1.1",
-    "react-dom": "19.1.1"
+    "@ssq/ui-tokens": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/react": "^19.1.12",
-    "@types/react-dom": "^19.1.9",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
+  },
+  "peerDependencies": {
+    "react": "^19.1.1"
   }
 }

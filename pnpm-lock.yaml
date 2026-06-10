@@ -38,6 +38,12 @@ importers:
 
   frontend/apps/dashboard:
     dependencies:
+      '@ssq/services':
+        specifier: workspace:*
+        version: link:../../packages/services
+      '@ssq/ui-library':
+        specifier: workspace:*
+        version: link:../../packages/ui-library
       next:
         specifier: 16.2.9
         version: 16.2.9(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -66,6 +72,12 @@ importers:
 
   frontend/apps/rental-security-subsidy:
     dependencies:
+      '@ssq/services':
+        specifier: workspace:*
+        version: link:../../packages/services
+      '@ssq/ui-library':
+        specifier: workspace:*
+        version: link:../../packages/ui-library
       next:
         specifier: 16.2.9
         version: 16.2.9(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -94,6 +106,12 @@ importers:
 
   frontend/apps/seniors-card:
     dependencies:
+      '@ssq/services':
+        specifier: workspace:*
+        version: link:../../packages/services
+      '@ssq/ui-library':
+        specifier: workspace:*
+        version: link:../../packages/ui-library
       next:
         specifier: 16.2.9
         version: 16.2.9(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -113,6 +131,92 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.9
         version: 19.2.3(@types/react@19.2.17)
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.20)
+
+  frontend/packages/services:
+    dependencies:
+      '@ssq/utils':
+        specifier: workspace:*
+        version: link:../utils
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.19.20
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.20)
+
+  frontend/packages/ui-assets:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.19.20
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.20)
+
+  frontend/packages/ui-library:
+    dependencies:
+      '@ssq/ui-tokens':
+        specifier: workspace:*
+        version: link:../ui-tokens
+      react:
+        specifier: ^19.1.1
+        version: 19.1.1
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.19.20
+      '@types/react':
+        specifier: ^19.1.12
+        version: 19.2.17
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.20)
+
+  frontend/packages/ui-tokens:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.19.20
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.20)
+
+  frontend/packages/utils:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.19.20
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.19.20)
+
+  frontend/packages/web-components:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.10.2
+        version: 22.19.20
       typescript:
         specifier: ^5.7.2
         version: 5.9.3

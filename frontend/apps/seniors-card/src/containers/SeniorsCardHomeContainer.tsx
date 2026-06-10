@@ -1,10 +1,12 @@
+import { createPrototypeAppSummary } from "@ssq/services";
+import { PrototypePageShell } from "@ssq/ui-library";
+
 export function SeniorsCardHomeContainer() {
+  const app = createPrototypeAppSummary("seniors-card");
+
   return (
-    <main>
-      <section>
-        <h1>Seniors Card</h1>
-        <p>Check eligibility and prepare a prototype Seniors Card application.</p>
-      </section>
-    </main>
+    <PrototypePageShell title={app.label}>
+      <p>Check eligibility and prepare a prototype Seniors Card application.</p>
+    </PrototypePageShell>
   );
 }

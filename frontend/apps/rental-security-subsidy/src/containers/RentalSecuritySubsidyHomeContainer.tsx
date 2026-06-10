@@ -1,10 +1,12 @@
+import { createPrototypeAppSummary } from "@ssq/services";
+import { PrototypePageShell } from "@ssq/ui-library";
+
 export function RentalSecuritySubsidyHomeContainer() {
+  const app = createPrototypeAppSummary("rental-security-subsidy");
+
   return (
-    <main>
-      <section>
-        <h1>Rental Security Subsidy</h1>
-        <p>Prepare a prototype rental support application and track its progress.</p>
-      </section>
-    </main>
+    <PrototypePageShell title={app.label}>
+      <p>Prepare a prototype rental support application and track its progress.</p>
+    </PrototypePageShell>
   );
 }
