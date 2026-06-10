@@ -80,6 +80,25 @@ export interface ServiceRequestEventRecord {
   createdAt: string;
 }
 
+export interface SupportingDocumentRecord {
+  id: string;
+  customerId: string;
+  serviceRequestDraftId?: string;
+  serviceRequestId?: string;
+  category: string;
+  fileName: string;
+  fileExtension: string;
+  mimeType: string;
+  sizeBytes: number;
+  storageKey: string;
+  uploadStatus: string;
+  scanStatus: string;
+  retentionPolicy: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface CustomerRow {
   id: string;
   external_ref: string;
@@ -158,6 +177,25 @@ interface ServiceRequestEventRow {
   event_type: string;
   event_payload: Record<string, unknown>;
   created_at: Date | string;
+}
+
+interface SupportingDocumentRow {
+  id: string;
+  customer_id: string;
+  service_request_draft_id?: string | null;
+  service_request_id?: string | null;
+  category: string;
+  file_name: string;
+  file_extension: string;
+  mime_type: string;
+  size_bytes: number;
+  storage_key: string;
+  upload_status: string;
+  scan_status: string;
+  retention_policy: string;
+  metadata: Record<string, unknown>;
+  created_at: Date | string;
+  updated_at: Date | string;
 }
 
 export class PrototypeRepository {
@@ -469,6 +507,32 @@ export class PrototypeRepository {
     return result.rows[0] ? mapServiceRequest(result.rows[0]) : undefined;
   }
 
+  async getServiceRequestByReferenceForCustomer(input: {
+    customerId: string;
+    referenceNumber: string;
+  }): Promise<ServiceRequestRecord | undefined> {
+    const result = await this.database.query<ServiceRequestRow>(
+      `
+        SELECT
+          sr.id,
+          sr.customer_id,
+          sr.transaction_definition_id,
+          sr.reference_number,
+          sr.status,
+          sr.payload,
+          td.transaction_key
+        FROM service_requests sr
+        INNER JOIN transaction_definitions td
+          ON td.id = sr.transaction_definition_id
+        WHERE sr.reference_number = $1
+          AND sr.customer_id = $2
+      `,
+      [input.referenceNumber, input.customerId]
+    );
+
+    return result.rows[0] ? mapServiceRequest(result.rows[0]) : undefined;
+  }
+
   async listActivityLogs(serviceRequestId: string): Promise<ServiceRequestEventRecord[]> {
     const result = await this.database.query<ServiceRequestEventRow>(
       `
@@ -574,6 +638,77 @@ export class PrototypeRepository {
 
     return result.rows.map(mapCustomerProfileEvidence);
   }
+
+  async createSupportingDocument(input: {
+    customerId: string;
+    serviceRequestDraftId?: string;
+    serviceRequestId?: string;
+    category: string;
+    fileName: string;
+    fileExtension: string;
+    mimeType: string;
+    sizeBytes: number;
+    storageKey: string;
+    uploadStatus: string;
+    scanStatus: string;
+    retentionPolicy: string;
+    metadata?: Record<string, unknown>;
+  }): Promise<SupportingDocumentRecord> {
+    const result = await this.database.query<SupportingDocumentRow>(
+      `
+        INSERT INTO supporting_documents (
+          customer_id,
+          service_request_draft_id,
+          service_request_id,
+          category,
+          file_name,
+          file_extension,
+          mime_type,
+          size_bytes,
+          storage_key,
+          upload_status,
+          scan_status,
+          retention_policy,
+          metadata
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb)
+        RETURNING
+          id,
+          customer_id,
+          service_request_draft_id,
+          service_request_id,
+          category,
+          file_name,
+          file_extension,
+          mime_type,
+          size_bytes,
+          storage_key,
+          upload_status,
+          scan_status,
+          retention_policy,
+          metadata,
+          created_at,
+          updated_at
+      `,
+      [
+        input.customerId,
+        input.serviceRequestDraftId ?? null,
+        input.serviceRequestId ?? null,
+        input.category,
+        input.fileName,
+        input.fileExtension,
+        input.mimeType,
+        input.sizeBytes,
+        input.storageKey,
+        input.uploadStatus,
+        input.scanStatus,
+        input.retentionPolicy,
+        JSON.stringify(input.metadata ?? {})
+      ]
+    );
+
+    return mapSupportingDocument(result.rows[0]);
+  }
 }
 
 function mapCustomer(row: CustomerRow): CustomerRecord {
@@ -672,5 +807,26 @@ function mapServiceRequestEvent(row: ServiceRequestEventRow): ServiceRequestEven
     eventType: row.event_type,
     eventPayload: row.event_payload,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at
+  };
+}
+
+function mapSupportingDocument(row: SupportingDocumentRow): SupportingDocumentRecord {
+  return {
+    id: row.id,
+    customerId: row.customer_id,
+    serviceRequestDraftId: row.service_request_draft_id ?? undefined,
+    serviceRequestId: row.service_request_id ?? undefined,
+    category: row.category,
+    fileName: row.file_name,
+    fileExtension: row.file_extension,
+    mimeType: row.mime_type,
+    sizeBytes: row.size_bytes,
+    storageKey: row.storage_key,
+    uploadStatus: row.upload_status,
+    scanStatus: row.scan_status,
+    retentionPolicy: row.retention_policy,
+    metadata: row.metadata,
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+    updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at
   };
 }

@@ -6,6 +6,7 @@ import { createDatabaseClient } from "./database/client.js";
 import { createLoggerOptions } from "./logger.js";
 import { registerGraphqlRoute } from "./routes/graphql.js";
 import { registerHealthRoutes } from "./routes/health.js";
+import { registerSupportingDocumentRoutes } from "./routes/supportingDocuments.js";
 
 import type { AppConfig } from "./config.js";
 import type { DatabaseClient } from "./database/client.js";
@@ -33,6 +34,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
 
   await registerHealthRoutes(app, config, database);
   await registerGraphqlRoute(app, database.queryable);
+  await registerSupportingDocumentRoutes(app, database.queryable);
 
   return app;
 }

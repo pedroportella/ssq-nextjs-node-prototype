@@ -55,12 +55,21 @@ The backend currently owns SQL migrations and seed data for:
 - service request drafts;
 - service requests;
 - service request events.
+- supporting document metadata.
 
 The seeded transaction catalogue includes dashboard, Seniors Card and Rental Security Subsidy entries. A transaction is startable only when its definition is enabled and its `transaction.<key>.enabled` feature flag is true.
 
 Draft submission validates the stored payload against the seeded transaction schema subset before creating a submitted service request. Validation returns field-keyed errors for required fields, enum strings, date strings, booleans, numeric minimums and string arrays.
 
 Submitted requests capture simulated profile evidence for transaction-declared prefill attributes. This evidence is marked `SIMULATED_PROFILE` and includes production-next metadata rather than claiming real Digital Identity integration.
+
+Supporting document uploads are currently metadata-only for local review. The backend validates category, file extension, MIME type, size and target ownership, then records production-next scanning, private storage and retention fields.
+
+## REST
+
+Current REST write surface:
+
+- `POST /uploads/supporting-documents`: records validated supporting document metadata for a customer-owned draft or service request.
 
 ## GraphQL
 
