@@ -70,6 +70,95 @@ describe("backend health service", () => {
     await app.close();
   });
 
+  it("applies security headers", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      })
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/health/live"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["x-content-type-options"]).toBe("nosniff");
+    expect(response.headers["x-frame-options"]).toBe("DENY");
+    expect(response.headers["referrer-policy"]).toBe("no-referrer");
+    expect(response.headers["permissions-policy"]).toContain("geolocation=()");
+
+    await app.close();
+  });
+
+  it("allows only configured CORS origins", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        CORS_ALLOWED_ORIGINS: "https://allowed.example.test",
+        NODE_ENV: "test",
+        PORT: "7001"
+      })
+    });
+
+    const allowed = await app.inject({
+      headers: {
+        origin: "https://allowed.example.test"
+      },
+      method: "GET",
+      url: "/health/live"
+    });
+    const blocked = await app.inject({
+      headers: {
+        origin: "https://blocked.example.test"
+      },
+      method: "GET",
+      url: "/health/live"
+    });
+
+    expect(allowed.headers["access-control-allow-origin"]).toBe("https://allowed.example.test");
+    expect(blocked.headers["access-control-allow-origin"]).toBeUndefined();
+
+    await app.close();
+  });
+
+  it("rate limits requests with safe errors", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001",
+        RATE_LIMIT_MAX: "1",
+        RATE_LIMIT_WINDOW_MS: "60000"
+      })
+    });
+
+    const first = await app.inject({
+      method: "GET",
+      url: "/health/live"
+    });
+    const limited = await app.inject({
+      headers: {
+        "x-correlation-id": "rate-limit-correlation"
+      },
+      method: "GET",
+      url: "/health/live"
+    });
+
+    expect(first.statusCode).toBe(200);
+    expect(limited.statusCode).toBe(429);
+    expect(limited.headers["x-ratelimit-limit"]).toBe("1");
+    expect(limited.json()).toEqual({
+      ok: false,
+      error: {
+        code: "RATE_LIMITED",
+        message: "Too many requests.",
+        correlationId: "rate-limit-correlation"
+      }
+    });
+
+    await app.close();
+  });
+
   it("preserves supplied correlation IDs on responses", async () => {
     const app = await buildApp({
       config: loadConfig({

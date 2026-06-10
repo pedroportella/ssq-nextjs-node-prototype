@@ -92,4 +92,6 @@ Current backend API endpoints:
 
 Local prototype identity can be selected with `X-SSQ-DEMO-ROLE` (`Citizen`, `ServiceOfficer`, `TeamLead` or `Admin`) and `X-SSQ-DEMO-SUBJECT`. Citizen identity defaults to `demo.customer@example.test`.
 
-Backend responses preserve or generate `x-correlation-id`. Safe error responses include the correlation ID without exposing stack traces or raw exception details. Debug routes remain unavailable unless explicitly enabled outside production.
+Backend responses preserve or generate `x-correlation-id`. Safe error responses include the correlation ID without exposing stack traces or raw exception details. Debug routes remain unavailable unless explicitly enabled outside production. The backend also supports configurable CORS allowed origins, simple local rate limiting and security response headers.
+
+See `docs/backend-architecture.md` and `docs/backend-production-readiness.md` for reviewer-facing backend notes.

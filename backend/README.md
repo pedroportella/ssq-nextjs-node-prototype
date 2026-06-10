@@ -27,6 +27,14 @@ Optional local debug route:
 DEBUG_ROUTES_ENABLED=true pnpm --dir backend dev
 ```
 
+Useful hardening configuration:
+
+- `CORS_ALLOWED_ORIGINS`: comma-separated allowed browser origins. Empty means no browser origins are allowed.
+- `RATE_LIMIT_ENABLED`: defaults to `true`.
+- `RATE_LIMIT_MAX`: requests per window, default `120`.
+- `RATE_LIMIT_WINDOW_MS`: rate window in milliseconds, default `60000`.
+- `DEBUG_ROUTES_ENABLED`: defaults to `false`; ignored in production.
+
 ## Docker
 
 Build the backend container from the repository root:
@@ -129,3 +137,7 @@ All backend responses preserve a supplied `x-correlation-id` or generate one whe
 `GET /debug/request` is available only when `DEBUG_ROUTES_ENABLED=true` and `NODE_ENV` is not `production`; it is unavailable by default.
 
 Service request connection queries validate paging and sort inputs before reaching SQL. Supported sort fields are `createdAt`, `referenceNumber`, `status` and `transactionKey`; page size is capped at 50 for the prototype.
+
+Transport hardening includes a configurable CORS allow-list, simple in-memory rate limiting, `nosniff`, frame, referrer and permissions-policy headers, and production-only HSTS.
+
+See `../docs/backend-architecture.md` and `../docs/backend-production-readiness.md` for reviewer-facing architecture and production-next notes.
