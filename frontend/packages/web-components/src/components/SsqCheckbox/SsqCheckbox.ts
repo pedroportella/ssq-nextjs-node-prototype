@@ -1,5 +1,6 @@
 import { LitElement, html, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 
 import { emitSsqEvent } from "../../internal/emitSsqEvent";
 import { getFieldIds } from "../../internal/fieldIds";
@@ -67,8 +68,8 @@ export class SsqCheckbox extends LitElement {
       >
         <div class="ssq-checkbox__control">
           <input
-            aria-describedby=${fieldIds.describedBy ?? nothing}
-            aria-invalid=${this.error ? "true" : nothing}
+            aria-describedby=${ifDefined(fieldIds.describedBy)}
+            aria-invalid=${this.error ? "true" : "false"}
             class="qld__control-input__input ssq-checkbox__input"
             ?checked=${this.checked}
             ?disabled=${this.disabled}
@@ -89,8 +90,8 @@ export class SsqCheckbox extends LitElement {
               : nothing}
           </label>
         </div>
-        ${this.hint ? html`<p class="qld__hint-text ssq-form-field__hint ssq-checkbox__hint" id=${fieldIds.hintId}>${this.hint}</p>` : nothing}
-        ${this.error ? html`<p class="qld__input--error ssq-form-field__error ssq-checkbox__error" id=${fieldIds.errorId}>${this.error}</p>` : nothing}
+        ${this.hint ? html`<p class="qld__hint-text ssq-form-field__hint ssq-checkbox__hint" id=${ifDefined(fieldIds.hintId)}>${this.hint}</p>` : nothing}
+        ${this.error ? html`<p class="qld__input--error ssq-form-field__error ssq-checkbox__error" id=${ifDefined(fieldIds.errorId)}>${this.error}</p>` : nothing}
       </div>
     `;
   }

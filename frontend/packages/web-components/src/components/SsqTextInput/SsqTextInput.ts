@@ -1,5 +1,6 @@
 import { LitElement, html, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 
 import { emitSsqEvent } from "../../internal/emitSsqEvent";
 import { getFieldIds } from "../../internal/fieldIds";
@@ -25,13 +26,22 @@ export class SsqTextInput extends LitElement {
   declare disabled: boolean;
   declare error: string;
   declare hint: string;
-  declare inputMode: string;
+  declare inputMode: "decimal" | "email" | "none" | "numeric" | "search" | "tel" | "text" | "url" | "";
   declare label: string;
   declare name: string;
   declare optional: boolean;
   declare placeholder: string;
   declare required: boolean;
-  declare type: string;
+  declare type:
+    | "date"
+    | "email"
+    | "number"
+    | "password"
+    | "search"
+    | "tel"
+    | "text"
+    | "time"
+    | "url";
   declare value: string;
 
   constructor() {
@@ -80,23 +90,23 @@ export class SsqTextInput extends LitElement {
             ? html`<span class="ssq-form-field__requirement">optional</span>`
             : nothing}
         </label>
-        ${this.hint ? html`<p class="qld__hint-text ssq-form-field__hint" id=${fieldIds.hintId}>${this.hint}</p>` : nothing}
+        ${this.hint ? html`<p class="qld__hint-text ssq-form-field__hint" id=${ifDefined(fieldIds.hintId)}>${this.hint}</p>` : nothing}
         <input
-          aria-describedby=${fieldIds.describedBy ?? nothing}
-          aria-invalid=${this.error ? "true" : nothing}
+          aria-describedby=${ifDefined(fieldIds.describedBy)}
+          aria-invalid=${this.error ? "true" : "false"}
           class="qld__text-input ssq-input"
           ?disabled=${this.disabled}
           id=${controlId}
-          inputmode=${this.inputMode || nothing}
+          inputmode=${ifDefined(this.inputMode || undefined)}
           name=${this.name || controlId}
-          placeholder=${this.placeholder || nothing}
+          placeholder=${ifDefined(this.placeholder || undefined)}
           ?required=${this.required}
           type=${this.type}
           .value=${this.value}
           @change=${this.onChange}
           @input=${this.onInput}
         />
-        ${this.error ? html`<p class="qld__input--error ssq-form-field__error" id=${fieldIds.errorId}>${this.error}</p>` : nothing}
+        ${this.error ? html`<p class="qld__input--error ssq-form-field__error" id=${ifDefined(fieldIds.errorId)}>${this.error}</p>` : nothing}
       </div>
     `;
   }

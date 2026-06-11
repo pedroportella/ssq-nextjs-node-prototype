@@ -10,3 +10,5 @@ export * from "./components/forms/QhdsRadioGroup";
 export * from "./components/forms/QhdsSelect";
 export * from "./components/forms/QhdsTextarea";
 export * from "./components/forms/QhdsTextInput";
+export * from "./components/web-components/SsqWebButton";
+export * from "./components/web-components/SsqWebTextInput";

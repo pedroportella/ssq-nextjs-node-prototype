@@ -1,5 +1,6 @@
 import { LitElement, html, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 
 import { emitSsqEvent } from "../../internal/emitSsqEvent";
 import { getFieldIds } from "../../internal/fieldIds";
@@ -54,7 +55,7 @@ export class SsqRadioGroup extends LitElement {
 
     return html`
       <fieldset
-        aria-describedby=${fieldIds.describedBy ?? nothing}
+        aria-describedby=${ifDefined(fieldIds.describedBy)}
         class=${classMap({
           "qld__form-group": true,
           "ssq-radio-group": true,
@@ -66,7 +67,7 @@ export class SsqRadioGroup extends LitElement {
           ${this.label}
           ${this.required ? html`<span class="ssq-form-field__requirement">required</span>` : nothing}
         </legend>
-        ${this.hint ? html`<p class="qld__hint-text ssq-form-field__hint" id=${fieldIds.hintId}>${this.hint}</p>` : nothing}
+        ${this.hint ? html`<p class="qld__hint-text ssq-form-field__hint" id=${ifDefined(fieldIds.hintId)}>${this.hint}</p>` : nothing}
         <div class="ssq-radio-group__options">
           ${options.map((option, index) => {
             const optionId = `${groupId}-${index + 1}`;
@@ -74,7 +75,7 @@ export class SsqRadioGroup extends LitElement {
             return html`
               <div class="qld__control-input ssq-radio">
                 <input
-                  aria-invalid=${this.error ? "true" : nothing}
+                  aria-invalid=${this.error ? "true" : "false"}
                   class="qld__control-input__input ssq-radio__input"
                   ?checked=${this.value === option.value}
                   ?disabled=${this.disabled || option.disabled}
@@ -91,7 +92,7 @@ export class SsqRadioGroup extends LitElement {
             `;
           })}
         </div>
-        ${this.error ? html`<p class="qld__input--error ssq-form-field__error" id=${fieldIds.errorId}>${this.error}</p>` : nothing}
+        ${this.error ? html`<p class="qld__input--error ssq-form-field__error" id=${ifDefined(fieldIds.errorId)}>${this.error}</p>` : nothing}
       </fieldset>
     `;
   }

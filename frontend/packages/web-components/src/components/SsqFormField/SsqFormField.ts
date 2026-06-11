@@ -1,5 +1,6 @@
 import { LitElement, html, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 
 import { ssqFormFieldStyles } from "./SsqFormField.styles";
 
@@ -57,9 +58,9 @@ export class SsqFormField extends LitElement {
             ? html`<span class="ssq-form-field__requirement">optional</span>`
             : nothing}
         </label>
-        ${this.hint ? html`<p class="qld__hint-text ssq-form-field__hint" id=${hintId}>${this.hint}</p>` : nothing}
+        ${this.hint ? html`<p class="qld__hint-text ssq-form-field__hint" id=${ifDefined(hintId)}>${this.hint}</p>` : nothing}
         <slot></slot>
-        ${this.error ? html`<p class="qld__input--error ssq-form-field__error" id=${errorId}>${this.error}</p>` : nothing}
+        ${this.error ? html`<p class="qld__input--error ssq-form-field__error" id=${ifDefined(errorId)}>${this.error}</p>` : nothing}
       </div>
     `;
   }

@@ -1,5 +1,6 @@
 import { LitElement, html, nothing } from "lit";
 import { classMap } from "lit/directives/class-map.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 
 import { emitSsqEvent } from "../../internal/emitSsqEvent";
 import { ssqButtonStyles } from "./SsqButton.styles";
@@ -59,7 +60,7 @@ export class SsqButton extends LitElement {
         <a
           aria-disabled=${this.disabled ? "true" : "false"}
           class=${classMap(this.classes)}
-          href=${this.disabled ? nothing : this.href}
+          href=${ifDefined(this.disabled ? undefined : this.href)}
           role="button"
           tabindex=${this.disabled ? "-1" : "0"}
           @click=${this.onClick}

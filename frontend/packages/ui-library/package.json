@@ -19,12 +19,14 @@
   },
   "dependencies": {
     "@ssq/ui-assets": "workspace:*",
-    "@ssq/ui-tokens": "workspace:*"
+    "@ssq/ui-tokens": "workspace:*",
+    "@ssq/web-components": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
+    "happy-dom": "^20.10.2",
     "react-dom": "19.1.1",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
