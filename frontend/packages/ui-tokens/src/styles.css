@@ -4,8 +4,10 @@
   --ssq-color-text: #1b1b1b;
   --ssq-color-muted: #4b5563;
   --ssq-color-border: #d6d9de;
+  --ssq-color-border-strong: #64748b;
   --ssq-color-action: #005eb8;
   --ssq-color-action-text: #ffffff;
+  --ssq-color-error: #b42318;
   --ssq-color-focus: #f9c642;
   --ssq-color-header-accent: #78ba00;
   --ssq-color-header-background: #05325f;

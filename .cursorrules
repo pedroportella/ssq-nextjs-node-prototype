@@ -69,6 +69,14 @@ Frontend rules:
   3. app global styles
   4. route/container layout styles
   5. component-specific styles
+- Keep reusable UI components folder-owned. A reusable React component should normally live under `frontend/packages/ui-library/src/components/<ComponentName>/` with:
+  - `<ComponentName>.tsx`
+  - `<ComponentName>.test.tsx`
+  - `<ComponentName>.scss`
+  - `index.ts`
+- Group related primitives under a domain folder such as `components/forms/<ComponentName>/` when that keeps the public surface clearer.
+- Components should import their own SCSS and export through local barrels. Package barrels should re-export component barrels.
+- `frontend/packages/ui-library/theme` owns theme entrypoints, token/palette integration, reset/base rules, app shell integration and documented migration glue. Do not use a single theme stylesheet as a dumping ground for every component's bespoke styles.
 - Avoid card nesting. Use cards for repeated items, modals or framed tools, not as a default page-section wrapper.
 
 QHDS/QGDS adapter rules:

@@ -3,6 +3,8 @@ export const prototypeTokens = {
     action: "#005eb8",
     background: "#f7f8fa",
     border: "#d6d9de",
+    borderStrong: "#64748b",
+    error: "#b42318",
     focus: "#f9c642",
     headerAccent: "#78ba00",
     headerBackground: "#05325f",
