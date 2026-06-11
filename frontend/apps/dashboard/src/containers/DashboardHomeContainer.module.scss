@@ -1,20 +1,20 @@
-.ssq-page-shell {
+.page {
   color: var(--ssq-color-text);
   padding: var(--ssq-space-8);
 }
 
-.ssq-page-shell__inner {
+.inner {
   margin: 0 auto;
   max-width: var(--ssq-content-width);
 }
 
-.ssq-page-shell__title {
+.title {
   font-size: 2rem;
   line-height: 1.2;
   margin: 0 0 var(--ssq-space-3);
 }
 
-.ssq-page-shell__lead {
+.lead {
   color: var(--ssq-color-muted);
   font-size: 1.125rem;
   margin: 0 0 var(--ssq-space-6);
@@ -22,11 +22,11 @@
 }
 
 @media (max-width: 48rem) {
-  .ssq-page-shell {
+  .page {
     padding-inline: var(--ssq-space-4);
   }
 
-  .ssq-page-shell__title {
+  .title {
     font-size: 1.75rem;
   }
 }

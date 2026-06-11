@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  PrototypePageShell,
   QhdsButton,
   QhdsCard,
   QhdsCheckbox,
@@ -17,8 +16,7 @@ import {
 } from "./index";
 
 describe("ui-library public exports", () => {
-  it("exports app-facing shell, layout and core components", () => {
-    expect(PrototypePageShell).toBeTypeOf("function");
+  it("exports app-facing layout and core components", () => {
     expect(QhdsButton).toBeTypeOf("function");
     expect(QhdsCard).toBeTypeOf("function");
     expect(QhdsFooter).toBeTypeOf("function");
