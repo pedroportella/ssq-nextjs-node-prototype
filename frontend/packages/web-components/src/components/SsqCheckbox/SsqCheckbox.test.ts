@@ -7,16 +7,24 @@ describe("ssq-checkbox", () => {
   it("renders a labelled checkbox with QGDS-compatible control class", async () => {
     const element = await fixture(document.createElement("ssq-checkbox"));
     element.id = "confirm";
+    element.hint = "Confirm before submitting";
     element.label = "I confirm";
     element.required = true;
     await element.updateComplete;
 
+    const group = element.shadowRoot?.querySelector(".qld__form-group");
     const input = element.shadowRoot?.querySelector("input");
     const label = element.shadowRoot?.querySelector("label");
+    const hint = element.shadowRoot?.querySelector("#confirm-hint");
 
+    expect(group?.classList.contains("qld__control-input")).toBe(true);
     expect(input?.classList.contains("qld__control-input__input")).toBe(true);
+    expect(input?.getAttribute("aria-describedby")).toBe("confirm-hint");
+    expect(input?.getAttribute("aria-invalid")).toBe("false");
     expect(input?.required).toBe(true);
+    expect(label?.classList.contains("qld__control-input__text")).toBe(true);
     expect(label?.getAttribute("for")).toBe("confirm");
+    expect(hint?.classList.contains("qld__hint-text")).toBe(true);
   });
 
   it("emits checked state details", async () => {

@@ -4,105 +4,6 @@
   "modules": [
     {
       "kind": "javascript-module",
-      "path": "src/components/SsqAlert/SsqAlert.ts",
-      "declarations": [
-        {
-          "kind": "class",
-          "description": "",
-          "name": "SsqAlert",
-          "members": [
-            {
-              "kind": "field",
-              "name": "heading",
-              "privacy": "public",
-              "type": {
-                "text": "string"
-              },
-              "default": "\"\"",
-              "attribute": "heading"
-            },
-            {
-              "kind": "field",
-              "name": "tone",
-              "privacy": "public",
-              "type": {
-                "text": "SsqAlertTone"
-              },
-              "default": "\"info\"",
-              "attribute": "tone",
-              "reflects": true
-            }
-          ],
-          "attributes": [
-            {
-              "name": "heading",
-              "type": {
-                "text": "string"
-              },
-              "default": "\"\"",
-              "fieldName": "heading"
-            },
-            {
-              "name": "tone",
-              "type": {
-                "text": "SsqAlertTone"
-              },
-              "default": "\"info\"",
-              "fieldName": "tone"
-            }
-          ],
-          "superclass": {
-            "name": "LitElement",
-            "package": "lit"
-          },
-          "tagName": "ssq-alert",
-          "customElement": true
-        }
-      ],
-      "exports": [
-        {
-          "kind": "js",
-          "name": "SsqAlert",
-          "declaration": {
-            "name": "SsqAlert",
-            "module": "src/components/SsqAlert/SsqAlert.ts"
-          }
-        },
-        {
-          "kind": "custom-element-definition",
-          "name": "ssq-alert",
-          "declaration": {
-            "name": "SsqAlert",
-            "module": "src/components/SsqAlert/SsqAlert.ts"
-          }
-        }
-      ]
-    },
-    {
-      "kind": "javascript-module",
-      "path": "src/components/SsqAlert/index.ts",
-      "declarations": [],
-      "exports": [
-        {
-          "kind": "js",
-          "name": "SsqAlert",
-          "declaration": {
-            "name": "SsqAlert",
-            "module": "./SsqAlert"
-          }
-        },
-        {
-          "kind": "js",
-          "name": "SsqAlertTone",
-          "declaration": {
-            "name": "SsqAlertTone",
-            "module": "./SsqAlert"
-          }
-        }
-      ]
-    },
-    {
-      "kind": "javascript-module",
       "path": "src/components/SsqButton/SsqButton.ts",
       "declarations": [
         {
@@ -664,6 +565,105 @@
           "declaration": {
             "name": "SsqFormField",
             "module": "./SsqFormField"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/SsqAlert/SsqAlert.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "",
+          "name": "SsqAlert",
+          "members": [
+            {
+              "kind": "field",
+              "name": "heading",
+              "privacy": "public",
+              "type": {
+                "text": "string"
+              },
+              "default": "\"\"",
+              "attribute": "heading"
+            },
+            {
+              "kind": "field",
+              "name": "tone",
+              "privacy": "public",
+              "type": {
+                "text": "SsqAlertTone"
+              },
+              "default": "\"info\"",
+              "attribute": "tone",
+              "reflects": true
+            }
+          ],
+          "attributes": [
+            {
+              "name": "heading",
+              "type": {
+                "text": "string"
+              },
+              "default": "\"\"",
+              "fieldName": "heading"
+            },
+            {
+              "name": "tone",
+              "type": {
+                "text": "SsqAlertTone"
+              },
+              "default": "\"info\"",
+              "fieldName": "tone"
+            }
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "ssq-alert",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "SsqAlert",
+          "declaration": {
+            "name": "SsqAlert",
+            "module": "src/components/SsqAlert/SsqAlert.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ssq-alert",
+          "declaration": {
+            "name": "SsqAlert",
+            "module": "src/components/SsqAlert/SsqAlert.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/SsqAlert/index.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "SsqAlert",
+          "declaration": {
+            "name": "SsqAlert",
+            "module": "./SsqAlert"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "SsqAlertTone",
+          "declaration": {
+            "name": "SsqAlertTone",
+            "module": "./SsqAlert"
           }
         }
       ]

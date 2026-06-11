@@ -12,8 +12,10 @@ describe("ssq-button", () => {
 
     const button = element.shadowRoot?.querySelector("button");
 
+    expect(button?.tagName).toBe("BUTTON");
     expect(button?.classList.contains("qld__btn")).toBe(true);
     expect(button?.classList.contains("qld__btn--secondary")).toBe(true);
+    expect(button?.getAttribute("type")).toBe("button");
     expect(button?.classList.contains("ssq-button--secondary")).toBe(true);
   });
 
@@ -40,5 +42,7 @@ describe("ssq-button", () => {
 
     expect(anchor?.getAttribute("aria-disabled")).toBe("true");
     expect(anchor?.hasAttribute("href")).toBe(false);
+    expect(anchor?.getAttribute("role")).toBe("button");
+    expect(anchor?.getAttribute("tabindex")).toBe("-1");
   });
 });

@@ -15,11 +15,17 @@ describe("ssq-radio-group", () => {
     await element.updateComplete;
 
     const fieldset = element.shadowRoot?.querySelector("fieldset");
+    const legend = element.shadowRoot?.querySelector("legend");
     const radios = element.shadowRoot?.querySelectorAll('input[type="radio"]');
+    const labels = element.shadowRoot?.querySelectorAll("label");
 
+    expect(fieldset?.classList.contains("qld__form-group")).toBe(true);
     expect(fieldset?.classList.contains("ssq-radio-group")).toBe(true);
+    expect(legend?.classList.contains("qld__label")).toBe(true);
     expect(radios).toHaveLength(2);
+    expect(radios?.[0].classList.contains("qld__control-input__input")).toBe(true);
     expect(radios?.[0].getAttribute("name")).toBe("eligibility");
+    expect(labels?.[0].classList.contains("qld__control-input__text")).toBe(true);
   });
 
   it("emits selected radio value details", async () => {

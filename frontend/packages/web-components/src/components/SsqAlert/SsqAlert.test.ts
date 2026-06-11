@@ -17,6 +17,7 @@ describe("ssq-alert", () => {
     expect(region?.getAttribute("aria-label")).toBe("Success");
     expect(region?.classList.contains("qld__page-alerts")).toBe(true);
     expect(region?.classList.contains("ssq-page-alert--success")).toBe(true);
+    expect(heading?.classList.contains("qld__page-alerts--heading")).toBe(true);
     expect(heading?.textContent).toBe("Application saved");
   });
 });

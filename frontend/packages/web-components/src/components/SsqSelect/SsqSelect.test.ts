@@ -15,9 +15,14 @@ describe("ssq-select", () => {
     await element.updateComplete;
 
     const select = element.shadowRoot?.querySelector("select");
+    const label = element.shadowRoot?.querySelector("label");
     const options = element.shadowRoot?.querySelectorAll("option");
 
+    expect(label?.classList.contains("qld__label")).toBe(true);
+    expect(label?.getAttribute("for")).toBe("state");
     expect(select?.classList.contains("qld__select-control")).toBe(true);
+    expect(select?.getAttribute("id")).toBe("state");
+    expect(select?.getAttribute("aria-invalid")).toBe("false");
     expect(options).toHaveLength(2);
     expect(options?.[0].textContent).toBe("Queensland");
   });

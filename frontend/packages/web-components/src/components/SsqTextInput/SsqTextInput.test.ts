@@ -13,10 +13,18 @@ describe("ssq-text-input", () => {
     await element.updateComplete;
 
     const input = element.shadowRoot?.querySelector("input");
+    const label = element.shadowRoot?.querySelector("label");
+    const hint = element.shadowRoot?.querySelector("#email-hint");
+    const error = element.shadowRoot?.querySelector("#email-error");
 
+    expect(label?.classList.contains("qld__label")).toBe(true);
+    expect(label?.getAttribute("for")).toBe("email");
+    expect(hint?.classList.contains("qld__hint-text")).toBe(true);
     expect(input?.classList.contains("qld__text-input")).toBe(true);
+    expect(input?.getAttribute("id")).toBe("email");
     expect(input?.getAttribute("aria-invalid")).toBe("true");
     expect(input?.getAttribute("aria-describedby")).toBe("email-hint email-error");
+    expect(error?.classList.contains("qld__input--error")).toBe(true);
   });
 
   it("emits input and change events with value detail", async () => {

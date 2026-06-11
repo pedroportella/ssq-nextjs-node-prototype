@@ -8,6 +8,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./web-components": {
+      "types": "./src/components/web-components/index.ts",
+      "default": "./src/components/web-components/index.ts"
+    },
     "./theme.css": "./src/theme/theme.css"
   },
   "scripts": {

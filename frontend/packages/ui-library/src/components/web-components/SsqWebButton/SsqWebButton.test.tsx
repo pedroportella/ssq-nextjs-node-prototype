@@ -9,6 +9,7 @@ import { SsqWebButton } from "./SsqWebButton";
 describe("SsqWebButton", () => {
   it("bridges ssq-click custom event details to React callbacks", async () => {
     const container = document.createElement("div");
+    document.body.append(container);
     const root = createRoot(container);
     const onSsqClick = vi.fn();
 
@@ -22,8 +23,9 @@ describe("SsqWebButton", () => {
 
     const element = container.querySelector("ssq-button");
 
-    expect(element?.getAttribute("href")).toBe("/apply");
-    expect(element?.getAttribute("variant")).toBe("secondary");
+    expect(element).toBeInstanceOf(customElements.get("ssq-button"));
+    expect(element?.href).toBe("/apply");
+    expect(element?.variant).toBe("secondary");
 
     element?.dispatchEvent(
       new CustomEvent("ssq-click", {
@@ -39,5 +41,6 @@ describe("SsqWebButton", () => {
     await act(async () => {
       root.unmount();
     });
+    container.remove();
   });
 });

@@ -27,8 +27,9 @@ describe("SsqWebTextInput", () => {
 
     const element = container.querySelector("ssq-text-input");
 
-    expect(element?.getAttribute("label")).toBe("Full name");
-    expect(element?.hasAttribute("required")).toBe(true);
+    expect(element).toBeInstanceOf(customElements.get("ssq-text-input"));
+    expect(element?.label).toBe("Full name");
+    expect(element?.required).toBe(true);
 
     element?.dispatchEvent(
       new CustomEvent("ssq-input", {
