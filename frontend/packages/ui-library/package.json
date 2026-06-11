@@ -8,10 +8,6 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./web-components": {
-      "types": "./src/components/web-components/index.ts",
-      "default": "./src/components/web-components/index.ts"
-    },
     "./theme.css": "./src/theme/theme.css"
   },
   "scripts": {
@@ -23,8 +19,7 @@
   },
   "dependencies": {
     "@ssq/ui-assets": "workspace:*",
-    "@ssq/ui-tokens": "workspace:*",
-    "@ssq/web-components": "workspace:*"
+    "@ssq/ui-tokens": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

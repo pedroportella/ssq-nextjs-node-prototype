@@ -73,9 +73,8 @@ Current shared frontend packages:
 - `frontend/packages/ui-tokens`
 - `frontend/packages/ui-assets`
 - `frontend/packages/utils`
-- `frontend/packages/web-components`
 
-The three apps import the shared theme through `@ssq/ui-library/theme.css`. The current theme is a prototype foundation for later QHDS/QGDS adapter work.
+The three apps import the shared theme through `@ssq/ui-library/theme.css`. The current frontend direction is QHDS as React wrappers in `@ssq/ui-library`; this repository no longer carries a local web-components package. Web-component exploration has been split out into the copied `ssq-web-components` repository so this prototype can stay smaller and focus on the Next.js app workflows. See `docs/frontend-architecture.md` for the active frontend architecture note.
 
 Frontend apps consume backend-facing service helpers through `@ssq/services/server` so private backend configuration stays on the server side.
 
