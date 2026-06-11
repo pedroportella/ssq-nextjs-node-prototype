@@ -1,7 +1,7 @@
 @import "@ssq/ui-tokens/styles.css";
 
 html {
-  color-scheme: light;
+  color-scheme: var(--ssq-color-scheme);
   font-family: var(--ssq-font-family-base);
   font-size: var(--ssq-font-size-base);
   line-height: var(--ssq-line-height-base);

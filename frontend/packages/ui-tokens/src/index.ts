@@ -1,23 +1,34 @@
 export const prototypeTokens = {
+  source: "qgds-shaped-css-snapshot",
+  selectedPalette: "qld-corporate",
   color: {
-    action: "#005eb8",
-    background: "#f7f8fa",
-    border: "#d6d9de",
-    borderStrong: "#64748b",
-    error: "#b42318",
-    focus: "#f9c642",
-    headerAccent: "#78ba00",
-    headerBackground: "#05325f",
-    headerText: "#ffffff",
-    infoBackground: "#e8f2fb",
-    infoBorder: "#2f80c3",
-    muted: "#4b5563",
-    surface: "#ffffff",
-    successBackground: "#eaf7ed",
-    successBorder: "#2e8540",
-    text: "#1b1b1b",
-    warningBackground: "#fff4d8",
-    warningBorder: "#d9822b"
+    primitive: {
+      blue700: "#315870",
+      gold500: "#c48c33",
+      night: "#00041b",
+      white: "#ffffff"
+    },
+    semanticVariables: [
+      "--ssq-color-background",
+      "--ssq-color-surface",
+      "--ssq-color-text",
+      "--ssq-color-muted",
+      "--ssq-color-border",
+      "--ssq-color-border-strong",
+      "--ssq-color-action",
+      "--ssq-color-action-text",
+      "--ssq-color-error",
+      "--ssq-color-focus",
+      "--ssq-color-header-accent",
+      "--ssq-color-header-background",
+      "--ssq-color-header-text",
+      "--ssq-color-info-background",
+      "--ssq-color-info-border",
+      "--ssq-color-success-background",
+      "--ssq-color-success-border",
+      "--ssq-color-warning-background",
+      "--ssq-color-warning-border"
+    ]
   },
   radius: {
     sm: "0.25rem",
