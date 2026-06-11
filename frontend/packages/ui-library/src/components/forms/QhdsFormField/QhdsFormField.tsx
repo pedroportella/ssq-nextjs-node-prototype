@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import "./QhdsFormField.scss";
+
 export interface QhdsFormFieldProps {
   children: ReactNode;
   disabled?: boolean;

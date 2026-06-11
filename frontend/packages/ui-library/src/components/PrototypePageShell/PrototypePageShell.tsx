@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 
-import { QhdsFooter } from "./QhdsFooter";
-import { QhdsHeader } from "./QhdsHeader";
-import { QhdsLayout } from "./QhdsLayout";
+import { QhdsFooter } from "../QhdsFooter";
+import { QhdsHeader } from "../QhdsHeader";
+import { QhdsLayout } from "../QhdsLayout";
+
+import "./PrototypePageShell.scss";
 
 export interface PrototypePageShellProps {
   children: ReactNode;

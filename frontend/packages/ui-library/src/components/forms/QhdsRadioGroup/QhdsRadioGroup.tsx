@@ -2,7 +2,9 @@ import { useId } from "react";
 
 import type { ReactNode } from "react";
 
-import { getQhdsFieldIds, toSafeControlId } from "./fieldIds";
+import { getQhdsFieldIds, toSafeControlId } from "../fieldIds";
+
+import "./QhdsRadioGroup.scss";
 
 export interface QhdsRadioOption {
   disabled?: boolean;

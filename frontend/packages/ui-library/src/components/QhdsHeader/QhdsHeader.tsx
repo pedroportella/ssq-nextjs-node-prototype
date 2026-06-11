@@ -2,6 +2,8 @@ import { prototypeAssetManifest } from "@ssq/ui-assets";
 
 import type { MouseEvent, ReactNode } from "react";
 
+import "./QhdsHeader.scss";
+
 export interface QhdsHeaderNavItem {
   href: string;
   label: string;

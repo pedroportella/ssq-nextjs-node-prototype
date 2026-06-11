@@ -1,0 +1,24 @@
+.ssq-card {
+  background: var(--ssq-color-surface);
+  border: 1px solid var(--ssq-color-border);
+  border-radius: var(--ssq-radius-md);
+  display: grid;
+  gap: var(--ssq-space-4);
+  margin-block: var(--ssq-space-4);
+  max-width: 46rem;
+  padding: var(--ssq-space-6);
+}
+
+.ssq-card__heading {
+  font-size: 1.25rem;
+  line-height: 1.25;
+  margin: 0 0 var(--ssq-space-2);
+}
+
+.ssq-card__content > :first-child {
+  margin-top: 0;
+}
+
+.ssq-card__content > :last-child {
+  margin-bottom: 0;
+}

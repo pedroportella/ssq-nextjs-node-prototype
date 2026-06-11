@@ -1,5 +1,7 @@
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 
+import "./QhdsButton.scss";
+
 type ButtonVariant = "primary" | "secondary";
 
 interface ButtonBaseProps {

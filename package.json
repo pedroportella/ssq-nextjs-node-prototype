@@ -26,5 +26,8 @@
   },
   "volta": {
     "node": "22.22.3"
+  },
+  "devDependencies": {
+    "sass": "1.100.0"
   }
 }

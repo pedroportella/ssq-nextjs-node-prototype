@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import "./QhdsFooter.scss";
+
 export interface QhdsFooterProps {
   children?: ReactNode;
   serviceName?: string;

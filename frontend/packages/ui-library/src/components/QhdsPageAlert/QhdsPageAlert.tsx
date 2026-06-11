@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import "./QhdsPageAlert.scss";
+
 type PageAlertTone = "info" | "success" | "warning";
 
 export interface QhdsPageAlertProps {

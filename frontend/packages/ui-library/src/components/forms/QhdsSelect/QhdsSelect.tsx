@@ -2,8 +2,10 @@ import { useId } from "react";
 
 import type { ReactNode, SelectHTMLAttributes } from "react";
 
-import { getQhdsFieldIds } from "./fieldIds";
-import { QhdsFormField } from "./QhdsFormField";
+import { QhdsFormField } from "../QhdsFormField";
+import { getQhdsFieldIds } from "../fieldIds";
+
+import "./QhdsSelect.scss";
 
 export interface QhdsSelectOption {
   disabled?: boolean;

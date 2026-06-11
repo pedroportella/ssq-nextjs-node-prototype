@@ -2,7 +2,9 @@ import { useId } from "react";
 
 import type { InputHTMLAttributes, ReactNode } from "react";
 
-import { getQhdsFieldIds } from "./fieldIds";
+import { getQhdsFieldIds } from "../fieldIds";
+
+import "./QhdsCheckbox.scss";
 
 export interface QhdsCheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "children" | "type"> {
   error?: ReactNode;

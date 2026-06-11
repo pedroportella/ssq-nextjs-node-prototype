@@ -1,18 +1,20 @@
 import { useId } from "react";
 
-import type { InputHTMLAttributes, ReactNode } from "react";
+import type { ReactNode, TextareaHTMLAttributes } from "react";
 
-import { getQhdsFieldIds } from "./fieldIds";
-import { QhdsFormField } from "./QhdsFormField";
+import { QhdsFormField } from "../QhdsFormField";
+import { getQhdsFieldIds } from "../fieldIds";
 
-export interface QhdsTextInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "children"> {
+import "./QhdsTextarea.scss";
+
+export interface QhdsTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   error?: ReactNode;
   hint?: ReactNode;
   label: ReactNode;
   optional?: boolean;
 }
 
-export function QhdsTextInput({
+export function QhdsTextarea({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
   className,
@@ -23,13 +25,12 @@ export function QhdsTextInput({
   label,
   optional = false,
   required = false,
-  type = "text",
-  ...inputProps
-}: QhdsTextInputProps) {
+  ...textareaProps
+}: QhdsTextareaProps) {
   const generatedId = useId();
-  const controlId = id ?? `ssq-text-input-${generatedId}`;
+  const controlId = id ?? `ssq-textarea-${generatedId}`;
   const fieldIds = getQhdsFieldIds({ controlId, describedBy: ariaDescribedBy, error, hint });
-  const classes = ["ssq-input", className].filter(Boolean).join(" ");
+  const classes = ["ssq-textarea", className].filter(Boolean).join(" ");
 
   return (
     <QhdsFormField
@@ -43,15 +44,14 @@ export function QhdsTextInput({
       optional={optional}
       required={required}
     >
-      <input
+      <textarea
         aria-describedby={fieldIds.describedBy}
         aria-invalid={ariaInvalid ?? (error ? true : undefined)}
         className={classes}
         disabled={disabled}
         id={controlId}
         required={required}
-        type={type}
-        {...inputProps}
+        {...textareaProps}
       />
     </QhdsFormField>
   );

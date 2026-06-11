@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import "./QhdsLayout.scss";
+
 export interface QhdsLayoutProps {
   children: ReactNode;
   footer?: ReactNode;

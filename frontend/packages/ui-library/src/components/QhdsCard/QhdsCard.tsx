@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import "./QhdsCard.scss";
+
 export interface QhdsCardProps {
   action?: ReactNode;
   children: ReactNode;
