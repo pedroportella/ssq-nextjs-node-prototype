@@ -1,0 +1,24 @@
+import { css } from "lit";
+import { ssqFormFieldStyles } from "../SsqFormField/SsqFormField.styles";
+
+export const ssqSelectStyles = [
+  ssqFormFieldStyles,
+  css`
+    .ssq-select {
+      background: var(--ssq-color-surface);
+      border: 2px solid var(--ssq-color-border-strong);
+      border-radius: var(--ssq-radius-sm);
+      box-sizing: border-box;
+      color: var(--ssq-color-text);
+      display: block;
+      font: inherit;
+      min-height: 2.75rem;
+      padding: var(--ssq-space-2) var(--ssq-space-3);
+      width: min(100%, 32rem);
+    }
+
+    .ssq-form-field--invalid .ssq-select {
+      border-color: var(--ssq-color-error);
+    }
+  `
+];

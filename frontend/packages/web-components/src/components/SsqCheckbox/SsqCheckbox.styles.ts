@@ -1,0 +1,44 @@
+import { css } from "lit";
+import { ssqFormFieldStyles } from "../SsqFormField/SsqFormField.styles";
+
+export const ssqCheckboxStyles = [
+  ssqFormFieldStyles,
+  css`
+    .ssq-checkbox {
+      border: 0;
+      margin: 0 0 var(--ssq-space-6);
+      max-width: 42rem;
+      padding: 0;
+    }
+
+    .ssq-checkbox--disabled {
+      opacity: 0.72;
+    }
+
+    .ssq-checkbox__control {
+      align-items: flex-start;
+      display: grid;
+      gap: var(--ssq-space-2);
+      grid-template-columns: 1.25rem minmax(0, 1fr);
+    }
+
+    .ssq-checkbox__input {
+      accent-color: var(--ssq-color-action);
+      height: 1.25rem;
+      margin: 0.15rem 0 0;
+      width: 1.25rem;
+    }
+
+    .ssq-checkbox__label {
+      color: var(--ssq-color-text);
+      display: block;
+      font-weight: 700;
+      margin: 0 0 var(--ssq-space-1);
+    }
+
+    .ssq-checkbox__hint,
+    .ssq-checkbox__error {
+      margin-left: calc(1.25rem + var(--ssq-space-2));
+    }
+  `
+];
