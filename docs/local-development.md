@@ -54,7 +54,7 @@ curl -i http://localhost:3001/status
 curl -i http://localhost:3002/status
 ```
 
-Frontend app containers receive `BACKEND_INTERNAL_URL` as a server-side environment variable pointing at the Compose backend service. Do not add `NEXT_PUBLIC_BACKEND_URL` or browser-visible backend URL values.
+Frontend app containers receive `BACKEND_INTERNAL_URL` as a server-side environment variable pointing at the Compose backend service. The current prototype Compose runtime also sets `SSQ_FRONTEND_DATA_SOURCE=mock`, because the workflow backend adapters are still deferred. Do not add `NEXT_PUBLIC_BACKEND_URL` or browser-visible backend URL values.
 
 The database is exposed on host port `54329` by default to avoid clashing with a local PostgreSQL install.
 
@@ -96,6 +96,14 @@ SSQ_FRONTEND_DATA_SOURCE=backend BACKEND_INTERNAL_URL=http://localhost:7001 pnpm
 ```
 
 Production-like runs fail safely unless `BACKEND_INTERNAL_URL` is configured or mock mode is explicitly requested.
+
+Cross-app links use server-side public URL settings:
+
+```bash
+DASHBOARD_PUBLIC_URL=http://localhost:3000
+SENIORS_CARD_PUBLIC_URL=http://localhost:3001
+RENTAL_SECURITY_SUBSIDY_PUBLIC_URL=http://localhost:3002
+```
 
 ## App Containers
 

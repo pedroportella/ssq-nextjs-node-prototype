@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "next build",
+    "build": "next build --webpack",
     "check": "pnpm typecheck && pnpm test",
     "dev": "next dev -p 3002",
     "lint": "tsc -p tsconfig.json --noEmit",

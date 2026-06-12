@@ -37,3 +37,14 @@ The shared app chrome is owned by `@ssq/ui-library` so individual Next.js apps d
 - Apps should pass page content sections into `QhdsLayout`; they should not wrap those sections in another `<main>`.
 
 The current layout layer is server-renderable by default. A future mobile drawer enhancement should be isolated behind a client component and must include Escape close, focus trapping, focus restoration and body scroll-lock cleanup tests before adoption.
+
+## Runtime architecture
+
+Next.js app routes that read frontend service data are rendered dynamically so production builds do not bake mock data into browser or server output. Runtime mode is resolved by the server-only service layer:
+
+- mock mode for frontend-only work and the current prototype Compose runtime;
+- backend mode only when `BACKEND_INTERNAL_URL` is configured and the relevant service adapter is implemented.
+
+Backend and GraphQL URLs must stay server-only. Apps should import server data helpers from `@ssq/services/server`; browser components should receive data through props and must not use `NEXT_PUBLIC_BACKEND_URL`.
+
+Deployment details live in `docs/frontend-deployment-readiness.md`. Adapter rules live in `docs/design-system-adapter.md`.
