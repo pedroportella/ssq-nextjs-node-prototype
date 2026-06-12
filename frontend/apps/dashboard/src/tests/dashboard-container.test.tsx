@@ -1,0 +1,89 @@
+import { createPrototypeAppSummary } from "@ssq/services";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vitest";
+
+import { DashboardContent } from "../containers/DashboardHomeContainer";
+
+import type { AppShellData } from "@ssq/services/server";
+import type { PrototypeDashboardSummaryData } from "@ssq/services";
+
+const shell: AppShellData = {
+  app: createPrototypeAppSummary("dashboard"),
+  backendBoundary: "server-only",
+  dataSource: "mock"
+};
+
+const summary: PrototypeDashboardSummaryData = {
+  activity: [
+    {
+      at: "2026-06-12T02:15:00.000Z",
+      description: "SC-2026-0001 submitted",
+      status: "APPROVED"
+    }
+  ],
+  availableServices: [
+    {
+      appKey: "seniors-card",
+      description: "Check eligibility.",
+      href: "https://example.test/seniors-card",
+      label: "Seniors Card",
+      status: "available"
+    }
+  ],
+  drafts: [
+    {
+      appKey: "seniors-card",
+      draftId: "seniors-card-draft-001",
+      lastUpdated: "2026-06-12T01:30:00.000Z",
+      status: "DRAFT",
+      title: "Seniors Card"
+    }
+  ],
+  profile: {
+    displayName: "Avery Taylor",
+    email: "avery.taylor@example.test",
+    identityStrength: "verified"
+  },
+  submittedRequests: [
+    {
+      appKey: "seniors-card",
+      referenceNumber: "SC-2026-0001",
+      status: "APPROVED",
+      submittedAt: "2026-06-12T02:15:00.000Z",
+      title: "Seniors Card"
+    }
+  ]
+};
+
+describe("DashboardContent", () => {
+  it("renders mock-seeded dashboard services and configured links", () => {
+    const html = renderToStaticMarkup(<DashboardContent shell={shell} summary={summary} />);
+
+    expect(html).toContain("SSQ Service Dashboard");
+    expect(html).toContain("Avery Taylor");
+    expect(html).toContain("Frontend mock runtime");
+    expect(html).toContain("Seniors Card");
+    expect(html).toContain('href="https://example.test/seniors-card"');
+    expect(html).toContain("SC-2026-0001");
+  });
+
+  it("renders safe empty states when dashboard data is missing", () => {
+    const html = renderToStaticMarkup(
+      <DashboardContent
+        shell={shell}
+        summary={{
+          ...summary,
+          activity: [],
+          availableServices: [],
+          drafts: [],
+          submittedRequests: []
+        }}
+      />
+    );
+
+    expect(html).toContain("No services are available right now.");
+    expect(html).toContain("No saved drafts.");
+    expect(html).toContain("No submitted requests.");
+    expect(html).toContain("No recent activity to show.");
+  });
+});

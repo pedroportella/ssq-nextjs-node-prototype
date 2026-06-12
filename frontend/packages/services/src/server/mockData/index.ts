@@ -13,6 +13,7 @@ import type {
   PrototypeValidationError,
   PrototypeWorkflowData
 } from "../../index";
+import type { FrontendPublicUrlConfig } from "../publicUrls";
 
 export const mockProfileSummary: PrototypeProfileSummary = {
   displayName: "Avery Taylor",
@@ -20,22 +21,24 @@ export const mockProfileSummary: PrototypeProfileSummary = {
   identityStrength: "verified"
 };
 
-export const mockServiceCatalogue: PrototypeServiceCatalogueEntry[] = [
-  {
-    appKey: "seniors-card",
-    description: "Check eligibility and prepare a Seniors Card application.",
-    href: "http://localhost:3001",
-    label: "Seniors Card",
-    status: "available"
-  },
-  {
-    appKey: "rental-security-subsidy",
-    description: "Prepare rental support information and track a subsidy request.",
-    href: "http://localhost:3002",
-    label: "Rental Security Subsidy",
-    status: "available"
-  }
-];
+export function createMockServiceCatalogue(publicUrls: FrontendPublicUrlConfig): PrototypeServiceCatalogueEntry[] {
+  return [
+    {
+      appKey: "seniors-card",
+      description: "Check eligibility and prepare a Seniors Card application.",
+      href: publicUrls["seniors-card"],
+      label: "Seniors Card",
+      status: "available"
+    },
+    {
+      appKey: "rental-security-subsidy",
+      description: "Prepare rental support information and track a subsidy request.",
+      href: publicUrls["rental-security-subsidy"],
+      label: "Rental Security Subsidy",
+      status: "available"
+    }
+  ];
+}
 
 export const mockValidationErrors: PrototypeValidationError[] = [
   {
@@ -104,10 +107,10 @@ export function createMockSubmissionSummaryMetadata(
   };
 }
 
-export function createMockDashboardSummaryData(): PrototypeDashboardSummaryData {
+export function createMockDashboardSummaryData(publicUrls: FrontendPublicUrlConfig): PrototypeDashboardSummaryData {
   return {
     activity: [...createMockActivity("seniors-card"), ...createMockActivity("rental-security-subsidy")],
-    availableServices: mockServiceCatalogue,
+    availableServices: createMockServiceCatalogue(publicUrls),
     drafts: [createMockDraftSummary("seniors-card")],
     profile: mockProfileSummary,
     submittedRequests: [

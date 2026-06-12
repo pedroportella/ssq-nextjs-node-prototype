@@ -22,3 +22,5 @@ export {
   resolveFrontendRuntimeConfig
 } from "./runtimeConfig";
 export type { FrontendDataSource, FrontendRuntimeConfig } from "./runtimeConfig";
+export { resolveFrontendPublicUrlConfig } from "./publicUrls";
+export type { FrontendPublicUrlConfig } from "./publicUrls";

@@ -9,6 +9,7 @@ import {
   createMockWorkflowData,
   mockValidationErrors
 } from "./mockData";
+import { resolveFrontendPublicUrlConfig } from "./publicUrls";
 
 import type {
   PrototypeAppKey,
@@ -28,7 +29,7 @@ export function createMockAppShellData(key: PrototypeAppKey): AppShellData {
 }
 
 export async function getMockDashboardSummaryData(): Promise<PrototypeDashboardSummaryData> {
-  return createMockDashboardSummaryData();
+  return createMockDashboardSummaryData(resolveFrontendPublicUrlConfig());
 }
 
 export async function getMockSeniorsCardWorkflowData(): Promise<PrototypeWorkflowData> {

@@ -3,6 +3,14 @@
   max-width: var(--ssq-content-width);
 }
 
+.hero {
+  align-items: start;
+  display: grid;
+  gap: var(--ssq-space-6);
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  margin-bottom: var(--ssq-space-6);
+}
+
 .title {
   font-size: 2rem;
   line-height: 1.2;
@@ -16,7 +24,143 @@
   max-width: 44rem;
 }
 
+.profileSummary,
+.metric {
+  background: var(--ssq-color-surface);
+  border: 1px solid var(--ssq-color-border);
+  border-radius: var(--ssq-radius-sm);
+  padding: var(--ssq-space-4);
+}
+
+.eyebrow,
+.meta,
+.itemDescription,
+.empty {
+  color: var(--ssq-color-muted);
+}
+
+.eyebrow {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin: 0 0 var(--ssq-space-1);
+  text-transform: uppercase;
+}
+
+.profileName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 var(--ssq-space-1);
+}
+
+.meta {
+  display: block;
+  font-size: 0.925rem;
+  margin: 0;
+}
+
+.summaryGrid {
+  display: grid;
+  gap: var(--ssq-space-4);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: var(--ssq-space-6) 0;
+}
+
+.metricValue {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.metricLabel {
+  color: var(--ssq-color-muted);
+  display: block;
+  margin-top: var(--ssq-space-2);
+}
+
+.grid {
+  display: grid;
+  gap: var(--ssq-space-6);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.serviceList,
+.recordList,
+.activityList {
+  display: grid;
+  gap: var(--ssq-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.serviceItem,
+.recordItem {
+  align-items: center;
+  border-top: 1px solid var(--ssq-color-border);
+  display: flex;
+  gap: var(--ssq-space-4);
+  justify-content: space-between;
+  padding-top: var(--ssq-space-3);
+}
+
+.serviceItem:first-child,
+.recordItem:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.itemTitle,
+.activityDescription {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.itemDescription {
+  margin: var(--ssq-space-1) 0 0;
+}
+
+.status {
+  border: 1px solid var(--ssq-color-border-strong);
+  border-radius: var(--ssq-radius-sm);
+  color: var(--ssq-color-muted);
+  flex: 0 0 auto;
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: var(--ssq-space-1) var(--ssq-space-2);
+}
+
+.activityItem {
+  display: grid;
+  gap: var(--ssq-space-3);
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.activityMarker {
+  background: var(--ssq-color-action);
+  border-radius: 50%;
+  height: 0.75rem;
+  margin-top: 0.4rem;
+  width: 0.75rem;
+}
+
+.empty {
+  margin: 0;
+}
+
 @media (max-width: 48rem) {
+  .hero,
+  .summaryGrid,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .serviceItem,
+  .recordItem {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .title {
     font-size: 1.75rem;
   }
