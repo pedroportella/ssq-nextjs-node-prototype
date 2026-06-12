@@ -21,12 +21,7 @@
 }
 
 .ssq-layout__body {
-  display: grid;
-  gap: var(--ssq-space-8);
-  grid-template-columns: minmax(0, 1fr);
-  margin: 0 auto;
-  max-width: var(--ssq-content-width);
-  padding: var(--ssq-space-8);
+  padding: var(--ssq-space-8) 0;
 }
 
 .ssq-layout__main {
@@ -41,14 +36,8 @@
   min-width: 0;
 }
 
-@media (min-width: 64rem) {
-  .ssq-layout__body:has(.ssq-layout__sidebar) {
-    grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
-  }
-}
-
 @media (max-width: 48rem) {
   .ssq-layout__body {
-    padding: var(--ssq-space-6) var(--ssq-space-4);
+    padding: var(--ssq-space-6) 0;
   }
 }

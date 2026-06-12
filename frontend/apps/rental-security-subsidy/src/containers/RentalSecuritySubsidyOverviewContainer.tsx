@@ -1,5 +1,15 @@
 import { getRentalSecuritySubsidyShellData, getRentalSecuritySubsidyWorkflowData } from "@ssq/services/server";
-import { QhdsButton, QhdsCard, QhdsFooter, QhdsHeader, QhdsLayout, QhdsPageAlert } from "@ssq/ui-library";
+import {
+  QhdsButton,
+  QhdsCard,
+  QhdsCol,
+  QhdsContainer,
+  QhdsFooter,
+  QhdsHeader,
+  QhdsLayout,
+  QhdsPageAlert,
+  QhdsRow
+} from "@ssq/ui-library";
 
 import styles from "./RentalSecuritySubsidyHomeContainer.module.scss";
 
@@ -15,20 +25,22 @@ export function RentalSecuritySubsidyOverviewContent({
 }) {
   return (
     <QhdsLayout footer={<QhdsFooter />} header={<QhdsHeader />}>
-      <section aria-labelledby="page-title" className={styles.inner}>
-        <div className={styles.hero}>
-          <div>
+      <QhdsContainer aria-labelledby="page-title">
+        <QhdsRow className={styles.hero}>
+          <QhdsCol lg={8} xl={8}>
             <h1 className={styles.title} id="page-title">
               {shell.app.label}
             </h1>
             <p className={styles.lead}>Prepare a prototype rental support application and track its progress.</p>
-          </div>
-          <div className={styles.profileSummary} aria-label="Profile summary">
-            <p className={styles.eyebrow}>Applicant</p>
-            <p className={styles.profileName}>{workflow.profile.displayName}</p>
-            <p className={styles.meta}>{workflow.profile.email}</p>
-          </div>
-        </div>
+          </QhdsCol>
+          <QhdsCol lg={4} xl={4}>
+            <div className={styles.profileSummary} aria-label="Profile summary">
+              <p className={styles.eyebrow}>Applicant</p>
+              <p className={styles.profileName}>{workflow.profile.displayName}</p>
+              <p className={styles.meta}>{workflow.profile.email}</p>
+            </div>
+          </QhdsCol>
+        </QhdsRow>
 
         <QhdsPageAlert heading="Frontend-only rental workflow" tone="success">
           <p>
@@ -37,23 +49,29 @@ export function RentalSecuritySubsidyOverviewContent({
           </p>
         </QhdsPageAlert>
 
-        <div className={styles.cardGrid}>
-          <QhdsCard action={<QhdsButton href="/apply">Start application</QhdsButton>} heading="Apply for rental support">
-            <p>Complete a multi-step prototype workflow covering household, income and rental property details.</p>
-          </QhdsCard>
-          <QhdsCard action={<QhdsButton href="/application-status" variant="secondary">View status</QhdsButton>} heading="Track your request">
-            <p>
-              View mock submission reference <strong>{workflow.submittedRequest.referenceNumber}</strong> and recent activity.
-            </p>
-          </QhdsCard>
-          <QhdsCard heading="Saved draft">
-            <p>
-              Draft <strong>{workflow.draft.draftId}</strong> is ready to continue.
-            </p>
-            <p className={styles.meta}>Last updated {new Date(workflow.draft.lastUpdated).toLocaleString("en-AU")}</p>
-          </QhdsCard>
-        </div>
-      </section>
+        <QhdsRow className={styles.cardGrid}>
+          <QhdsCol lg={4} xl={4}>
+            <QhdsCard action={<QhdsButton href="/apply">Start application</QhdsButton>} heading="Apply for rental support">
+              <p>Complete a multi-step prototype workflow covering household, income and rental property details.</p>
+            </QhdsCard>
+          </QhdsCol>
+          <QhdsCol lg={4} xl={4}>
+            <QhdsCard action={<QhdsButton href="/application-status" variant="secondary">View status</QhdsButton>} heading="Track your request">
+              <p>
+                View mock submission reference <strong>{workflow.submittedRequest.referenceNumber}</strong> and recent activity.
+              </p>
+            </QhdsCard>
+          </QhdsCol>
+          <QhdsCol lg={4} xl={4}>
+            <QhdsCard heading="Saved draft">
+              <p>
+                Draft <strong>{workflow.draft.draftId}</strong> is ready to continue.
+              </p>
+              <p className={styles.meta}>Last updated {new Date(workflow.draft.lastUpdated).toLocaleString("en-AU")}</p>
+            </QhdsCard>
+          </QhdsCol>
+        </QhdsRow>
+      </QhdsContainer>
     </QhdsLayout>
   );
 }

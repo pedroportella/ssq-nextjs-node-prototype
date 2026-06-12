@@ -73,12 +73,36 @@ The `ssq-postgres-data` Docker volume persists database state across container r
 
 Frontend app work can run without Docker, PostgreSQL or the backend API. The server-side frontend service layer defaults to mock data in local development and tests when `BACKEND_INTERNAL_URL` is not configured.
 
-Run the apps locally:
+The root `.env` file can be used for frontend-only work. Load it in each terminal session before starting an app:
+
+```bash
+set -a
+source .env
+set +a
+```
+
+Then run the apps locally in three separate terminal tabs:
+
+```bash
+pnpm --filter @ssq/dashboard dev
+pnpm --filter @ssq/seniors-card dev
+pnpm --filter @ssq/rental-security-subsidy dev
+```
+
+Or run them without loading `.env` by keeping the mock runtime inline:
 
 ```bash
 SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/dashboard dev
 SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/seniors-card dev
 SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/rental-security-subsidy dev
+```
+
+Open the apps at:
+
+```text
+Dashboard: http://localhost:3000
+Seniors Card: http://localhost:3001
+Rental Security Subsidy: http://localhost:3002
 ```
 
 Run the frontend mock smoke check:

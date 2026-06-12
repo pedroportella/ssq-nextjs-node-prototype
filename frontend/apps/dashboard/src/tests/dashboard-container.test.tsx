@@ -60,6 +60,11 @@ describe("DashboardContent", () => {
     const html = renderToStaticMarkup(<DashboardContent shell={shell} summary={summary} />);
 
     expect(html).toContain("SSQ Service Dashboard");
+    expect(html).toContain("qld__grid");
+    expect(html).toContain("container-fluid");
+    expect(html).toContain("row");
+    expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
+    expect(html).toContain("col-xs-12 col-sm-6 col-lg-3 col-xl-3");
     expect(html).toContain("Avery Taylor");
     expect(html).toContain("Frontend mock runtime");
     expect(html).toContain("Seniors Card");

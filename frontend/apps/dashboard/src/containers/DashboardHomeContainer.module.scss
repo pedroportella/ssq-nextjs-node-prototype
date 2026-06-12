@@ -1,14 +1,7 @@
-.inner {
-  margin: 0 auto;
-  max-width: var(--ssq-content-width);
-}
-
 .hero {
   align-items: start;
-  display: grid;
-  gap: var(--ssq-space-6);
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
   margin-bottom: var(--ssq-space-6);
+  row-gap: var(--ssq-space-6);
 }
 
 .title {
@@ -59,10 +52,8 @@
 }
 
 .summaryGrid {
-  display: grid;
-  gap: var(--ssq-space-4);
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin: var(--ssq-space-6) 0;
+  row-gap: var(--ssq-space-4);
 }
 
 .metricValue {
@@ -79,9 +70,7 @@
 }
 
 .grid {
-  display: grid;
-  gap: var(--ssq-space-6);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  row-gap: var(--ssq-space-6);
 }
 
 .serviceList,
@@ -149,12 +138,6 @@
 }
 
 @media (max-width: 48rem) {
-  .hero,
-  .summaryGrid,
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
   .serviceItem,
   .recordItem {
     align-items: stretch;

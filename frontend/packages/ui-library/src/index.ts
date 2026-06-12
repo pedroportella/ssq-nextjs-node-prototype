@@ -2,6 +2,7 @@ export * from "./components/QhdsAccordion";
 export * from "./components/QhdsButton";
 export * from "./components/QhdsCard";
 export * from "./components/QhdsFooter";
+export * from "./components/QhdsGrid";
 export * from "./components/QhdsHeader";
 export * from "./components/QhdsLayout";
 export * from "./components/QhdsPageAlert";

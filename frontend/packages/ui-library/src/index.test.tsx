@@ -6,6 +6,9 @@ import {
   QhdsCheckbox,
   QhdsFooter,
   QhdsFormField,
+  QhdsCol,
+  QhdsContainer,
+  QhdsRow,
   QhdsRadioGroup,
   QhdsSelect,
   QhdsTextarea,
@@ -20,9 +23,12 @@ describe("ui-library public exports", () => {
     expect(QhdsButton).toBeTypeOf("function");
     expect(QhdsCard).toBeTypeOf("function");
     expect(QhdsFooter).toBeTypeOf("function");
+    expect(QhdsCol).toBeTypeOf("function");
+    expect(QhdsContainer).toBeTypeOf("function");
     expect(QhdsHeader).toBeTypeOf("function");
     expect(QhdsLayout).toBeTypeOf("function");
     expect(QhdsPageAlert).toBeTypeOf("function");
+    expect(QhdsRow).toBeTypeOf("function");
   });
 
   it("exports app-facing form components", () => {

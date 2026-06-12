@@ -96,6 +96,31 @@ async function expectNoVisibleHorizontalOverflow(page: Page) {
   expect(overflowingElements).toEqual([]);
 }
 
+async function expectQhdsGridFoundation(page: Page, viewportWidth: number) {
+  const gridState = await page.evaluate(() => {
+    const containers = Array.from(document.querySelectorAll<HTMLElement>(".qld__grid .container, .qld__grid .container-fluid"));
+    const rows = Array.from(document.querySelectorAll<HTMLElement>(".qld__grid .row"));
+    const columns = Array.from(document.querySelectorAll<HTMLElement>('.qld__grid .row > [class*="col-"]'));
+
+    return {
+      columnClassNames: columns.map((column) => column.className),
+      containerWidths: containers.map((container) => container.getBoundingClientRect().width),
+      hasGridRoot: Boolean(document.querySelector(".qld__grid")),
+      rowCount: rows.length
+    };
+  });
+
+  expect(gridState.hasGridRoot).toBe(true);
+  expect(gridState.containerWidths.length).toBeGreaterThanOrEqual(1);
+  expect(Math.max(...gridState.containerWidths)).toBeLessThanOrEqual(Math.min(viewportWidth, 1376) + 1);
+  expect(gridState.rowCount).toBeGreaterThanOrEqual(1);
+  expect(gridState.columnClassNames.some((className) => className.includes("col-xs-12"))).toBe(true);
+
+  if (viewportWidth >= 992) {
+    expect(gridState.columnClassNames.some((className) => /col-lg-[1-9]/.test(className))).toBe(true);
+  }
+}
+
 async function expectFocusedElementHasVisibleFocus(page: Page) {
   await page.keyboard.press("Tab");
   await page.waitForFunction(() => document.activeElement !== document.body);
@@ -139,6 +164,7 @@ for (const viewport of viewports) {
         await expect(page.getByText(pageTarget.keyText)).toBeVisible();
         await expect(page.getByRole("main")).toBeVisible();
         await expectNoVisibleHorizontalOverflow(page);
+        await expectQhdsGridFoundation(page, viewport.width);
         await expectFocusedElementHasVisibleFocus(page);
         expect(forbiddenRequests).toEqual([]);
       });

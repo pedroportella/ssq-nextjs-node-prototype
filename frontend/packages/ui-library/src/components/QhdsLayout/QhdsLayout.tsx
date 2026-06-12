@@ -28,7 +28,7 @@ export function QhdsLayout({
   const hasSideNav = Boolean(sideNav) && !focusMode;
 
   return (
-    <div className={["ssq-layout", focusMode ? "ssq-layout--focus" : "", className].filter(Boolean).join(" ")}>
+    <div className={["qld__grid", "ssq-layout", focusMode ? "ssq-layout--focus" : "", className].filter(Boolean).join(" ")}>
       <a className="ssq-layout__skip-link" href={`#${mainId}`}>
         {skipLinkLabel}
       </a>

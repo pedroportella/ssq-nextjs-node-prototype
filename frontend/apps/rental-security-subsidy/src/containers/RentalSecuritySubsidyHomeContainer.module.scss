@@ -1,14 +1,7 @@
-.inner {
-  margin: 0 auto;
-  max-width: var(--ssq-content-width);
-}
-
 .hero {
   align-items: start;
-  display: grid;
-  gap: var(--ssq-space-6);
-  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
   margin-bottom: var(--ssq-space-6);
+  row-gap: var(--ssq-space-6);
 }
 
 .title {
@@ -57,10 +50,8 @@
 
 .cardGrid,
 .workflowGrid {
-  display: grid;
-  gap: var(--ssq-space-6);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: var(--ssq-space-6);
+  row-gap: var(--ssq-space-6);
 }
 
 .workflowGrid {
@@ -92,12 +83,6 @@
 }
 
 @media (max-width: 48rem) {
-  .hero,
-  .cardGrid,
-  .workflowGrid {
-    grid-template-columns: 1fr;
-  }
-
   .title {
     font-size: 1.75rem;
   }

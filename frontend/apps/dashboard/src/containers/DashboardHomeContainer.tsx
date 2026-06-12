@@ -1,5 +1,15 @@
 import { getDashboardShellData, getDashboardSummaryData } from "@ssq/services/server";
-import { QhdsButton, QhdsCard, QhdsFooter, QhdsHeader, QhdsLayout, QhdsPageAlert } from "@ssq/ui-library";
+import {
+  QhdsButton,
+  QhdsCard,
+  QhdsCol,
+  QhdsContainer,
+  QhdsFooter,
+  QhdsHeader,
+  QhdsLayout,
+  QhdsPageAlert,
+  QhdsRow
+} from "@ssq/ui-library";
 
 import styles from "./DashboardHomeContainer.module.scss";
 
@@ -75,21 +85,23 @@ export function DashboardContent({ shell, summary }: { shell: AppShellData; summ
 
   return (
     <QhdsLayout footer={<QhdsFooter />} header={<QhdsHeader />}>
-      <section aria-labelledby="page-title" className={styles.inner}>
-        <div className={styles.hero}>
-          <div>
+      <QhdsContainer aria-labelledby="page-title">
+        <QhdsRow className={styles.hero}>
+          <QhdsCol lg={8} xl={8}>
             <h1 className={styles.title} id="page-title">
               {shell.app.label}
             </h1>
             <p className={styles.lead}>Review digital transaction activity across the prototype services.</p>
-          </div>
-          <div className={styles.profileSummary} aria-label="Profile summary">
-            <p className={styles.eyebrow}>Signed in as</p>
-            <p className={styles.profileName}>{summary.profile.displayName}</p>
-            <p className={styles.meta}>{summary.profile.email}</p>
-            <p className={styles.meta}>Identity: {formatStatus(summary.profile.identityStrength)}</p>
-          </div>
-        </div>
+          </QhdsCol>
+          <QhdsCol lg={4} xl={4}>
+            <div className={styles.profileSummary} aria-label="Profile summary">
+              <p className={styles.eyebrow}>Signed in as</p>
+              <p className={styles.profileName}>{summary.profile.displayName}</p>
+              <p className={styles.meta}>{summary.profile.email}</p>
+              <p className={styles.meta}>Identity: {formatStatus(summary.profile.identityStrength)}</p>
+            </div>
+          </QhdsCol>
+        </QhdsRow>
 
         <QhdsPageAlert heading="Frontend mock runtime" tone={shell.dataSource === "mock" ? "success" : "info"}>
           <p>
@@ -98,73 +110,89 @@ export function DashboardContent({ shell, summary }: { shell: AppShellData; summ
           </p>
         </QhdsPageAlert>
 
-        <section aria-label="Dashboard summary" className={styles.summaryGrid}>
-          <div className={styles.metric}>
-            <span className={styles.metricValue}>{summary.availableServices.length}</span>
-            <span className={styles.metricLabel}>Available services</span>
-          </div>
-          <div className={styles.metric}>
-            <span className={styles.metricValue}>{summary.drafts.length}</span>
-            <span className={styles.metricLabel}>Drafts</span>
-          </div>
-          <div className={styles.metric}>
-            <span className={styles.metricValue}>{summary.submittedRequests.length}</span>
-            <span className={styles.metricLabel}>Submitted requests</span>
-          </div>
-          <div className={styles.metric}>
-            <span className={styles.metricValue}>{activeRequests}</span>
-            <span className={styles.metricLabel}>Active records</span>
-          </div>
-        </section>
+        <QhdsRow aria-label="Dashboard summary" className={styles.summaryGrid}>
+          <QhdsCol sm={6} lg={3} xl={3}>
+            <div className={styles.metric}>
+              <span className={styles.metricValue}>{summary.availableServices.length}</span>
+              <span className={styles.metricLabel}>Available services</span>
+            </div>
+          </QhdsCol>
+          <QhdsCol sm={6} lg={3} xl={3}>
+            <div className={styles.metric}>
+              <span className={styles.metricValue}>{summary.drafts.length}</span>
+              <span className={styles.metricLabel}>Drafts</span>
+            </div>
+          </QhdsCol>
+          <QhdsCol sm={6} lg={3} xl={3}>
+            <div className={styles.metric}>
+              <span className={styles.metricValue}>{summary.submittedRequests.length}</span>
+              <span className={styles.metricLabel}>Submitted requests</span>
+            </div>
+          </QhdsCol>
+          <QhdsCol sm={6} lg={3} xl={3}>
+            <div className={styles.metric}>
+              <span className={styles.metricValue}>{activeRequests}</span>
+              <span className={styles.metricLabel}>Active records</span>
+            </div>
+          </QhdsCol>
+        </QhdsRow>
 
-        <div className={styles.grid}>
-          <QhdsCard heading="Available services">
-            <ServiceList services={summary.availableServices} />
-          </QhdsCard>
+        <QhdsRow className={styles.grid}>
+          <QhdsCol lg={6} xl={6}>
+            <QhdsCard heading="Available services">
+              <ServiceList services={summary.availableServices} />
+            </QhdsCard>
+          </QhdsCol>
 
-          <QhdsCard heading="Drafts">
-            {summary.drafts.length === 0
-              ? renderEmptyState("No saved drafts.")
-              : (
-                  <ul className={styles.recordList}>
-                    {summary.drafts.map((draft) => (
-                      <li className={styles.recordItem} key={draft.draftId}>
-                        <span>
-                          <strong>{draft.title}</strong>
-                          <span className={styles.meta}>Last updated {formatDateTime(draft.lastUpdated)}</span>
-                        </span>
-                        <span className={styles.status}>{formatStatus(draft.status)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-          </QhdsCard>
-
-          <QhdsCard action={<QhdsButton href="/status">Check app status</QhdsButton>} heading="Submitted requests">
-            {summary.submittedRequests.length === 0
-              ? renderEmptyState("No submitted requests.")
-              : (
-                  <ul className={styles.recordList}>
-                    {summary.submittedRequests.map((request) => (
-                      <li className={styles.recordItem} key={request.referenceNumber}>
-                        <span>
-                          <strong>{request.title}</strong>
-                          <span className={styles.meta}>
-                            {request.referenceNumber} · Submitted {formatDateTime(request.submittedAt)}
+          <QhdsCol lg={6} xl={6}>
+            <QhdsCard heading="Drafts">
+              {summary.drafts.length === 0
+                ? renderEmptyState("No saved drafts.")
+                : (
+                    <ul className={styles.recordList}>
+                      {summary.drafts.map((draft) => (
+                        <li className={styles.recordItem} key={draft.draftId}>
+                          <span>
+                            <strong>{draft.title}</strong>
+                            <span className={styles.meta}>Last updated {formatDateTime(draft.lastUpdated)}</span>
                           </span>
-                        </span>
-                        <span className={styles.status}>{formatStatus(request.status)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-          </QhdsCard>
+                          <span className={styles.status}>{formatStatus(draft.status)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+            </QhdsCard>
+          </QhdsCol>
 
-          <QhdsCard heading="Recent activity">
-            <ActivityList activity={summary.activity} />
-          </QhdsCard>
-        </div>
-      </section>
+          <QhdsCol lg={6} xl={6}>
+            <QhdsCard action={<QhdsButton href="/status">Check app status</QhdsButton>} heading="Submitted requests">
+              {summary.submittedRequests.length === 0
+                ? renderEmptyState("No submitted requests.")
+                : (
+                    <ul className={styles.recordList}>
+                      {summary.submittedRequests.map((request) => (
+                        <li className={styles.recordItem} key={request.referenceNumber}>
+                          <span>
+                            <strong>{request.title}</strong>
+                            <span className={styles.meta}>
+                              {request.referenceNumber} · Submitted {formatDateTime(request.submittedAt)}
+                            </span>
+                          </span>
+                          <span className={styles.status}>{formatStatus(request.status)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+            </QhdsCard>
+          </QhdsCol>
+
+          <QhdsCol lg={6} xl={6}>
+            <QhdsCard heading="Recent activity">
+              <ActivityList activity={summary.activity} />
+            </QhdsCard>
+          </QhdsCol>
+        </QhdsRow>
+      </QhdsContainer>
     </QhdsLayout>
   );
 }

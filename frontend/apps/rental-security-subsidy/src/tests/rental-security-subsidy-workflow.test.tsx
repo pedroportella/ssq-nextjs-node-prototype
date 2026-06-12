@@ -109,6 +109,11 @@ describe("Rental Security Subsidy workflow containers", () => {
     const html = renderToStaticMarkup(<RentalSecuritySubsidyOverviewContent shell={shell} workflow={workflow} />);
 
     expect(html).toContain("Rental Security Subsidy");
+    expect(html).toContain("qld__grid");
+    expect(html).toContain("container-fluid");
+    expect(html).toContain("row");
+    expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
+    expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
     expect(html).toContain("Frontend-only rental workflow");
     expect(html).toContain('href="/apply"');
     expect(html).toContain('href="/application-status"');
@@ -126,6 +131,12 @@ describe("Rental Security Subsidy workflow containers", () => {
     );
 
     expect(html).toContain("Prepare your rental support application");
+    expect(html).toContain("qld__grid");
+    expect(html).toContain("container-fluid");
+    expect(html).toContain("row");
+    expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
+    expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
+    expect(html).toContain("col-xs-12 col-lg-6 col-xl-6");
     expect(html).toContain("Rental property");
     expect(html).toContain("Enter the weekly rent amount for the property.");
     expect(html).toContain("RSS-2026-0001");
@@ -143,6 +154,10 @@ describe("Rental Security Subsidy workflow containers", () => {
     );
 
     expect(html).toContain("Rental Security Subsidy application status");
+    expect(html).toContain("qld__grid");
+    expect(html).toContain("container-fluid");
+    expect(html).toContain("row");
+    expect(html).toContain("col-xs-12 col-lg-6 col-xl-6");
     expect(html).toContain("Application submitted");
     expect(html).toContain("RSS-2026-0001");
     expect(html).toContain("Download submission summary");

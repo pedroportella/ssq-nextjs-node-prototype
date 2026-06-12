@@ -109,6 +109,11 @@ describe("Seniors Card workflow containers", () => {
     const html = renderToStaticMarkup(<SeniorsCardOverviewContent shell={shell} workflow={workflow} />);
 
     expect(html).toContain("Seniors Card");
+    expect(html).toContain("qld__grid");
+    expect(html).toContain("container-fluid");
+    expect(html).toContain("row");
+    expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
+    expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
     expect(html).toContain("Frontend-only workflow");
     expect(html).toContain('href="/apply"');
     expect(html).toContain('href="/application-status"');
@@ -126,6 +131,11 @@ describe("Seniors Card workflow containers", () => {
     );
 
     expect(html).toContain("Check your eligibility");
+    expect(html).toContain("qld__grid");
+    expect(html).toContain("container-fluid");
+    expect(html).toContain("row");
+    expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
+    expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
     expect(html).toContain("Enter a date of birth that confirms eligibility.");
     expect(html).toContain("SC-2026-0001");
     expect(html).toContain("sc-2026-0001-summary.txt");
@@ -142,6 +152,10 @@ describe("Seniors Card workflow containers", () => {
     );
 
     expect(html).toContain("Seniors Card application status");
+    expect(html).toContain("qld__grid");
+    expect(html).toContain("container-fluid");
+    expect(html).toContain("row");
+    expect(html).toContain("col-xs-12 col-lg-6 col-xl-6");
     expect(html).toContain("Application submitted");
     expect(html).toContain("SC-2026-0001");
     expect(html).toContain("Download submission summary");
