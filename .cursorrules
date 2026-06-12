@@ -153,7 +153,8 @@ Commit message handoff:
 - Use lowercase scopes with hyphens where needed.
 - Allowed types are `feat`, `fix`, `refactor`, `chore`, `perf`, `ci`, `ops`, `build`, `docs`, `style`, `revert` and `test`.
 - Do not include private planning labels in commit messages.
-- Format suggested commit messages in final user wrap-ups as copyable code blocks.
+- Prefer `frontend` scope when a frontend slice touches an app plus shared frontend packages, service contracts, mock data, UI packages or cross-app configuration. Use app-specific scopes such as `dashboard` only when the change is contained to that app boundary.
+- Format suggested commit messages in final user wrap-ups as copyable code blocks containing only the commit subject. Do not include `git commit -m`, shell commands, quotes or extra prose inside the code block.
 
 Step handoff:
 
