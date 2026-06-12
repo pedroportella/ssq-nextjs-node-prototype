@@ -8,6 +8,90 @@ export interface PrototypeAppSummary {
   status: "UP";
 }
 
+export type ServiceRequestStatus = "DRAFT" | "SUBMITTED" | "IN_REVIEW" | "APPROVED" | "ACTION_REQUIRED";
+
+export interface PrototypeProfileSummary {
+  displayName: string;
+  email: string;
+  identityStrength: "basic" | "verified";
+}
+
+export interface PrototypeServiceCatalogueEntry {
+  appKey: PrototypeAppKey;
+  description: string;
+  href: string;
+  label: string;
+  status: "available" | "coming-soon";
+}
+
+export interface PrototypeDraftSummary {
+  appKey: PrototypeAppKey;
+  draftId: string;
+  lastUpdated: string;
+  status: "DRAFT";
+  title: string;
+}
+
+export interface PrototypeSubmittedRequestSummary {
+  appKey: PrototypeAppKey;
+  referenceNumber: string;
+  status: Exclude<ServiceRequestStatus, "DRAFT">;
+  submittedAt: string;
+  title: string;
+}
+
+export interface PrototypeActivityEntry {
+  at: string;
+  description: string;
+  status: ServiceRequestStatus;
+}
+
+export interface PrototypeValidationError {
+  fieldPath: string;
+  message: string;
+}
+
+export interface PrototypeUploadPolicy {
+  acceptedFileTypes: string[];
+  maxFileSizeBytes: number;
+  rejectedExample: PrototypeValidationError;
+}
+
+export interface PrototypeSubmissionSummaryMetadata {
+  filename: string;
+  href: string;
+  referenceNumber: string;
+}
+
+export interface PrototypeDashboardSummaryData {
+  activity: PrototypeActivityEntry[];
+  availableServices: PrototypeServiceCatalogueEntry[];
+  drafts: PrototypeDraftSummary[];
+  profile: PrototypeProfileSummary;
+  submittedRequests: PrototypeSubmittedRequestSummary[];
+}
+
+export interface PrototypeWorkflowData {
+  activity: PrototypeActivityEntry[];
+  app: PrototypeAppSummary;
+  draft: PrototypeDraftSummary;
+  profile: PrototypeProfileSummary;
+  submittedRequest: PrototypeSubmittedRequestSummary;
+  validationErrors: PrototypeValidationError[];
+}
+
+export interface PrototypeDraftMutationResult {
+  draft: PrototypeDraftSummary;
+  validationErrors: PrototypeValidationError[];
+}
+
+export interface PrototypeSubmitResult {
+  activity: PrototypeActivityEntry[];
+  referenceNumber: string;
+  status: Exclude<ServiceRequestStatus, "DRAFT">;
+  summary: PrototypeSubmissionSummaryMetadata;
+}
+
 export function createPrototypeAppSummary(key: PrototypeAppKey): PrototypeAppSummary {
   return {
     key,

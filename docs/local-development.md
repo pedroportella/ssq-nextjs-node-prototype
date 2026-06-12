@@ -69,6 +69,34 @@ Connection details:
 
 The `ssq-postgres-data` Docker volume persists database state across container restarts.
 
+## Frontend-Only Mock Runtime
+
+Frontend app work can run without Docker, PostgreSQL or the backend API. The server-side frontend service layer defaults to mock data in local development and tests when `BACKEND_INTERNAL_URL` is not configured.
+
+Run the apps locally:
+
+```bash
+SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/dashboard dev
+SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/seniors-card dev
+SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/rental-security-subsidy dev
+```
+
+Run the frontend mock smoke check:
+
+```bash
+pnpm test:mock-smoke
+```
+
+The smoke check starts all three Next.js apps in mock mode and verifies that their landing pages render without backend or private GraphQL requests. In managed sandboxes, the command may need permission to bind local ports `3000`, `3001` and `3002`.
+
+Use backend mode only for explicit integration checks:
+
+```bash
+SSQ_FRONTEND_DATA_SOURCE=backend BACKEND_INTERNAL_URL=http://localhost:7001 pnpm --filter @ssq/dashboard dev
+```
+
+Production-like runs fail safely unless `BACKEND_INTERNAL_URL` is configured or mock mode is explicitly requested.
+
 ## App Containers
 
 The three frontend apps are built with app-local Dockerfiles:

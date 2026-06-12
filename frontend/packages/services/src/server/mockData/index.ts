@@ -1,0 +1,129 @@
+import { createPrototypeAppSummary } from "../../index";
+
+import type {
+  PrototypeActivityEntry,
+  PrototypeAppKey,
+  PrototypeDashboardSummaryData,
+  PrototypeDraftSummary,
+  PrototypeProfileSummary,
+  PrototypeServiceCatalogueEntry,
+  PrototypeSubmissionSummaryMetadata,
+  PrototypeSubmittedRequestSummary,
+  PrototypeUploadPolicy,
+  PrototypeValidationError,
+  PrototypeWorkflowData
+} from "../../index";
+
+export const mockProfileSummary: PrototypeProfileSummary = {
+  displayName: "Avery Taylor",
+  email: "avery.taylor@example.test",
+  identityStrength: "verified"
+};
+
+export const mockServiceCatalogue: PrototypeServiceCatalogueEntry[] = [
+  {
+    appKey: "seniors-card",
+    description: "Check eligibility and prepare a Seniors Card application.",
+    href: "http://localhost:3001",
+    label: "Seniors Card",
+    status: "available"
+  },
+  {
+    appKey: "rental-security-subsidy",
+    description: "Prepare rental support information and track a subsidy request.",
+    href: "http://localhost:3002",
+    label: "Rental Security Subsidy",
+    status: "available"
+  }
+];
+
+export const mockValidationErrors: PrototypeValidationError[] = [
+  {
+    fieldPath: "eligibility.dateOfBirth",
+    message: "Enter a date of birth that confirms eligibility."
+  }
+];
+
+export const mockUploadPolicy: PrototypeUploadPolicy = {
+  acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
+  maxFileSizeBytes: 10 * 1024 * 1024,
+  rejectedExample: {
+    fieldPath: "supportingDocuments[0].file",
+    message: "Upload a PDF, JPG or PNG file under 10 MB."
+  }
+};
+
+export function createMockDraftSummary(appKey: Exclude<PrototypeAppKey, "dashboard">): PrototypeDraftSummary {
+  return {
+    appKey,
+    draftId: `${appKey}-draft-001`,
+    lastUpdated: "2026-06-12T01:30:00.000Z",
+    status: "DRAFT",
+    title: createPrototypeAppSummary(appKey).label
+  };
+}
+
+export function createMockSubmittedRequestSummary(
+  appKey: Exclude<PrototypeAppKey, "dashboard">
+): PrototypeSubmittedRequestSummary {
+  return {
+    appKey,
+    referenceNumber: appKey === "seniors-card" ? "SC-2026-0001" : "RSS-2026-0001",
+    status: appKey === "seniors-card" ? "APPROVED" : "IN_REVIEW",
+    submittedAt: "2026-06-12T02:15:00.000Z",
+    title: createPrototypeAppSummary(appKey).label
+  };
+}
+
+export function createMockActivity(appKey: Exclude<PrototypeAppKey, "dashboard">): PrototypeActivityEntry[] {
+  const submittedRequest = createMockSubmittedRequestSummary(appKey);
+
+  return [
+    {
+      at: "2026-06-12T01:30:00.000Z",
+      description: "Draft saved",
+      status: "DRAFT"
+    },
+    {
+      at: submittedRequest.submittedAt,
+      description: `${submittedRequest.referenceNumber} submitted`,
+      status: submittedRequest.status
+    }
+  ];
+}
+
+export function createMockSubmissionSummaryMetadata(
+  appKey: Exclude<PrototypeAppKey, "dashboard">
+): PrototypeSubmissionSummaryMetadata {
+  const submittedRequest = createMockSubmittedRequestSummary(appKey);
+
+  return {
+    filename: `${submittedRequest.referenceNumber.toLowerCase()}-summary.txt`,
+    href: `/service-requests/${submittedRequest.referenceNumber}/summary/download`,
+    referenceNumber: submittedRequest.referenceNumber
+  };
+}
+
+export function createMockDashboardSummaryData(): PrototypeDashboardSummaryData {
+  return {
+    activity: [...createMockActivity("seniors-card"), ...createMockActivity("rental-security-subsidy")],
+    availableServices: mockServiceCatalogue,
+    drafts: [createMockDraftSummary("seniors-card")],
+    profile: mockProfileSummary,
+    submittedRequests: [
+      createMockSubmittedRequestSummary("seniors-card"),
+      createMockSubmittedRequestSummary("rental-security-subsidy")
+    ]
+  };
+}
+
+export function createMockWorkflowData(appKey: Exclude<PrototypeAppKey, "dashboard">): PrototypeWorkflowData {
+  return {
+    activity: createMockActivity(appKey),
+    app: createPrototypeAppSummary(appKey),
+    draft: createMockDraftSummary(appKey),
+    profile: mockProfileSummary,
+    submittedRequest: createMockSubmittedRequestSummary(appKey),
+    validationErrors: mockValidationErrors
+  };
+}
