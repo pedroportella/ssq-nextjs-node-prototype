@@ -38,3 +38,27 @@ for (const app of apps) {
     expect(forbiddenRequests).toEqual([]);
   });
 }
+
+test("seniors-card workflow renders apply and status pages in mock mode", async ({ page }) => {
+  const forbiddenRequests: string[] = [];
+
+  page.on("request", (request) => {
+    const url = request.url();
+
+    if (forbiddenRequestPatterns.some((pattern) => pattern.test(url))) {
+      forbiddenRequests.push(url);
+    }
+  });
+
+  await page.goto("http://localhost:3001/apply");
+  await expect(page.getByRole("heading", { level: 1, name: "Check your eligibility" })).toBeVisible();
+  await expect(page.getByText("Enter a date of birth that confirms eligibility.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Submit result" }).locator("xpath=ancestor::article")).toContainText("SC-2026-0001");
+
+  await page.goto("http://localhost:3001/application-status");
+  await expect(page.getByRole("heading", { level: 1, name: "Seniors Card application status" })).toBeVisible();
+  await expect(page.getByText("Application submitted")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Application submitted" }).locator("xpath=ancestor::aside")).toContainText("SC-2026-0001");
+
+  expect(forbiddenRequests).toEqual([]);
+});
