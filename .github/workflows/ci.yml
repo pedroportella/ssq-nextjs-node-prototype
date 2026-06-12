@@ -16,6 +16,7 @@ env:
   NEXT_TELEMETRY_DISABLED: "1"
   NODE_VERSION: "22.22.3"
   PNPM_VERSION: "10.18.3"
+  SSQ_FRONTEND_DATA_SOURCE: "mock"
 
 jobs:
   quality:
