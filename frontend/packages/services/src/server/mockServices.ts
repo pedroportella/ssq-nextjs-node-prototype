@@ -6,8 +6,8 @@ import {
   createMockDashboardSummaryData,
   createMockDraftSummary,
   createMockSubmissionSummaryMetadata,
+  createMockValidationErrors,
   createMockWorkflowData,
-  mockValidationErrors
 } from "./mockData";
 import { resolveFrontendPublicUrlConfig } from "./publicUrls";
 
@@ -52,7 +52,7 @@ export async function updateMockDraftWithValidationError(
 ): Promise<PrototypeDraftMutationResult> {
   return {
     draft: createMockDraftSummary(appKey),
-    validationErrors: mockValidationErrors
+    validationErrors: createMockValidationErrors(appKey)
   };
 }
 

@@ -1,0 +1,121 @@
+import { createPrototypeAppSummary } from "@ssq/services";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it } from "vitest";
+
+import { RentalSecuritySubsidyApplyContent } from "../containers/RentalSecuritySubsidyApplyContainer";
+import { RentalSecuritySubsidyOverviewContent } from "../containers/RentalSecuritySubsidyOverviewContainer";
+import { RentalSecuritySubsidyStatusContent } from "../containers/RentalSecuritySubsidyStatusContainer";
+
+import type {
+  PrototypeDraftMutationResult,
+  PrototypeSubmitResult,
+  PrototypeWorkflowData
+} from "@ssq/services";
+import type { AppShellData } from "@ssq/services/server";
+
+const shell: AppShellData = {
+  app: createPrototypeAppSummary("rental-security-subsidy"),
+  backendBoundary: "server-only",
+  dataSource: "mock"
+};
+
+const workflow: PrototypeWorkflowData = {
+  activity: [
+    {
+      at: "2026-06-12T01:30:00.000Z",
+      description: "Draft saved",
+      status: "DRAFT"
+    },
+    {
+      at: "2026-06-12T02:15:00.000Z",
+      description: "RSS-2026-0001 submitted",
+      status: "IN_REVIEW"
+    }
+  ],
+  app: createPrototypeAppSummary("rental-security-subsidy"),
+  draft: {
+    appKey: "rental-security-subsidy",
+    draftId: "rental-security-subsidy-draft-001",
+    lastUpdated: "2026-06-12T01:30:00.000Z",
+    status: "DRAFT",
+    title: "Rental Security Subsidy"
+  },
+  profile: {
+    displayName: "Avery Taylor",
+    email: "avery.taylor@example.test",
+    identityStrength: "verified"
+  },
+  submittedRequest: {
+    appKey: "rental-security-subsidy",
+    referenceNumber: "RSS-2026-0001",
+    status: "IN_REVIEW",
+    submittedAt: "2026-06-12T02:15:00.000Z",
+    title: "Rental Security Subsidy"
+  },
+  validationErrors: [
+    {
+      fieldPath: "rentalProperty.weeklyRent",
+      message: "Enter the weekly rent amount for the property."
+    }
+  ]
+};
+
+const createdDraft: PrototypeDraftMutationResult = {
+  draft: workflow.draft,
+  validationErrors: []
+};
+
+const validationResult: PrototypeDraftMutationResult = {
+  draft: workflow.draft,
+  validationErrors: workflow.validationErrors
+};
+
+const submitResult: PrototypeSubmitResult = {
+  activity: workflow.activity,
+  referenceNumber: "RSS-2026-0001",
+  status: "IN_REVIEW",
+  summary: {
+    filename: "rss-2026-0001-summary.txt",
+    href: "/service-requests/RSS-2026-0001/summary/download",
+    referenceNumber: "RSS-2026-0001"
+  }
+};
+
+describe("Rental Security Subsidy workflow containers", () => {
+  it("renders the overview with apply and status entry points", () => {
+    const html = renderToStaticMarkup(<RentalSecuritySubsidyOverviewContent shell={shell} workflow={workflow} />);
+
+    expect(html).toContain("Rental Security Subsidy");
+    expect(html).toContain("Frontend-only rental workflow");
+    expect(html).toContain('href="/apply"');
+    expect(html).toContain('href="/application-status"');
+    expect(html).toContain("rental-security-subsidy-draft-001");
+  });
+
+  it("renders the apply workflow with rental-property validation and submit result", () => {
+    const html = renderToStaticMarkup(
+      <RentalSecuritySubsidyApplyContent
+        createdDraft={createdDraft}
+        submitResult={submitResult}
+        validationResult={validationResult}
+        workflow={workflow}
+      />
+    );
+
+    expect(html).toContain("Prepare your rental support application");
+    expect(html).toContain("Rental property");
+    expect(html).toContain("Enter the weekly rent amount for the property.");
+    expect(html).toContain("RSS-2026-0001");
+    expect(html).toContain("rss-2026-0001-summary.txt");
+  });
+
+  it("renders the status view with submitted request reference and activity", () => {
+    const html = renderToStaticMarkup(<RentalSecuritySubsidyStatusContent submitResult={submitResult} workflow={workflow} />);
+
+    expect(html).toContain("Rental Security Subsidy application status");
+    expect(html).toContain("Application submitted");
+    expect(html).toContain("RSS-2026-0001");
+    expect(html).toContain("Draft saved");
+    expect(html).toContain("RSS-2026-0001 submitted");
+  });
+});

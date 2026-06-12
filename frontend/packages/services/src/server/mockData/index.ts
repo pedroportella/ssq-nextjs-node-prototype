@@ -40,12 +40,23 @@ export function createMockServiceCatalogue(publicUrls: FrontendPublicUrlConfig):
   ];
 }
 
-export const mockValidationErrors: PrototypeValidationError[] = [
-  {
-    fieldPath: "eligibility.dateOfBirth",
-    message: "Enter a date of birth that confirms eligibility."
+export function createMockValidationErrors(appKey: Exclude<PrototypeAppKey, "dashboard">): PrototypeValidationError[] {
+  if (appKey === "rental-security-subsidy") {
+    return [
+      {
+        fieldPath: "rentalProperty.weeklyRent",
+        message: "Enter the weekly rent amount for the property."
+      }
+    ];
   }
-];
+
+  return [
+    {
+      fieldPath: "eligibility.dateOfBirth",
+      message: "Enter a date of birth that confirms eligibility."
+    }
+  ];
+}
 
 export const mockUploadPolicy: PrototypeUploadPolicy = {
   acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
@@ -127,6 +138,6 @@ export function createMockWorkflowData(appKey: Exclude<PrototypeAppKey, "dashboa
     draft: createMockDraftSummary(appKey),
     profile: mockProfileSummary,
     submittedRequest: createMockSubmittedRequestSummary(appKey),
-    validationErrors: mockValidationErrors
+    validationErrors: createMockValidationErrors(appKey)
   };
 }

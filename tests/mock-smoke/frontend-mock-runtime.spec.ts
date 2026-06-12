@@ -62,3 +62,26 @@ test("seniors-card workflow renders apply and status pages in mock mode", async 
 
   expect(forbiddenRequests).toEqual([]);
 });
+
+test("rental-security-subsidy workflow renders apply and status pages in mock mode", async ({ page }) => {
+  const forbiddenRequests: string[] = [];
+
+  page.on("request", (request) => {
+    const url = request.url();
+
+    if (forbiddenRequestPatterns.some((pattern) => pattern.test(url))) {
+      forbiddenRequests.push(url);
+    }
+  });
+
+  await page.goto("http://localhost:3002/apply");
+  await expect(page.getByRole("heading", { level: 1, name: "Prepare your rental support application" })).toBeVisible();
+  await expect(page.getByText("Enter the weekly rent amount for the property.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Submit result" }).locator("xpath=ancestor::article")).toContainText("RSS-2026-0001");
+
+  await page.goto("http://localhost:3002/application-status");
+  await expect(page.getByRole("heading", { level: 1, name: "Rental Security Subsidy application status" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Application submitted" }).locator("xpath=ancestor::aside")).toContainText("RSS-2026-0001");
+
+  expect(forbiddenRequests).toEqual([]);
+});

@@ -3,6 +3,14 @@
   max-width: var(--ssq-content-width);
 }
 
+.hero {
+  align-items: start;
+  display: grid;
+  gap: var(--ssq-space-6);
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  margin-bottom: var(--ssq-space-6);
+}
+
 .title {
   font-size: 2rem;
   line-height: 1.2;
@@ -16,7 +24,80 @@
   max-width: 44rem;
 }
 
+.profileSummary {
+  background: var(--ssq-color-surface);
+  border: 1px solid var(--ssq-color-border);
+  border-radius: var(--ssq-radius-sm);
+  padding: var(--ssq-space-4);
+}
+
+.eyebrow,
+.meta {
+  color: var(--ssq-color-muted);
+}
+
+.eyebrow {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin: 0 0 var(--ssq-space-1);
+  text-transform: uppercase;
+}
+
+.profileName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 var(--ssq-space-1);
+}
+
+.meta {
+  display: block;
+  font-size: 0.925rem;
+  margin: var(--ssq-space-1) 0 0;
+}
+
+.cardGrid,
+.workflowGrid {
+  display: grid;
+  gap: var(--ssq-space-6);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: var(--ssq-space-6);
+}
+
+.workflowGrid {
+  align-items: start;
+}
+
+.progressList,
+.activityList {
+  display: grid;
+  gap: var(--ssq-space-2);
+  margin: 0;
+  padding-left: var(--ssq-space-6);
+}
+
+.activityItem {
+  border-top: 1px solid var(--ssq-color-border);
+  display: grid;
+  gap: var(--ssq-space-1);
+  padding-top: var(--ssq-space-3);
+}
+
+.activityItem:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.activityDescription {
+  font-weight: 700;
+}
+
 @media (max-width: 48rem) {
+  .hero,
+  .cardGrid,
+  .workflowGrid {
+    grid-template-columns: 1fr;
+  }
+
   .title {
     font-size: 1.75rem;
   }
