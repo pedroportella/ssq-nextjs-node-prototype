@@ -1,0 +1,53 @@
+.ssq-file-upload {
+  display: grid;
+  gap: var(--ssq-space-3);
+}
+
+.ssq-file-upload__label {
+  font-weight: 700;
+}
+
+.ssq-file-upload__hint,
+.ssq-file-upload__meta,
+.ssq-file-upload__message {
+  color: var(--ssq-color-muted);
+  margin: 0;
+}
+
+.ssq-file-upload__input {
+  background: var(--ssq-color-surface);
+  border: 2px dashed var(--ssq-color-border-strong);
+  border-radius: var(--ssq-radius-sm);
+  box-sizing: border-box;
+  color: var(--ssq-color-text);
+  padding: var(--ssq-space-4);
+  width: min(100%, 32rem);
+}
+
+.ssq-file-upload__list {
+  display: grid;
+  gap: var(--ssq-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ssq-file-upload__item {
+  border-left: 4px solid var(--ssq-color-success-border);
+  display: grid;
+  gap: var(--ssq-space-1);
+  padding-left: var(--ssq-space-3);
+}
+
+.ssq-file-upload__item--rejected {
+  border-left-color: var(--ssq-color-error);
+}
+
+.ssq-file-upload__file-name,
+.ssq-file-upload__status {
+  font-weight: 700;
+}
+
+.ssq-file-upload__status {
+  font-size: 0.925rem;
+}

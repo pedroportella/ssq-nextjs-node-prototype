@@ -6,8 +6,11 @@ import {
   createMockDashboardSummaryData,
   createMockDraftSummary,
   createMockSubmissionSummaryMetadata,
+  createMockSubmissionSummaryDownload,
   createMockValidationErrors,
   createMockWorkflowData,
+  mockUploadPolicy,
+  createMockUploadedDocuments
 } from "./mockData";
 import { resolveFrontendPublicUrlConfig } from "./publicUrls";
 
@@ -15,7 +18,10 @@ import type {
   PrototypeAppKey,
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
+  PrototypeSubmissionSummaryDownload,
   PrototypeSubmitResult,
+  PrototypeUploadedDocument,
+  PrototypeUploadPolicy,
   PrototypeWorkflowData
 } from "../index";
 import type { AppShellData } from "./appServices";
@@ -65,4 +71,19 @@ export async function submitMockDraft(appKey: Exclude<PrototypeAppKey, "dashboar
     status: appKey === "seniors-card" ? "APPROVED" : "IN_REVIEW",
     summary
   };
+}
+
+export async function getMockSupportingDocumentUploadPolicy(): Promise<PrototypeUploadPolicy> {
+  return mockUploadPolicy;
+}
+
+export async function getMockUploadedDocuments(appKey: Exclude<PrototypeAppKey, "dashboard">): Promise<PrototypeUploadedDocument[]> {
+  return createMockUploadedDocuments(appKey);
+}
+
+export async function getMockSubmissionSummaryDownload(
+  appKey: Exclude<PrototypeAppKey, "dashboard">,
+  referenceNumber: string
+): Promise<PrototypeSubmissionSummaryDownload> {
+  return createMockSubmissionSummaryDownload(appKey, referenceNumber);
 }

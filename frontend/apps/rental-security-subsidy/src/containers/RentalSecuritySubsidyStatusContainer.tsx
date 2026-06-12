@@ -1,9 +1,14 @@
-import { getRentalSecuritySubsidyWorkflowData, submitTransactionDraft } from "@ssq/services/server";
-import { QhdsButton, QhdsCard, QhdsFooter, QhdsHeader, QhdsLayout, QhdsPageAlert } from "@ssq/ui-library";
+import {
+  getRentalSecuritySubsidyWorkflowData,
+  getSupportingDocumentUploadPolicy,
+  getUploadedDocuments,
+  submitTransactionDraft
+} from "@ssq/services/server";
+import { QhdsButton, QhdsCard, QhdsFileUpload, QhdsFooter, QhdsHeader, QhdsLayout, QhdsPageAlert } from "@ssq/ui-library";
 
 import styles from "./RentalSecuritySubsidyHomeContainer.module.scss";
 
-import type { PrototypeSubmitResult, PrototypeWorkflowData } from "@ssq/services";
+import type { PrototypeSubmitResult, PrototypeUploadedDocument, PrototypeUploadPolicy, PrototypeWorkflowData } from "@ssq/services";
 
 function formatStatus(status: string): string {
   return status
@@ -15,9 +20,13 @@ function formatStatus(status: string): string {
 
 export function RentalSecuritySubsidyStatusContent({
   submitResult,
+  supportingDocuments,
+  uploadPolicy,
   workflow
 }: {
   submitResult: PrototypeSubmitResult;
+  supportingDocuments: PrototypeUploadedDocument[];
+  uploadPolicy: PrototypeUploadPolicy;
   workflow: PrototypeWorkflowData;
 }) {
   return (
@@ -41,8 +50,21 @@ export function RentalSecuritySubsidyStatusContent({
               Applicant: <strong>{workflow.profile.displayName}</strong>
             </p>
             <p>
-              Summary file placeholder: <strong>{submitResult.summary.filename}</strong>
+              Summary file: <strong>{submitResult.summary.filename}</strong>
             </p>
+            <p>
+              <a href={submitResult.summary.href}>Download submission summary</a>
+            </p>
+          </QhdsCard>
+
+          <QhdsCard heading="Supporting documents">
+            <QhdsFileUpload
+              hint="The mock upload policy shows accepted and rejected file states without storing real files."
+              label="Upload supporting documents"
+              name="supportingDocuments"
+              policy={uploadPolicy}
+              uploadedFiles={supportingDocuments}
+            />
           </QhdsCard>
 
           <QhdsCard heading="Recent activity">
@@ -62,10 +84,19 @@ export function RentalSecuritySubsidyStatusContent({
 }
 
 export async function RentalSecuritySubsidyStatusContainer() {
-  const [workflow, submitResult] = await Promise.all([
+  const [workflow, submitResult, uploadPolicy, supportingDocuments] = await Promise.all([
     getRentalSecuritySubsidyWorkflowData(),
-    submitTransactionDraft("rental-security-subsidy")
+    submitTransactionDraft("rental-security-subsidy"),
+    getSupportingDocumentUploadPolicy(),
+    getUploadedDocuments("rental-security-subsidy")
   ]);
 
-  return <RentalSecuritySubsidyStatusContent submitResult={submitResult} workflow={workflow} />;
+  return (
+    <RentalSecuritySubsidyStatusContent
+      submitResult={submitResult}
+      supportingDocuments={supportingDocuments}
+      uploadPolicy={uploadPolicy}
+      workflow={workflow}
+    />
+  );
 }

@@ -52,6 +52,29 @@ const workflow: PrototypeWorkflowData = {
     submittedAt: "2026-06-12T02:15:00.000Z",
     title: "Seniors Card"
   },
+  supportingDocuments: [
+    {
+      category: "Identity evidence",
+      fileName: "identity-evidence.pdf",
+      sizeBytes: 512_000,
+      status: "uploaded"
+    },
+    {
+      category: "Rejected example",
+      fileName: "identity-archive.zip",
+      message: "Upload a PDF, JPG or PNG file under 10 MB.",
+      sizeBytes: 14_000_000,
+      status: "rejected"
+    }
+  ],
+  uploadPolicy: {
+    acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
+    maxFileSizeBytes: 10 * 1024 * 1024,
+    rejectedExample: {
+      fieldPath: "supportingDocuments[0].file",
+      message: "Upload a PDF, JPG or PNG file under 10 MB."
+    }
+  },
   validationErrors: [
     {
       fieldPath: "eligibility.dateOfBirth",
@@ -109,11 +132,21 @@ describe("Seniors Card workflow containers", () => {
   });
 
   it("renders the status view with submitted request reference and activity", () => {
-    const html = renderToStaticMarkup(<SeniorsCardStatusContent submitResult={submitResult} workflow={workflow} />);
+    const html = renderToStaticMarkup(
+      <SeniorsCardStatusContent
+        submitResult={submitResult}
+        supportingDocuments={workflow.supportingDocuments}
+        uploadPolicy={workflow.uploadPolicy}
+        workflow={workflow}
+      />
+    );
 
     expect(html).toContain("Seniors Card application status");
     expect(html).toContain("Application submitted");
     expect(html).toContain("SC-2026-0001");
+    expect(html).toContain("Download submission summary");
+    expect(html).toContain("identity-evidence.pdf");
+    expect(html).toContain("identity-archive.zip");
     expect(html).toContain("Draft saved");
     expect(html).toContain("SC-2026-0001 submitted");
   });

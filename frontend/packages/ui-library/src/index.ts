@@ -4,6 +4,7 @@ export * from "./components/QhdsFooter";
 export * from "./components/QhdsHeader";
 export * from "./components/QhdsLayout";
 export * from "./components/QhdsPageAlert";
+export * from "./components/QhdsFileUpload";
 export * from "./components/QhdsSideNav";
 export * from "./components/QhdsWorkflowLayout";
 export * from "./components/forms/QhdsCheckbox";

@@ -4,6 +4,9 @@ import {
   createTransactionDraft,
   getDashboardShellData,
   getDashboardSummaryData,
+  getSubmissionSummaryDownload,
+  getSupportingDocumentUploadPolicy,
+  getUploadedDocuments,
   getRentalSecuritySubsidyShellData,
   getRentalSecuritySubsidyWorkflowData,
   getSeniorsCardShellData,
@@ -118,6 +121,32 @@ describe("server app services", () => {
       summary: {
         filename: "sc-2026-0001-summary.txt"
       }
+    });
+  });
+
+  it("returns mock upload policy, uploaded document states and summary downloads", async () => {
+    await expect(getSupportingDocumentUploadPolicy({ dataSource: "mock" })).resolves.toMatchObject({
+      acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
+      rejectedExample: {
+        fieldPath: "supportingDocuments[0].file"
+      }
+    });
+    await expect(getUploadedDocuments("rental-security-subsidy", { dataSource: "mock" })).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fileName: "rental-property-evidence.pdf",
+          status: "uploaded"
+        }),
+        expect.objectContaining({
+          fileName: "rental-property-archive.zip",
+          status: "rejected"
+        })
+      ])
+    );
+    await expect(getSubmissionSummaryDownload("seniors-card", "SC-2026-0001", { dataSource: "mock" })).resolves.toMatchObject({
+      contentType: "text/plain",
+      filename: "sc-2026-0001-summary.txt",
+      referenceNumber: "SC-2026-0001"
     });
   });
 });

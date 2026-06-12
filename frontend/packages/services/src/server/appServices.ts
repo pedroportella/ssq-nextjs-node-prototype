@@ -5,6 +5,9 @@ import {
   createMockAppShellData,
   createMockDraft,
   getMockDashboardSummaryData,
+  getMockSubmissionSummaryDownload,
+  getMockSupportingDocumentUploadPolicy,
+  getMockUploadedDocuments,
   getMockRentalSecuritySubsidyWorkflowData,
   getMockSeniorsCardWorkflowData,
   submitMockDraft,
@@ -17,7 +20,10 @@ import type {
   PrototypeAppSummary,
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
+  PrototypeSubmissionSummaryDownload,
   PrototypeSubmitResult,
+  PrototypeUploadedDocument,
+  PrototypeUploadPolicy,
   PrototypeWorkflowData
 } from "../index";
 import type { FrontendDataSource, FrontendRuntimeConfig } from "./runtimeConfig";
@@ -121,4 +127,41 @@ export async function submitTransactionDraft(
   }
 
   return submitMockDraft(appKey);
+}
+
+export async function getSupportingDocumentUploadPolicy(config?: FrontendRuntimeConfig): Promise<PrototypeUploadPolicy> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    throw new Error("Backend upload policy reads are not implemented in the frontend service layer yet.");
+  }
+
+  return getMockSupportingDocumentUploadPolicy();
+}
+
+export async function getUploadedDocuments(
+  appKey: Exclude<PrototypeAppKey, "dashboard">,
+  config?: FrontendRuntimeConfig
+): Promise<PrototypeUploadedDocument[]> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    throw new Error("Backend uploaded document reads are not implemented in the frontend service layer yet.");
+  }
+
+  return getMockUploadedDocuments(appKey);
+}
+
+export async function getSubmissionSummaryDownload(
+  appKey: Exclude<PrototypeAppKey, "dashboard">,
+  referenceNumber: string,
+  config?: FrontendRuntimeConfig
+): Promise<PrototypeSubmissionSummaryDownload> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    throw new Error("Backend submission summary downloads are not implemented in the frontend service layer yet.");
+  }
+
+  return getMockSubmissionSummaryDownload(appKey, referenceNumber);
 }

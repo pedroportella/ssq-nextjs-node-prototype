@@ -59,6 +59,8 @@ test("seniors-card workflow renders apply and status pages in mock mode", async 
   await expect(page.getByRole("heading", { level: 1, name: "Seniors Card application status" })).toBeVisible();
   await expect(page.getByText("Application submitted")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Application submitted" }).locator("xpath=ancestor::aside")).toContainText("SC-2026-0001");
+  await expect(page.getByText("Download submission summary")).toBeVisible();
+  await expect(page.getByText("identity-evidence.pdf")).toBeVisible();
 
   expect(forbiddenRequests).toEqual([]);
 });
@@ -82,6 +84,8 @@ test("rental-security-subsidy workflow renders apply and status pages in mock mo
   await page.goto("http://localhost:3002/application-status");
   await expect(page.getByRole("heading", { level: 1, name: "Rental Security Subsidy application status" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Application submitted" }).locator("xpath=ancestor::aside")).toContainText("RSS-2026-0001");
+  await expect(page.getByText("Download submission summary")).toBeVisible();
+  await expect(page.getByText("rental-property-evidence.pdf")).toBeVisible();
 
   expect(forbiddenRequests).toEqual([]);
 });

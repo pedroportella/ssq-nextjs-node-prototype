@@ -57,9 +57,24 @@ export interface PrototypeUploadPolicy {
   rejectedExample: PrototypeValidationError;
 }
 
+export interface PrototypeUploadedDocument {
+  category: string;
+  fileName: string;
+  message?: string;
+  sizeBytes: number;
+  status: "uploaded" | "rejected";
+}
+
 export interface PrototypeSubmissionSummaryMetadata {
   filename: string;
   href: string;
+  referenceNumber: string;
+}
+
+export interface PrototypeSubmissionSummaryDownload {
+  body: string;
+  contentType: "text/plain";
+  filename: string;
   referenceNumber: string;
 }
 
@@ -77,6 +92,8 @@ export interface PrototypeWorkflowData {
   draft: PrototypeDraftSummary;
   profile: PrototypeProfileSummary;
   submittedRequest: PrototypeSubmittedRequestSummary;
+  supportingDocuments: PrototypeUploadedDocument[];
+  uploadPolicy: PrototypeUploadPolicy;
   validationErrors: PrototypeValidationError[];
 }
 
