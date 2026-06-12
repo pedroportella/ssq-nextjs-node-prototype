@@ -17,6 +17,10 @@ describe("QhdsSideNav", () => {
     );
 
     expect(html).toContain('class="qld__side-nav ssq-side-nav"');
+    expect(html).toContain("qld__side-nav__heading");
+    expect(html).toContain("qld__side-nav__content");
+    expect(html).toContain("qld__side-nav__list");
+    expect(html).toContain("qld__side-nav__link");
     expect(html).toContain('aria-label="Section navigation"');
     expect(html).toContain('aria-current="page"');
     expect(html).toContain("My account");

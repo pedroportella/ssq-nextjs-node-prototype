@@ -11,7 +11,10 @@ describe("QhdsFooter", () => {
       </QhdsFooter>
     );
 
-    expect(html).toContain("<footer");
+    expect(html).toContain('class="qld__footer qld__footer--dark-alt ssq-footer"');
+    expect(html).toContain("container-fluid");
+    expect(html).toContain("qld__footer__row");
+    expect(html).toContain("qld__footer__heading");
     expect(html).toContain("Footer service");
     expect(html).toContain("Review environment");
   });

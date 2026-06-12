@@ -1,11 +1,12 @@
 .ssq-side-nav {
-  border-left: 4px solid var(--ssq-color-border-strong);
-  padding-left: var(--ssq-space-4);
+  border-top: 4px solid var(--ssq-color-border-strong);
+  padding-top: var(--ssq-space-4);
 }
 
 .ssq-side-nav__heading {
   font-weight: 700;
   margin-bottom: var(--ssq-space-3);
+  margin-top: 0;
 }
 
 .ssq-side-nav__list {

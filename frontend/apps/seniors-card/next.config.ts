@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: repoRoot,
   poweredByHeader: false,
-  transpilePackages: ["@ssq/services", "@ssq/ui-library", "@ssq/ui-tokens", "@ssq/utils"]
+  transpilePackages: ["@ssq/services", "@ssq/ui-assets", "@ssq/ui-library", "@ssq/ui-tokens", "@ssq/utils"]
 };
 
 export default nextConfig;

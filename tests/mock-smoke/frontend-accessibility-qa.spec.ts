@@ -104,20 +104,36 @@ async function expectQhdsGridFoundation(page: Page, viewportWidth: number) {
 
     return {
       columnClassNames: columns.map((column) => column.className),
-      containerWidths: containers.map((container) => container.getBoundingClientRect().width),
+      headerContainerWidths: containers
+        .filter((container) => Boolean(container.closest(".qld__header")))
+        .map((container) => container.getBoundingClientRect().width),
+      contentContainerWidths: containers
+        .filter((container) => !container.closest(".qld__header"))
+        .map((container) => container.getBoundingClientRect().width),
+      desktopColumnWidths: columns
+        .filter((column) => /\bcol-lg-[1-9]\b/.test(column.className))
+        .map((column) => {
+          const row = column.closest(".row");
+          return {
+            column: column.getBoundingClientRect().width,
+            row: row?.getBoundingClientRect().width ?? 0
+          };
+        }),
       hasGridRoot: Boolean(document.querySelector(".qld__grid")),
       rowCount: rows.length
     };
   });
 
   expect(gridState.hasGridRoot).toBe(true);
-  expect(gridState.containerWidths.length).toBeGreaterThanOrEqual(1);
-  expect(Math.max(...gridState.containerWidths)).toBeLessThanOrEqual(Math.min(viewportWidth, 1376) + 1);
+  expect(gridState.contentContainerWidths.length + gridState.headerContainerWidths.length).toBeGreaterThanOrEqual(1);
+  expect(Math.max(...gridState.contentContainerWidths)).toBeLessThanOrEqual(Math.min(viewportWidth, 1376) + 1);
+  expect(Math.max(...gridState.headerContainerWidths)).toBeLessThanOrEqual(viewportWidth + 1);
   expect(gridState.rowCount).toBeGreaterThanOrEqual(1);
   expect(gridState.columnClassNames.some((className) => className.includes("col-xs-12"))).toBe(true);
 
   if (viewportWidth >= 992) {
     expect(gridState.columnClassNames.some((className) => /col-lg-[1-9]/.test(className))).toBe(true);
+    expect(gridState.desktopColumnWidths.some((widths) => widths.column > 0 && widths.column < widths.row)).toBe(true);
   }
 }
 

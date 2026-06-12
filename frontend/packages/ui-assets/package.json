@@ -7,7 +7,14 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    }
+    },
+    "./icons/qld-icons-url": "./icons/qld-icons-url.ts",
+    "./icons/svg-icons-url": "./icons/svg-icons-url.ts",
+    "./icons/*": "./icons/*",
+    "./logos/header-logo-qgov-url": "./logos/header-logo-qgov-url.ts",
+    "./logos/*": "./logos/*",
+    "./fonts/*": "./fonts/*",
+    "./images/*": "./images/*"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",

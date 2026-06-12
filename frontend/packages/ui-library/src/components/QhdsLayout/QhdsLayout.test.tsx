@@ -11,9 +11,13 @@ describe("QhdsLayout", () => {
       </QhdsLayout>
     );
 
+    expect(html).toContain("qld__grid");
     expect(html).toContain("ssq-layout");
+    expect(html).toContain('aria-label="skip links"');
     expect(html).toContain('href="#content"');
-    expect(html).toContain('<main class="ssq-layout__main" id="content" tabindex="-1">');
+    expect(html).toContain('<main class="main ssq-layout__main" tabindex="-1">');
+    expect(html).toContain('<section class="qld__body ssq-layout__body">');
+    expect(html).toContain('class="col-xs-12 col-lg-12 col-xl-12 ssq-layout__content" id="content"');
     expect(html).toContain("Header");
     expect(html).toContain("Body");
     expect(html).toContain("Footer");
@@ -26,7 +30,9 @@ describe("QhdsLayout", () => {
       </QhdsLayout>
     );
 
-    expect(html).toContain('<aside aria-label="Section navigation" class="ssq-layout__sidebar">');
+    expect(html).toContain('href="#section-navigation"');
+    expect(html).toContain('class="col-xs-12 col-lg-3 col-xl-3 ssq-layout__sidebar" id="section-navigation"');
+    expect(html).toContain('class="col-xs-12 col-lg-9 col-xl-9 ssq-layout__content" id="content"');
     expect(html).toContain('<nav aria-label="Account sections">Navigation</nav>');
   });
 

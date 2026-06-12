@@ -37,7 +37,13 @@ export function QhdsSideNav({ activeHref, ariaLabel = "Section navigation", head
 
   function renderItems(navItems: QhdsSideNavItem[], nested = false) {
     return (
-      <ul className={nested ? "qld__link-list ssq-side-nav__list ssq-side-nav__list--nested" : "qld__link-list ssq-side-nav__list"}>
+      <ul
+        className={
+          nested
+            ? "qld__link-list qld__side-nav__list ssq-side-nav__list ssq-side-nav__list--nested"
+            : "qld__link-list qld__side-nav__list ssq-side-nav__list"
+        }
+      >
         {navItems.map((item) => {
           const active = isActive(item, activeHref);
           const current = item.href === activeHref;
@@ -46,7 +52,9 @@ export function QhdsSideNav({ activeHref, ariaLabel = "Section navigation", head
             <li className="ssq-side-nav__item" key={item.href}>
               <a
                 aria-current={current ? "page" : undefined}
-                className={["ssq-side-nav__link", active ? "ssq-side-nav__link--active" : ""].filter(Boolean).join(" ")}
+                className={["qld__side-nav__link", "ssq-side-nav__link", active ? "ssq-side-nav__link--active" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
                 href={item.href}
                 {...getNavigationProps(item.href)}
               >
@@ -63,8 +71,8 @@ export function QhdsSideNav({ activeHref, ariaLabel = "Section navigation", head
 
   return (
     <nav aria-label={ariaLabel} className="qld__side-nav ssq-side-nav">
-      {heading ? <div className="ssq-side-nav__heading">{heading}</div> : null}
-      {renderItems(items)}
+      {heading ? <h2 className="qld__side-nav__heading ssq-side-nav__heading">{heading}</h2> : null}
+      <div className="qld__side-nav__content ssq-side-nav__content">{renderItems(items)}</div>
     </nav>
   );
 }

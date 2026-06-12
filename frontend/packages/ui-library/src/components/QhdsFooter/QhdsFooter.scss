@@ -1,18 +1,47 @@
 .ssq-footer {
-  border-top: 1px solid var(--ssq-color-border);
-  color: var(--ssq-color-muted);
-  margin-top: var(--ssq-space-8);
+  background: #011c2a;
+  border-top: 4px solid var(--ssq-color-header-accent);
+  color: #fff;
+  padding: 2rem 0 4rem;
 }
 
-.ssq-footer__inner {
-  margin: 0 auto;
-  max-width: var(--ssq-content-width);
-  padding: var(--ssq-space-6) var(--ssq-space-8);
-}
-
-.ssq-footer__service {
+.ssq-footer__heading {
+  font-size: 1.125rem;
   font-weight: 700;
+  margin: var(--ssq-space-8) 0 var(--ssq-space-6);
+}
+
+.ssq-footer__title .ssq-footer__heading {
+  margin-top: 0;
+}
+
+.ssq-footer__row {
+  row-gap: 2rem;
+}
+
+.ssq-footer__column {
+  padding-top: var(--ssq-space-2);
+}
+
+.ssq-footer__section-heading {
+  font-size: 1.25rem;
+  margin-top: 0;
+}
+
+.ssq-footer a {
+  color: inherit;
+}
+
+.ssq-footer__link-list {
+  display: grid;
+  gap: var(--ssq-space-3);
+  list-style: none;
   margin: 0;
+  padding: 0;
+}
+
+.ssq-footer__acknowledgements {
+  border-left: 2px solid #c48c33;
 }
 
 .ssq-footer__content > :first-child {
@@ -21,10 +50,4 @@
 
 .ssq-footer__content > :last-child {
   margin-bottom: 0;
-}
-
-@media (max-width: 48rem) {
-  .ssq-footer__inner {
-    padding-inline: var(--ssq-space-4);
-  }
 }
