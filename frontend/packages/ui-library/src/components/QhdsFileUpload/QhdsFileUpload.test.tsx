@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { QhdsFileUpload } from "./QhdsFileUpload";
 
@@ -36,5 +36,27 @@ describe("QhdsFileUpload", () => {
     expect(html).toContain("identity.pdf");
     expect(html).toContain("archive.zip");
     expect(html).toContain("Rejected");
+  });
+
+  it("renders accessible errors and accepts change handlers", () => {
+    const onChange = vi.fn();
+    const html = renderToStaticMarkup(
+      <QhdsFileUpload
+        error="Choose a smaller file."
+        label="Upload supporting documents"
+        multiple
+        name="documents"
+        onChange={onChange}
+        policy={{
+          acceptedFileTypes: ["application/pdf"],
+          maxFileSizeBytes: 10 * 1024 * 1024
+        }}
+      />
+    );
+
+    expect(html).toContain('aria-invalid="true"');
+    expect(html).toContain('aria-describedby="supporting-documents-hint supporting-documents-error"');
+    expect(html).toContain("Choose a smaller file.");
+    expect(html).toContain("multiple");
   });
 });

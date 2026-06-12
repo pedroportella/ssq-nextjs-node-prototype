@@ -1,3 +1,4 @@
+export * from "./components/QhdsAccordion";
 export * from "./components/QhdsButton";
 export * from "./components/QhdsCard";
 export * from "./components/QhdsFooter";
@@ -5,7 +6,10 @@ export * from "./components/QhdsHeader";
 export * from "./components/QhdsLayout";
 export * from "./components/QhdsPageAlert";
 export * from "./components/QhdsFileUpload";
+export * from "./components/QhdsProgressIndicator";
 export * from "./components/QhdsSideNav";
+export * from "./components/QhdsTable";
+export * from "./components/QhdsTabs";
 export * from "./components/QhdsWorkflowLayout";
 export * from "./components/forms/QhdsCheckbox";
 export * from "./components/forms/QhdsFormField";

@@ -24,6 +24,16 @@
   width: min(100%, 32rem);
 }
 
+.ssq-file-upload--invalid .ssq-file-upload__input {
+  border-color: var(--ssq-color-error);
+}
+
+.ssq-file-upload__error {
+  color: var(--ssq-color-error);
+  font-weight: 700;
+  margin: 0;
+}
+
 .ssq-file-upload__list {
   display: grid;
   gap: var(--ssq-space-3);
