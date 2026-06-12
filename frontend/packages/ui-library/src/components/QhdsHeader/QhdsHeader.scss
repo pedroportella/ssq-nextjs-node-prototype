@@ -1,6 +1,6 @@
 .ssq-header {
-  background: #023a55;
-  color: #fff;
+  background: var(--ssq-color-header-background);
+  color: var(--ssq-color-header-text);
 }
 
 .ssq-header .container-fluid {
@@ -20,8 +20,8 @@
 }
 
 .ssq-header__pre-header {
-  background: #011c2a;
-  color: #fff;
+  background: var(--ssq-palette-strong-background);
+  color: var(--ssq-color-header-text);
   font-size: 0.875rem;
   line-height: 1.7143;
   padding: 0.5rem 0;
@@ -41,7 +41,7 @@
 }
 
 .ssq-header__main {
-  background: #023a55;
+  background: var(--ssq-color-header-background);
   min-height: 7.5625rem;
   padding: 0;
 }
@@ -65,7 +65,7 @@
 
 .ssq-header__qg-lockup {
   align-items: center;
-  border-right: 2px solid #c48c33;
+  border-right: 2px solid var(--ssq-color-header-accent);
   display: flex;
   min-height: 3.5rem;
   padding-right: var(--ssq-space-6);
@@ -80,16 +80,17 @@
 
 .ssq-header__site-name {
   display: block;
+  font-family: var(--ssq-font-family-site-title);
 }
 
 .ssq-header__heading {
   display: block;
-  font-size: 1.25rem;
-  line-height: 1.2;
+  font-size: var(--ssq-font-size-h5-desktop);
+  line-height: var(--ssq-line-height-heading);
 }
 
 .ssq-header__subline {
-  color: rgb(181 181 181);
+  color: var(--ssq-palette-bold-muted);
   display: block;
   font-size: 1rem;
   font-weight: 400;

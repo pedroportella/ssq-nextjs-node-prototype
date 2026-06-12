@@ -46,7 +46,7 @@ export function RentalSecuritySubsidyStatusContent({
         <h1 className={styles.title} id="page-title">
           Rental Security Subsidy application status
         </h1>
-        <p className={styles.lead}>Track the mock submission produced by the frontend-only rental workflow.</p>
+        <p className={`qld__abstract ${styles.lead}`}>Track the mock submission produced by the frontend-only rental workflow.</p>
 
         <QhdsPageAlert heading="Application submitted" tone="success">
           <p>

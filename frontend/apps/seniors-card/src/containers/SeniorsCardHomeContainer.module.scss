@@ -5,14 +5,15 @@
 }
 
 .title {
-  font-size: 2rem;
-  line-height: 1.2;
+  font-size: var(--ssq-font-size-h1-desktop);
+  line-height: var(--ssq-line-height-heading);
   margin: 0 0 var(--ssq-space-3);
 }
 
 .lead {
   color: var(--ssq-color-muted);
-  font-size: 1.125rem;
+  font-size: var(--ssq-font-size-lead-desktop);
+  line-height: var(--ssq-line-height-base);
   margin: 0 0 var(--ssq-space-6);
   max-width: 44rem;
 }
@@ -37,7 +38,7 @@
 }
 
 .profileName {
-  font-size: 1.25rem;
+  font-size: var(--ssq-font-size-h5-desktop);
   font-weight: 700;
   margin: 0 0 var(--ssq-space-1);
 }
@@ -84,6 +85,10 @@
 
 @media (max-width: 48rem) {
   .title {
-    font-size: 1.75rem;
+    font-size: var(--ssq-font-size-h1-mobile);
+  }
+
+  .lead {
+    font-size: var(--ssq-font-size-lead-mobile);
   }
 }

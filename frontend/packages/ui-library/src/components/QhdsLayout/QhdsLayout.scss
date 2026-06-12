@@ -27,7 +27,7 @@
 }
 
 .ssq-layout__body {
-  padding: var(--ssq-space-8) 0 var(--ssq-space-10);
+  padding: var(--ssq-section-padding-desktop) 0;
 }
 
 .ssq-layout__main {
@@ -50,6 +50,6 @@
 
 @media (max-width: 48rem) {
   .ssq-layout__body {
-    padding: var(--ssq-space-6) 0;
+    padding: var(--ssq-section-padding-mobile) 0;
   }
 }

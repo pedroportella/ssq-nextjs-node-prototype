@@ -46,7 +46,7 @@ export function SeniorsCardStatusContent({
         <h1 className={styles.title} id="page-title">
           Seniors Card application status
         </h1>
-        <p className={styles.lead}>Track the mock submission produced by the frontend-only workflow.</p>
+        <p className={`qld__abstract ${styles.lead}`}>Track the mock submission produced by the frontend-only workflow.</p>
 
         <QhdsPageAlert heading="Application submitted" tone="success">
           <p>

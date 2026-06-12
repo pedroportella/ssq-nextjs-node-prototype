@@ -12,26 +12,81 @@ const styles = readFileSync(
 );
 
 describe("prototypeTokens", () => {
-  it("documents the selected QGDS-shaped token boundary", () => {
-    expect(prototypeTokens.source).toBe("qgds-shaped-css-snapshot");
-    expect(prototypeTokens.selectedPalette).toBe("qld-corporate");
-    expect(prototypeTokens.color.primitive.blue700).toBe("#315870");
-    expect(prototypeTokens.space[8]).toBe("2rem");
+  it("documents the selected QHDS token boundary", () => {
+    expect(prototypeTokens.source).toBe("qhds-reference-css-snapshot");
+    expect(prototypeTokens.selectedPalette).toBe("qld-health");
+    expect(prototypeTokens.color.primitive.heading).toBe("#000053");
+    expect(prototypeTokens.color.primitive.text).toBe("#353535");
+    expect(prototypeTokens.color.primitive.link).toBe("#005eb8");
+    expect(prototypeTokens.color.primitive.lightFocus).toBe("#002e85");
+    expect(prototypeTokens.color.primitive.lightBackground).toBe("#e6f6ff");
+    expect(prototypeTokens.color.primitive.lightBackgroundAlt).toBe("#e3e7ea");
+    expect(prototypeTokens.color.primitive.darkBackground).toBe("#005eb8");
+    expect(prototypeTokens.color.primitive.darkBackgroundAlt).toBe("#001d74");
   });
 
-  it("exposes stable semantic variables for components", () => {
+  it("exposes QHDS custom properties and stable SSQ aliases for components", () => {
+    expect(prototypeTokens.color.qldVariables).toContain("--QLD-color-light__heading");
+    expect(prototypeTokens.color.qldVariables).toContain("--QLD-color-dark__background--alt");
+    expect(prototypeTokens.color.qldVariables).toContain("--QLD-underline__offset");
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-background");
+    expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-heading");
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-action");
+    expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-link");
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-header-background");
   });
 
-  it("maps light and dark theme layers in CSS", () => {
-    expect(styles).toContain('--ssq-palette-name: "qld-corporate"');
-    expect(styles).toContain("--ssq-palette-bright-background");
-    expect(styles).toContain("--ssq-palette-strong-background");
-    expect(styles).toContain("--ssq-color-background: var(--ssq-palette-bright-background)");
+  it("documents QHDS typography and spacing tokens", () => {
+    expect(prototypeTokens.typography.fontFamilyBase).toContain("Noto Sans");
+    expect(prototypeTokens.typography.fontFamilySiteTitle).toContain("Noto Sans");
+    expect(prototypeTokens.typography.h1Desktop).toBe("3rem");
+    expect(prototypeTokens.typography.h1DesktopLineHeight).toBe("3.75rem");
+    expect(prototypeTokens.typography.h1Mobile).toBe("2rem");
+    expect(prototypeTokens.typography.h2Mobile).toBe("1.75rem");
+    expect(prototypeTokens.typography.h3).toBe("1.5rem");
+    expect(prototypeTokens.typography.h6).toBe("0.875rem");
+    expect(prototypeTokens.typography.fontWeightRegular).toBe(400);
+    expect(prototypeTokens.typography.fontWeightSemibold).toBe(600);
+    expect(prototypeTokens.typography.fontWeightBold).toBe(700);
+    expect(prototypeTokens.typography.lineHeightParagraph).toBe(1.75);
+    expect(prototypeTokens.typography.letterSpacingDefault).toBe(0);
+    expect(prototypeTokens.layout.sectionPaddingDesktop).toBe("4rem");
+    expect(prototypeTokens.layout.sectionPaddingMobile).toBe("2.25rem");
+  });
+
+  it("maps QHDS light, alt, dark and dark-alt layers in CSS", () => {
+    expect(styles).toContain('--ssq-palette-name: "qld-health"');
+    expect(styles).toContain("--QLD-color-light__heading: #000053");
+    expect(styles).toContain("--QLD-color-light__text: #353535");
+    expect(styles).toContain("--QLD-color-light__link: #005eb8");
+    expect(styles).toContain("--QLD-color-light__focus: #002e85");
+    expect(styles).toContain("--QLD-color-light__background: #e6f6ff");
+    expect(styles).toContain("--QLD-color-light__background--alt: #e3e7ea");
+    expect(styles).toContain("--QLD-color-dark__background: #005eb8");
+    expect(styles).toContain("--QLD-color-dark__background--alt: #001d74");
+    expect(styles).toContain("--ssq-color-background: var(--ssq-palette-default-background)");
+    expect(styles).toContain("--ssq-palette-bright-background: var(--QLD-color-light__background)");
+    expect(styles).toContain("--ssq-palette-alt-background: var(--QLD-color-light__background--alt)");
+    expect(styles).toContain("--ssq-palette-bold-background: var(--QLD-color-dark__background)");
+    expect(styles).toContain("--ssq-palette-strong-background: var(--QLD-color-dark__background--alt)");
     expect(styles).toContain("@media (prefers-color-scheme: dark)");
-    expect(styles).toContain("--ssq-color-background: var(--ssq-palette-strong-background)");
-    expect(styles).toContain('[data-ssq-theme="dark"]');
+    expect(styles).toContain("--ssq-color-background: var(--ssq-palette-bold-background)");
+    expect(styles).toContain("--ssq-color-focus: var(--ssq-palette-bold-focus)");
+  });
+
+  it("keeps key CSS custom properties aligned with QHDS reference values", () => {
+    expect(styles).toContain("--ssq-font-family-base: \"Noto Sans\"");
+    expect(styles).toContain("--ssq-font-family-site-title: \"Noto Sans\"");
+    expect(styles).toContain("--ssq-font-size-h1-mobile: 2rem");
+    expect(styles).toContain("--ssq-font-size-h1-desktop: 3rem");
+    expect(styles).toContain("--ssq-font-size-h2-mobile: 1.75rem");
+    expect(styles).toContain("--ssq-font-size-h2-desktop: 2rem");
+    expect(styles).toContain("--ssq-line-height-h1-desktop: 3.75rem");
+    expect(styles).toContain("--ssq-line-height-h3: 2rem");
+    expect(styles).toContain("--ssq-link-decoration-thickness: var(--QLD-underline__thickness-thin)");
+    expect(styles).toContain("--ssq-link-decoration-thickness-hover: var(--QLD-underline__thickness-thick)");
+    expect(styles).toContain("--ssq-link-decoration-offset: var(--QLD-underline__offset)");
+    expect(styles).toContain("--ssq-section-padding-mobile: 2.25rem");
+    expect(styles).toContain("--ssq-section-padding-desktop: 4rem");
   });
 });

@@ -91,7 +91,7 @@ export function DashboardContent({ shell, summary }: { shell: AppShellData; summ
             <h1 className={styles.title} id="page-title">
               {shell.app.label}
             </h1>
-            <p className={styles.lead}>Review digital transaction activity across the prototype services.</p>
+            <p className={`qld__abstract ${styles.lead}`}>Review digital transaction activity across the prototype services.</p>
           </QhdsCol>
           <QhdsCol lg={4} xl={4}>
             <div className={styles.profileSummary} aria-label="Profile summary">

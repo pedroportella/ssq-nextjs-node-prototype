@@ -31,7 +31,7 @@ export function RentalSecuritySubsidyOverviewContent({
             <h1 className={styles.title} id="page-title">
               {shell.app.label}
             </h1>
-            <p className={styles.lead}>Prepare a prototype rental support application and track its progress.</p>
+            <p className={`qld__abstract ${styles.lead}`}>Prepare a prototype rental support application and track its progress.</p>
           </QhdsCol>
           <QhdsCol lg={4} xl={4}>
             <div className={styles.profileSummary} aria-label="Profile summary">

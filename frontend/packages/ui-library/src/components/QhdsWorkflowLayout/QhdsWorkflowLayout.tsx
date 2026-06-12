@@ -35,7 +35,7 @@ export function QhdsWorkflowLayout({
         <header className="ssq-workflow-layout__header">
           {contextLabel ? <p className="ssq-workflow-layout__context">{contextLabel}</p> : null}
           <h1 className="ssq-workflow-layout__heading">{heading}</h1>
-          {lead ? <p className="ssq-workflow-layout__lead">{lead}</p> : null}
+          {lead ? <p className="qld__abstract ssq-workflow-layout__lead">{lead}</p> : null}
           {requiredText ? <p className="ssq-workflow-layout__required">{requiredText}</p> : null}
         </header>
         <div className="ssq-workflow-layout__body">{children}</div>

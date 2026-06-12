@@ -11,8 +11,8 @@
 }
 
 .ssq-card__heading {
-  font-size: 1.25rem;
-  line-height: 1.25;
+  font-size: var(--ssq-font-size-h5-desktop);
+  line-height: var(--ssq-line-height-heading);
   margin: 0 0 var(--ssq-space-2);
 }
 

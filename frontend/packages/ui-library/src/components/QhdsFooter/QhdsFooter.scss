@@ -1,13 +1,14 @@
 .ssq-footer {
-  background: #011c2a;
+  background: var(--ssq-palette-strong-background);
   border-top: 4px solid var(--ssq-color-header-accent);
-  color: #fff;
+  color: var(--ssq-palette-strong-text);
   padding: 2rem 0 4rem;
 }
 
 .ssq-footer__heading {
-  font-size: 1.125rem;
-  font-weight: 700;
+  color: inherit;
+  font-size: var(--ssq-font-size-h5-desktop);
+  font-weight: 600;
   margin: var(--ssq-space-8) 0 var(--ssq-space-6);
 }
 
@@ -24,12 +25,13 @@
 }
 
 .ssq-footer__section-heading {
-  font-size: 1.25rem;
+  font-size: var(--ssq-font-size-h5-desktop);
   margin-top: 0;
 }
 
 .ssq-footer a {
-  color: inherit;
+  color: var(--ssq-palette-strong-link);
+  text-decoration-color: var(--ssq-palette-strong-link-decoration);
 }
 
 .ssq-footer__link-list {
@@ -41,7 +43,7 @@
 }
 
 .ssq-footer__acknowledgements {
-  border-left: 2px solid #c48c33;
+  border-left: 2px solid var(--ssq-color-header-accent);
 }
 
 .ssq-footer__content > :first-child {

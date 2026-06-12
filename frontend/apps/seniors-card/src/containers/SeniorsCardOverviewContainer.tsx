@@ -25,7 +25,7 @@ export function SeniorsCardOverviewContent({ shell, workflow }: { shell: AppShel
             <h1 className={styles.title} id="page-title">
               {shell.app.label}
             </h1>
-            <p className={styles.lead}>Check eligibility and prepare a prototype Seniors Card application.</p>
+            <p className={`qld__abstract ${styles.lead}`}>Check eligibility and prepare a prototype Seniors Card application.</p>
           </QhdsCol>
           <QhdsCol lg={4} xl={4}>
             <div className={styles.profileSummary} aria-label="Profile summary">
