@@ -4,6 +4,8 @@ export * from "./components/QhdsFooter";
 export * from "./components/QhdsHeader";
 export * from "./components/QhdsLayout";
 export * from "./components/QhdsPageAlert";
+export * from "./components/QhdsSideNav";
+export * from "./components/QhdsWorkflowLayout";
 export * from "./components/forms/QhdsCheckbox";
 export * from "./components/forms/QhdsFormField";
 export * from "./components/forms/QhdsRadioGroup";

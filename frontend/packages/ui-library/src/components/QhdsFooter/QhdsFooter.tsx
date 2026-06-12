@@ -9,7 +9,7 @@ export interface QhdsFooterProps {
 
 export function QhdsFooter({ children, serviceName = "Services Queensland" }: QhdsFooterProps) {
   return (
-    <footer className="ssq-footer">
+    <footer className="qld__footer ssq-footer" role="contentinfo">
       <div className="ssq-footer__inner">
         <p className="ssq-footer__service">{serviceName}</p>
         {children ? <div className="ssq-footer__content">{children}</div> : null}

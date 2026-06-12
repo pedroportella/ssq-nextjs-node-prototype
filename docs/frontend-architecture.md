@@ -25,3 +25,15 @@ Reusable UI should stay component-owned:
 - `index.ts`
 
 Theme entrypoints should own tokens, palettes, resets and integration-level imports. Avoid growing `theme.css` into a catch-all file for bespoke component styles.
+
+## Layout architecture
+
+The shared app chrome is owned by `@ssq/ui-library` so individual Next.js apps do not recreate landmarks or page structure.
+
+- `QhdsLayout` owns the skip link, optional header/footer slots, optional section navigation aside and stable `main` landmark.
+- `QhdsHeader` and `QhdsFooter` expose QGDS/QHDS-compatible banner and contentinfo hooks while staying framework-agnostic.
+- `QhdsSideNav` renders accessible section navigation with `aria-current="page"`, nested active branches and optional router interception through `onNavigate`.
+- `QhdsWorkflowLayout` owns form/workflow page structure: optional progress aside, back-link area, page header, content region and action row.
+- Apps should pass page content sections into `QhdsLayout`; they should not wrap those sections in another `<main>`.
+
+The current layout layer is server-renderable by default. A future mobile drawer enhancement should be isolated behind a client component and must include Escape close, focus trapping, focus restoration and body scroll-lock cleanup tests before adoption.

@@ -1,8 +1,3 @@
-.page {
-  color: var(--ssq-color-text);
-  padding: var(--ssq-space-8);
-}
-
 .inner {
   margin: 0 auto;
   max-width: var(--ssq-content-width);
@@ -22,10 +17,6 @@
 }
 
 @media (max-width: 48rem) {
-  .page {
-    padding-inline: var(--ssq-space-4);
-  }
-
   .title {
     font-size: 1.75rem;
   }

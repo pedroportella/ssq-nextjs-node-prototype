@@ -36,7 +36,7 @@ export function QhdsHeader({
   }
 
   return (
-    <header className="ssq-header">
+    <header className="qld__header ssq-header" role="banner">
       <div className="ssq-header__inner">
         <a className="ssq-header__brand" href="/" {...getNavigationProps("/")}>
           {serviceName}
