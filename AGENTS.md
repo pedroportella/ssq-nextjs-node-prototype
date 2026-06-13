@@ -1,0 +1,197 @@
+# SSQ Next.js + Node.js Prototype Agent Guide
+
+You are working in the SSQ Next.js + Node.js prototype.
+
+## Codex Instruction Model
+
+- Treat this `AGENTS.md` file as the source of truth for durable repository guidance.
+- Keep ordinary engineering conventions, verification expectations and handoff rules here.
+- Keep private research, delivery planning and implementation diary notes in `../ai-notes/`; do not copy private planning history into public repo docs.
+- Do not move project guidance to `.codex/AGENTS.md`. Codex reads `$CODEX_HOME/AGENTS.md` as global guidance and repo-root or nested `AGENTS.md` files as project guidance; a checked-in `.codex/AGENTS.md` only applies when Codex is deliberately launched with `CODEX_HOME` pointed at that directory.
+- Reserve `.codex/config.toml`, Codex rules, hooks or plugins for Codex settings, command approvals, lifecycle enforcement or reusable workflows. Do not use them for ordinary prose guidance unless the repo needs that capability.
+- Add nested `AGENTS.md` files only when a subtree needs stable rules that differ from this root guidance.
+- Keep `.cursorrules` as a legacy compatibility pointer only. Do not duplicate the full instruction set there.
+
+## Project Intent
+
+- This is a working prototype for Queensland Government-style digital transaction workflows.
+- Optimise for Principal Full-Stack Software Engineer review: clear architecture, production-shaped boundaries, focused tests, runnable local setup and honest documentation.
+- Do not describe this as an official Queensland Government, Smart Service Queensland, myQLD, Queensland Health, Department of Justice or production Digital Transaction Platform system.
+- Do not imply real citizen data, production identity, official accreditation, private government integration, production hosting, production security controls or real agency endorsement.
+- Prefer "prototype", "production-shaped", "review environment", "future integration point", "backend-authoritative validation", "governance boundary" and "production-next" where accurate.
+- Internal delivery labels and planning shorthand belong outside the public repo. Do not add private planning labels to README, docs, `AGENTS.md`, `.cursorrules` or UI copy.
+
+## Repo Shape
+
+- The git repo root is `ssq-nextjs-node-prototype/`.
+- `backend/` owns the Node.js/TypeScript API, persistence, validation, service request lifecycle, uploads, observability and operational endpoints.
+- `frontend/` owns the Next.js apps and shared frontend packages.
+- `frontend/apps/dashboard` is the reviewer/admin dashboard app.
+- `frontend/apps/seniors-card` is the Seniors Card transaction app.
+- `frontend/apps/rental-security-subsidy` is the Rental Security Subsidy transaction app.
+- `frontend/src/app`, where present, should stay framework/routing-focused.
+- `frontend/src/containers`, where present, should orchestrate page-level data, workflow state and UI composition.
+- `frontend/packages/services` owns frontend service clients, DTOs, typed API responses, app-specific service modules and shared service helpers.
+- `frontend/packages/ui-library/components` owns React wrappers and reusable app-facing components.
+- `frontend/packages/ui-library/theme` owns the QHDS/QGDS theme entrypoint and prototype-specific styling integration.
+- `frontend/packages/ui-tokens` owns shared design tokens and CSS variables.
+- `frontend/packages/ui-assets` owns icons, images and reusable asset helpers.
+- `frontend/packages/utils` owns shared formatting, validation helpers and constants.
+- `frontend/packages/web-components` owns framework-neutral Lit web components for high-value QHDS-derived primitives.
+- `docker/` owns local runtime and deployment support.
+- `docs/` owns reviewer-facing architecture, setup, testing, CI/CD, deployment and production-readiness notes.
+- `.github/workflows/` owns all CI/CD automation for this prototype.
+- `.do/` may contain safe DigitalOcean App Platform templates. Do not commit generated specs containing secrets.
+- Planning notes outside the repo are not app source. Do not copy private planning notes into public docs.
+
+## Runtime And Tooling
+
+- Use Node.js 22 and pnpm 10.18.3.
+- Prefer TypeScript throughout backend, frontend and web component packages.
+- Keep root scripts as orchestration commands over package scripts.
+- Do not commit `node_modules`, `.next`, `dist`, coverage, Playwright reports, local databases, logs, local env files or generated DigitalOcean specs.
+- Keep changes small, reviewable and easy to commit.
+- Check `git status` before editing and never overwrite user changes.
+
+## Runtime Config
+
+- Backend-origin configuration belongs server-side.
+- Do not treat generated public runtime config files as source of truth.
+- Add local-only keys to safe example env files and document them when introduced.
+- Keep mock mode explicit and visually obvious in the app shell when mock data is active.
+- Mock API fixtures must stay aligned with backend contracts.
+
+## Frontend Rules
+
+- Use Next.js with React and TypeScript.
+- Use server components, route handlers, server actions or SSR/BFF-style server-side calls for backend communication.
+- Browser code must not know the real backend origin. Do not add `NEXT_PUBLIC_BACKEND_URL`, hard-coded backend hostnames or direct browser calls to private backend endpoints.
+- Public `NEXT_PUBLIC_*` values may contain only safe browser configuration such as public app URLs, feature labels or analytics-free prototype settings.
+- Keep app-specific workflow orchestration in containers. Routes should remain thin and compose containers.
+- Use `frontend/packages/services` for backend DTOs, service clients, mock data boundaries and API response types. App routes and containers should consume services through package imports, not ad hoc `fetch` wrappers.
+- Keep service package splitting modest at first: use shared services plus thin app-specific modules unless contracts genuinely diverge.
+- Preserve form state on recoverable errors and prevent duplicate submissions where practical.
+- Use semantic forms with labels, fieldsets, legends, clear errors, visible focus and keyboard-operable controls.
+- Every routed page should preserve one clear `h1`, useful landmarks, readable contrast and no text overflow at supported viewport widths.
+- Avoid marketing-page composition. The UI should feel like a clear public-service workflow, not a product landing page.
+- Do not scatter colours, shadows, radii, spacing or focus styles through route pages when a token, theme rule or shared component is more appropriate.
+- Keep token and style layering clear:
+  1. `frontend/packages/ui-tokens`
+  2. `frontend/packages/ui-library/theme`
+  3. app global styles
+  4. route/container layout styles
+  5. component-specific styles
+- Keep reusable UI components folder-owned. A reusable React component should normally live under `frontend/packages/ui-library/src/components/<ComponentName>/` with:
+  - `<ComponentName>.tsx`
+  - `<ComponentName>.test.tsx`
+  - `<ComponentName>.scss`
+  - `index.ts`
+- Group related primitives under a domain folder such as `components/forms/<ComponentName>/` when that keeps the public surface clearer.
+- Components should import their own SCSS and export through local barrels. Package barrels should re-export component barrels.
+- `frontend/packages/ui-library/theme` owns theme entrypoints, token/palette integration, reset/base rules, app shell integration and documented migration glue. Do not use a single theme stylesheet as a dumping ground for every component's bespoke styles.
+- Avoid card nesting. Use cards for repeated items, modals or framed tools, not as a default page-section wrapper.
+
+## QHDS/QGDS Adapter Rules
+
+- Follow the DCIR/RBDM pattern: preserve useful QHDS/QGDS markup, classes, visual states and accessibility semantics, but rewrite behaviour into local TypeScript/React/Lit wrappers.
+- Do not import or copy upstream QHDS browser runtime JavaScript directly.
+- Treat QHDS/QGDS and related repositories as design-system references, not as proof that every runtime behaviour is production-ready.
+- Keep the adapter boundary visible in code and docs: design-system markup/styles in, local behaviour and tests out.
+- Prefer high-value wrappers before broad component cloning: layout/header/footer, button, text input, select, form field wrapper, page alert, tabs, table, file upload, progress indicator/service status, cards, accordions, checkboxes and radio buttons.
+- Use `frontend/packages/web-components` for framework-neutral components only when portability or clean behavioural isolation is valuable.
+- Use Lit for web components unless there is a strong reason not to.
+- Web components should expose small typed public APIs through attributes/properties, dispatch typed custom events, support keyboard access, reflect disabled/error/required states and avoid unsafe `innerHTML`.
+- React `ui-library` wrappers may wrap web components, but should keep React app ergonomics, typing and validation integration clear.
+- Be especially careful with file upload: implement real file input behaviour, accessible errors, validation hooks and backend policy integration. Do not ship a status-only mock as a completed upload component.
+
+## Backend Rules
+
+- Build a production-shaped Node.js/TypeScript backend, not a thin mock API.
+- Prefer Fastify for HTTP, GraphQL Yoga or Apollo for GraphQL, PostgreSQL for persistence, Prisma or Drizzle for database access, Zod for validation, Pino for logging and Vitest for tests unless the repo has already chosen otherwise.
+- Keep the backend authoritative for validation, persistence, workflow state, document policy and service request lifecycle.
+- Do not rely on frontend validation for safety.
+- Keep controllers/resolvers focused on transport coordination. Put business rules in services and persistence in repositories/data access modules.
+- Keep GraphQL contracts typed and documented when response shapes change.
+- Use REST where it is a better fit, especially for file upload/download and health/status endpoints.
+- Return consistent, user-safe errors with correlation IDs. Do not expose stack traces, raw exception messages, personal data, secrets or infrastructure details in public responses.
+- Maintain correlation IDs, correlated problem responses and operational status behaviour once introduced.
+- Add `/health` for runtime health and `/status` for reviewer-friendly status where appropriate.
+- Add debug routes only when explicitly gated by non-production environment and an explicit debug flag.
+- Do not imply real Queensland Digital Identity, myGov, PRODA, SSO, enterprise IAM, row-level security, malware scanning, private file storage, retention governance or production authorization unless it is implemented.
+- If demo identity or roles are added, document them as prototype-only and keep the boundary obvious in code and docs.
+- Store local prototype uploads safely enough for review, but document production-next needs: MIME/content validation, malware scanning, private storage, access control, retention, audit and privacy review.
+- Use an outbox table or equivalent persisted event record to demonstrate event-driven integration thinking without needing a real queue.
+- Keep operational endpoints support-safe and useful: health, status, version/build metadata, event counts or queue/outbox summaries where implemented.
+
+## Contracts And Workflows
+
+- Frontend DTOs, mocks, Playwright fixtures and backend response shapes must stay aligned.
+- If adding workflow states, document the lifecycle before or alongside implementation.
+- If adding writes, add focused tests and do not show saved/submitted state until the backend confirms success.
+- Treat transaction definitions as a platform capability, not just hard-coded page copy.
+- Keep Seniors Card as the simpler eligibility/application workflow.
+- Keep Rental Security Subsidy as the richer workflow that proves backend validation, document metadata, status transitions, activity logging, submission summaries and SSR/BFF endpoint hiding.
+- Keep Dashboard as the operational/reviewer surface that shows submissions, statuses, activity and platform capability without pretending to be a production staff portal.
+
+## Security And Configuration
+
+- Keep secrets server-side only.
+- Do not put secrets, tokens, database URLs, private backend URLs or DigitalOcean credentials in frontend public config.
+- Do not commit `.env` files except safe examples.
+- Validate all input on the backend with explicit schemas.
+- Apply CORS narrowly. Prefer same-origin app-to-BFF calls from the browser and server-to-backend calls from Next.js.
+- Add rate limiting, request size limits and safe upload limits when backend surfaces become public.
+- Keep security headers explicit and configurable once HTTP middleware is introduced.
+- Logs should include correlation IDs and useful operation metadata, but avoid personal data and sensitive payloads.
+
+## Testing And Quality Gates
+
+- Add focused tests when behaviour changes.
+- Use Vitest for backend services, validation, repositories with test databases/mocks and frontend utilities/components where practical.
+- Use Playwright for routed UI, keyboard access, viewport, validation and core workflow smoke coverage.
+- Add tests for SSR/BFF endpoint hiding when service clients are introduced. Browser bundles should not reveal private backend origins.
+- Add tests for backend validation and user-safe error shapes when request/response contracts change.
+- Add upload policy tests when file upload behaviour changes.
+- Prefer root quality commands that can run lint, typecheck, test and build across workspaces.
+- GitHub Actions should run quality gates for pull requests and main. Do not add GitLab CI for this prototype.
+- DigitalOcean deployment automation should run only after ordinary quality checks pass and should keep secrets in platform/GitHub secret stores.
+
+## Commit Message Handoff
+
+- Every implementation wrap-up should include a suggested git commit message.
+- Use `type(scope): past-tense summary`.
+- Keep the message concise, conventional and scoped to the actual changes made.
+- Start the summary with a past-tense verb such as `added`, `documented`, `implemented`, `improved` or `resolved`.
+- Use lowercase scopes with hyphens where needed.
+- Allowed types are `feat`, `fix`, `refactor`, `chore`, `perf`, `ci`, `ops`, `build`, `docs`, `style`, `revert` and `test`.
+- Do not include private planning labels in commit messages.
+- Prefer `frontend` scope when a frontend slice touches an app plus shared frontend packages, service contracts, mock data, UI packages or cross-app configuration. Use app-specific scopes such as `dashboard` only when the change is contained to that app boundary.
+- Format suggested commit messages in final user wrap-ups as copyable code blocks containing only the commit subject. Do not include `git commit -m`, shell commands, quotes or extra prose inside the code block.
+
+## Step Handoff
+
+- After completing a meaningful chunk, update the private planning notes with what was implemented, how it was verified, any remaining gaps and the recommended next work.
+- Public docs should receive professional system documentation only, not private implementation diary notes.
+- Final user wrap-ups should mention the important files changed, verification run, known caveats and suggested commit message.
+
+## Docs And Reviewer Handoff
+
+- Keep docs technical and reviewer-friendly, not marketing copy.
+- README should clearly answer: what this is, how to run it, how to verify it, what is real, what is simulated and what production-next would require.
+- Update `docs/architecture-overview.md`, `docs/backend-architecture.md`, `docs/frontend-architecture.md`, `docs/testing-strategy.md`, `docs/ci-cd.md`, `docs/deployment.md` and `docs/production-readiness-gap-analysis.md` as those surfaces are introduced.
+- Document Docker, GitHub Actions and DigitalOcean as review infrastructure, not Queensland Government production hosting.
+- Document public live links only after they exist and smoke checks pass.
+- Do not publish internal planning notes or private delivery shorthand in public docs.
+- Keep screenshots intentional and refresh them only after runtime mode, content and theme are stable.
+
+## Implementation Style
+
+- Prefer small vertical slices that prove real behaviour end to end.
+- Reuse existing packages, components, services and helpers before creating new abstractions.
+- Add abstractions only when repeated behaviour has stabilized or the boundary is architecturally meaningful.
+- Keep shared constants, policy rules, mappings, validation logic and response shapes single-source where practical.
+- Derive secondary views from canonical policy maps instead of maintaining parallel lists.
+- Keep route/page code thin; move reusable behaviour into services, containers, packages or backend modules.
+- Keep comments short and useful. Avoid narrating obvious code.
+- Do not rewrite unrelated files or planning notes while implementing a scoped repo change.
+- Before finishing a change, scan for endpoint leaks, generated artifacts, accidental secrets, misleading production claims and public docs containing internal planning labels.
