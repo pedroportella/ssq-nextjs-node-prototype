@@ -3,7 +3,7 @@ import { useId } from "react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 
 import { QhdsFormField } from "../QhdsFormField";
-import { getQhdsFieldIds } from "../fieldIds";
+import { getQhdsFieldIds, joinClassNames } from "../fieldIds";
 
 import "./QhdsTextInput.scss";
 
@@ -31,7 +31,14 @@ export function QhdsTextInput({
   const generatedId = useId();
   const controlId = id ?? `ssq-text-input-${generatedId}`;
   const fieldIds = getQhdsFieldIds({ controlId, describedBy: ariaDescribedBy, error, hint });
-  const classes = ["ssq-input", className].filter(Boolean).join(" ");
+  const classes = joinClassNames(
+    "qld__text-input",
+    "qld__text-input--block",
+    type === "number" && "qld__text-input--number",
+    error ? "qld__text-input--error" : undefined,
+    "ssq-input",
+    className
+  );
 
   return (
     <QhdsFormField

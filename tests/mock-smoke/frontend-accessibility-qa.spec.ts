@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import { isMockSmokeAppSelected, selectedMockSmokeAppNames, type MockSmokeAppName } from "./app-selection";
 
 const forbiddenRequestPatterns = [/localhost:7001/, /127\.0\.0\.1:7001/, /backend:7001/, /\/graphql(?:\?|$)/];
@@ -172,6 +172,22 @@ async function expectFocusedElementHasVisibleFocus(page: Page) {
       hasVisibleFocus: hasOutline || style.boxShadow !== "none",
       tagName: element.tagName.toLowerCase(),
       text: element.innerText || element.getAttribute("aria-label") || element.getAttribute("name") || ""
+    };
+  });
+
+  expect(focusState).toMatchObject({ hasVisibleFocus: true });
+}
+
+async function expectLocatorHasVisibleFocus(locator: Locator) {
+  await locator.focus();
+
+  const focusState = await locator.evaluate((element) => {
+    const style = window.getComputedStyle(element as HTMLElement);
+    const outlineWidth = Number.parseFloat(style.outlineWidth);
+    const hasOutline = style.outlineStyle !== "none" && outlineWidth > 0;
+
+    return {
+      hasVisibleFocus: hasOutline || style.boxShadow !== "none"
     };
   });
 
@@ -631,12 +647,18 @@ if (isMockSmokeAppSelected("seniors-card")) {
   test("seniors-card transaction form validation states are accessible in mock mode", async ({ page }) => {
     const forbiddenRequests = trackForbiddenRequests(page);
 
+    await page.setViewportSize({ height: 844, width: 390 });
     await page.goto("http://localhost:3001/apply");
+    await expect(page.locator("form.qld__form")).toBeVisible();
     const dateOfBirth = page.getByLabel("Date of birth");
     await expect(dateOfBirth).toHaveAttribute("aria-invalid", "true");
-    await expect(dateOfBirth).toHaveAttribute("aria-describedby", /error/);
+    await expect(dateOfBirth).toHaveAttribute("aria-describedby", "date-of-birth-hint date-of-birth-error");
+    await expect(dateOfBirth).toHaveClass(/qld__text-input--error/);
+    await expect(page.locator("#date-of-birth-error")).toHaveText("Enter a date of birth that confirms eligibility.");
     await expect(page.getByText("Enter a date of birth that confirms eligibility.")).toBeVisible();
     await expect(dateOfBirth).toBeVisible();
+    await expectLocatorHasVisibleFocus(dateOfBirth);
+    await expectNoVisibleHorizontalOverflow(page);
 
     expect(forbiddenRequests).toEqual([]);
   });
@@ -657,12 +679,18 @@ if (isMockSmokeAppSelected("rental-security-subsidy")) {
   test("rental-security-subsidy transaction form validation states are accessible in mock mode", async ({ page }) => {
     const forbiddenRequests = trackForbiddenRequests(page);
 
+    await page.setViewportSize({ height: 844, width: 390 });
     await page.goto("http://localhost:3002/apply");
+    await expect(page.locator("form.qld__form")).toBeVisible();
     const weeklyRent = page.getByLabel("Weekly rent");
     await expect(weeklyRent).toHaveAttribute("aria-invalid", "true");
-    await expect(weeklyRent).toHaveAttribute("aria-describedby", /error/);
+    await expect(weeklyRent).toHaveAttribute("aria-describedby", "weekly-rent-hint weekly-rent-error");
+    await expect(weeklyRent).toHaveClass(/qld__text-input--error/);
+    await expect(page.locator("#weekly-rent-error")).toHaveText("Enter the weekly rent amount for the property.");
     await expect(page.getByText("Enter the weekly rent amount for the property.")).toBeVisible();
     await expect(weeklyRent).toBeVisible();
+    await expectLocatorHasVisibleFocus(weeklyRent);
+    await expectNoVisibleHorizontalOverflow(page);
 
     expect(forbiddenRequests).toEqual([]);
   });

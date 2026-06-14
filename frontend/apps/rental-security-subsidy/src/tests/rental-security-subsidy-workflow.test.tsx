@@ -137,6 +137,13 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
     expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
     expect(html).toContain("col-xs-12 col-lg-6 col-xl-6");
+    expect(html).toContain("qld__form");
+    expect(html).toContain("qld__form-group");
+    expect(html).toContain("qld__text-input--error");
+    expect(html).toContain('id="weekly-rent"');
+    expect(html).toContain('for="weekly-rent"');
+    expect(html).toContain('id="weekly-rent-error"');
+    expect(html).toContain('aria-describedby="weekly-rent-hint weekly-rent-error"');
     expect(html).toContain("Rental property");
     expect(html).toContain("Enter the weekly rent amount for the property.");
     expect(html).toContain("RSS-2026-0001");

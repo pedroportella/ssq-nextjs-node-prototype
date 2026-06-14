@@ -136,6 +136,13 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("row");
     expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
     expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
+    expect(html).toContain("qld__form");
+    expect(html).toContain("qld__form-group");
+    expect(html).toContain("qld__text-input--error");
+    expect(html).toContain('id="date-of-birth"');
+    expect(html).toContain('for="date-of-birth"');
+    expect(html).toContain('id="date-of-birth-error"');
+    expect(html).toContain('aria-describedby="date-of-birth-hint date-of-birth-error"');
     expect(html).toContain("Enter a date of birth that confirms eligibility.");
     expect(html).toContain("SC-2026-0001");
     expect(html).toContain("sc-2026-0001-summary.txt");

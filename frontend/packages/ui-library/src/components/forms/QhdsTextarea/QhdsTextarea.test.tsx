@@ -10,6 +10,8 @@ describe("QhdsTextarea", () => {
     expect(html).toContain('for="notes"');
     expect(html).toContain('id="notes"');
     expect(html).toContain("<textarea");
+    expect(html).toContain("qld__text-input");
+    expect(html).toContain("qld__text-input--block");
     expect(html).toContain("optional");
   });
 });

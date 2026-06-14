@@ -61,69 +61,80 @@ export function SeniorsCardApplyContent({
           }
           requiredText="All fields are required unless marked optional."
         >
-          <QhdsRow className={styles.workflowGrid}>
-            <QhdsCol lg={4} xl={4}>
-              <QhdsCard heading="Draft state">
-                <p>
-                  Created draft <strong>{createdDraft.draft.draftId}</strong> for {createdDraft.draft.title}.
-                </p>
-                <p className={styles.meta}>No validation errors were returned on draft creation.</p>
-              </QhdsCard>
-            </QhdsCol>
+          <form aria-label="Seniors Card application details" className={`qld__form ${styles.workflowForm}`} noValidate>
+            <QhdsRow className={styles.workflowGrid}>
+              <QhdsCol lg={4} xl={4}>
+                <QhdsCard heading="Draft state">
+                  <p>
+                    Created draft <strong>{createdDraft.draft.draftId}</strong> for {createdDraft.draft.title}.
+                  </p>
+                  <p className={styles.meta}>No validation errors were returned on draft creation.</p>
+                </QhdsCard>
+              </QhdsCol>
 
-            <QhdsCol lg={8} xl={8}>
-              <QhdsCard heading="Eligibility details">
-                <QhdsTextInput
-                  hint="Use the name shown on your identity documents."
-                  label="Full name"
-                  name="fullName"
-                  readOnly
-                  required
-                  value={workflow.profile.displayName}
-                />
-                <QhdsTextInput
-                  error={dateOfBirthError?.message}
-                  hint="For this mock state, the backend-compatible error path is eligibility.dateOfBirth."
-                  label="Date of birth"
-                  name="dateOfBirth"
-                  required
-                  type="date"
-                />
-                <QhdsSelect
-                  defaultValue="qld"
-                  hint="You must live in Queensland to apply for this prototype Seniors Card workflow."
-                  label="Residential state"
-                  name="residentialState"
-                  options={[
-                    { label: "Queensland", value: "qld" },
-                    { label: "Other Australian state or territory", value: "other" }
-                  ]}
-                  required
-                />
-                <QhdsRadioGroup
-                  defaultValue="yes"
-                  legend="Are you 65 years or older?"
-                  name="ageEligible"
-                  options={[
-                    { label: "Yes", value: "yes" },
-                    { label: "No", value: "no" }
-                  ]}
-                  required
-                />
-                <QhdsCheckbox label="I declare this prototype information is ready for review." name="declaration" required />
-              </QhdsCard>
-            </QhdsCol>
+              <QhdsCol lg={8} xl={8}>
+                <QhdsCard heading="Eligibility details">
+                  <QhdsTextInput
+                    hint="Use the name shown on your identity documents."
+                    id="full-name"
+                    label="Full name"
+                    name="fullName"
+                    readOnly
+                    required
+                    value={workflow.profile.displayName}
+                  />
+                  <QhdsTextInput
+                    error={dateOfBirthError?.message}
+                    hint="For this mock state, the backend-compatible error path is eligibility.dateOfBirth."
+                    id="date-of-birth"
+                    label="Date of birth"
+                    name="dateOfBirth"
+                    required
+                    type="date"
+                  />
+                  <QhdsSelect
+                    defaultValue="qld"
+                    hint="You must live in Queensland to apply for this prototype Seniors Card workflow."
+                    id="residential-state"
+                    label="Residential state"
+                    name="residentialState"
+                    options={[
+                      { label: "Queensland", value: "qld" },
+                      { label: "Other Australian state or territory", value: "other" }
+                    ]}
+                    required
+                  />
+                  <QhdsRadioGroup
+                    defaultValue="yes"
+                    id="age-eligible"
+                    legend="Are you 65 years or older?"
+                    name="ageEligible"
+                    options={[
+                      { label: "Yes", value: "yes" },
+                      { label: "No", value: "no" }
+                    ]}
+                    required
+                  />
+                  <QhdsCheckbox
+                    id="declaration"
+                    label="I declare this prototype information is ready for review."
+                    name="declaration"
+                    required
+                  />
+                </QhdsCard>
+              </QhdsCol>
 
-            <QhdsCol lg={4} xl={4}>
-              <QhdsCard heading="Submit result">
-                <p>
-                  Mock submission <strong>{submitResult.referenceNumber}</strong> returned status{" "}
-                  <strong>{submitResult.status.toLowerCase().replace("_", " ")}</strong>.
-                </p>
-                <p className={styles.meta}>Summary placeholder: {submitResult.summary.filename}</p>
-              </QhdsCard>
-            </QhdsCol>
-          </QhdsRow>
+              <QhdsCol lg={4} xl={4}>
+                <QhdsCard heading="Submit result">
+                  <p>
+                    Mock submission <strong>{submitResult.referenceNumber}</strong> returned status{" "}
+                    <strong>{submitResult.status.toLowerCase().replace("_", " ")}</strong>.
+                  </p>
+                  <p className={styles.meta}>Summary placeholder: {submitResult.summary.filename}</p>
+                </QhdsCard>
+              </QhdsCol>
+            </QhdsRow>
+          </form>
         </QhdsWorkflowLayout>
       </QhdsContainer>
     </QhdsLayout>

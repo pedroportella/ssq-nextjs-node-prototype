@@ -22,6 +22,9 @@ describe("QhdsTextInput", () => {
     expect(html).toContain('id="full-name-error"');
     expect(html).toContain('aria-describedby="full-name-hint full-name-error"');
     expect(html).toContain('aria-invalid="true"');
+    expect(html).toContain("qld__text-input");
+    expect(html).toContain("qld__text-input--block");
+    expect(html).toContain("qld__text-input--error");
     expect(html).toContain("required");
   });
 });

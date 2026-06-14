@@ -3,7 +3,7 @@ import { useId } from "react";
 import type { ReactNode, SelectHTMLAttributes } from "react";
 
 import { QhdsFormField } from "../QhdsFormField";
-import { getQhdsFieldIds } from "../fieldIds";
+import { getQhdsFieldIds, joinClassNames } from "../fieldIds";
 
 import "./QhdsSelect.scss";
 
@@ -39,7 +39,7 @@ export function QhdsSelect({
   const generatedId = useId();
   const controlId = id ?? `ssq-select-${generatedId}`;
   const fieldIds = getQhdsFieldIds({ controlId, describedBy: ariaDescribedBy, error, hint });
-  const classes = ["ssq-select", className].filter(Boolean).join(" ");
+  const classes = joinClassNames("qld__select-control", error ? "qld__text-input--error" : undefined, "ssq-select", className);
 
   return (
     <QhdsFormField

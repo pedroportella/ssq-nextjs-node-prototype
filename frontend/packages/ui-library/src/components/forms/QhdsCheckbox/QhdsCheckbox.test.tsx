@@ -11,6 +11,11 @@ describe("QhdsCheckbox", () => {
 
     expect(html).toContain('type="checkbox"');
     expect(html).toContain('for="declaration"');
+    expect(html).toContain("qld__form-group");
+    expect(html).toContain("qld__control-input");
+    expect(html).toContain("qld__control-input__input");
+    expect(html).toContain("qld__control-input__text");
+    expect(html).toContain("qld__input--error");
     expect(html).toContain("ssq-checkbox--disabled");
     expect(html).toContain("ssq-checkbox--invalid");
     expect(html).toContain('disabled=""');

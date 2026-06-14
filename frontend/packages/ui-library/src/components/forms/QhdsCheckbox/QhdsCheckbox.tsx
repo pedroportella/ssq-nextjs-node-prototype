@@ -2,7 +2,7 @@ import { useId } from "react";
 
 import type { InputHTMLAttributes, ReactNode } from "react";
 
-import { getQhdsFieldIds } from "../fieldIds";
+import { getQhdsFieldIds, joinClassNames } from "../fieldIds";
 
 import "./QhdsCheckbox.scss";
 
@@ -29,11 +29,11 @@ export function QhdsCheckbox({
   const generatedId = useId();
   const controlId = id ?? `ssq-checkbox-${generatedId}`;
   const fieldIds = getQhdsFieldIds({ controlId, describedBy: ariaDescribedBy, error, hint });
-  const classes = ["ssq-checkbox__input", className].filter(Boolean).join(" ");
+  const classes = joinClassNames("qld__control-input__input", error ? "qld__input--error" : undefined, "ssq-checkbox__input", className);
 
   return (
-    <div className={["ssq-checkbox", disabled ? "ssq-checkbox--disabled" : "", error ? "ssq-checkbox--invalid" : ""].filter(Boolean).join(" ")}>
-      <div className="ssq-checkbox__control">
+    <div className={joinClassNames("qld__form-group", "ssq-checkbox", disabled && "ssq-checkbox--disabled", error ? "ssq-checkbox--invalid" : undefined)}>
+      <div className="qld__control-input qld__control-input--block ssq-checkbox__control">
         <input
           aria-describedby={fieldIds.describedBy}
           aria-invalid={ariaInvalid ?? (error ? true : undefined)}
@@ -44,19 +44,19 @@ export function QhdsCheckbox({
           type="checkbox"
           {...inputProps}
         />
-        <label className="ssq-checkbox__label" htmlFor={controlId}>
+        <label className="qld__control-input__text ssq-checkbox__label" htmlFor={controlId}>
           {label}
           {required ? <span className="ssq-form-field__requirement">required</span> : null}
-          {!required && optional ? <span className="ssq-form-field__requirement">optional</span> : null}
+          {!required && optional ? <span className="qld__label--optional ssq-form-field__requirement">optional</span> : null}
         </label>
       </div>
       {hint ? (
-        <p className="ssq-form-field__hint ssq-checkbox__hint" id={fieldIds.hintId}>
+        <p className="qld__hint-text ssq-form-field__hint ssq-checkbox__hint" id={fieldIds.hintId}>
           {hint}
         </p>
       ) : null}
       {error ? (
-        <p className="ssq-form-field__error ssq-checkbox__error" id={fieldIds.errorId}>
+        <p className="qld__input--error ssq-form-field__error ssq-checkbox__error" id={fieldIds.errorId}>
           {error}
         </p>
       ) : null}

@@ -25,3 +25,7 @@ export function toSafeControlId(value: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
+
+export function joinClassNames(...classes: Array<false | null | string | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}

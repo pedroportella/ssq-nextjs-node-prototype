@@ -2,7 +2,7 @@ import { useId } from "react";
 
 import type { ReactNode } from "react";
 
-import { getQhdsFieldIds, toSafeControlId } from "../fieldIds";
+import { getQhdsFieldIds, joinClassNames, toSafeControlId } from "../fieldIds";
 
 import "./QhdsRadioGroup.scss";
 
@@ -50,30 +50,38 @@ export function QhdsRadioGroup({
   return (
     <fieldset
       aria-describedby={fieldIds.describedBy}
-      className={["ssq-radio-group", disabled ? "ssq-radio-group--disabled" : "", error ? "ssq-radio-group--invalid" : ""].filter(Boolean).join(" ")}
+      className={joinClassNames(
+        "qld__form-group",
+        "qld__radio-buttons",
+        "ssq-radio-group",
+        disabled && "ssq-radio-group--disabled",
+        error ? "ssq-radio-group--invalid" : undefined
+      )}
       disabled={disabled}
       id={controlId}
     >
-      <legend className="ssq-radio-group__legend">
+      <legend className="qld__fieldset__legend ssq-radio-group__legend">
         {legend}
         {required ? <span className="ssq-form-field__requirement">required</span> : null}
-        {!required && optional ? <span className="ssq-form-field__requirement">optional</span> : null}
+        {!required && optional ? <span className="qld__label--optional ssq-form-field__requirement">optional</span> : null}
       </legend>
       {hint ? (
-        <p className="ssq-form-field__hint" id={fieldIds.hintId}>
+        <p className="qld__hint-text ssq-form-field__hint" id={fieldIds.hintId}>
           {hint}
         </p>
       ) : null}
-      <div className="ssq-radio-group__options">
+      <div className="qld__control-group ssq-radio-group__options">
         {options.map((option) => {
           const optionId = `${controlId}-${toSafeControlId(option.value)}`;
+          const optionHintId = option.hint ? `${optionId}-hint` : undefined;
           const checkedProps = value !== undefined ? { checked: value === option.value } : { defaultChecked: defaultValue === option.value };
 
           return (
-            <div className="ssq-radio" key={option.value}>
+            <div className="qld__control-input qld__control-input--block ssq-radio" key={option.value}>
               <input
+                aria-describedby={optionHintId}
                 aria-invalid={error ? true : undefined}
-                className="ssq-radio__input"
+                className={joinClassNames("qld__control-input__input", error ? "qld__input--error" : undefined, "ssq-radio__input")}
                 disabled={disabled || option.disabled}
                 id={optionId}
                 name={groupName}
@@ -83,16 +91,20 @@ export function QhdsRadioGroup({
                 value={option.value}
                 {...checkedProps}
               />
-              <label className="ssq-radio__label" htmlFor={optionId}>
+              <label className="qld__control-input__text ssq-radio__label" htmlFor={optionId}>
                 {option.label}
               </label>
-              {option.hint ? <p className="ssq-radio__hint">{option.hint}</p> : null}
+              {option.hint ? (
+                <p className="qld__hint-text ssq-radio__hint" id={optionHintId}>
+                  {option.hint}
+                </p>
+              ) : null}
             </div>
           );
         })}
       </div>
       {error ? (
-        <p className="ssq-form-field__error" id={fieldIds.errorId}>
+        <p className="qld__input--error ssq-form-field__error" id={fieldIds.errorId}>
           {error}
         </p>
       ) : null}

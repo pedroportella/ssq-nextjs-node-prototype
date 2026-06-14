@@ -23,10 +23,19 @@ describe("QhdsRadioGroup", () => {
 
     expect(html).toContain("<fieldset");
     expect(html).toContain("<legend");
+    expect(html).toContain("qld__form-group");
+    expect(html).toContain("qld__radio-buttons");
+    expect(html).toContain("qld__fieldset__legend");
+    expect(html).toContain("qld__control-group");
+    expect(html).toContain("qld__control-input");
+    expect(html).toContain("qld__control-input__input");
+    expect(html).toContain("qld__control-input__text");
+    expect(html).toContain("qld__input--error");
     expect(html).toContain('id="age-eligible-yes"');
     expect(html).toContain('for="age-eligible-yes"');
     expect(html).toContain('checked=""');
     expect(html).toContain('aria-describedby="age-eligible-hint age-eligible-error"');
+    expect(html).toContain('aria-describedby="age-eligible-yes-hint"');
     expect(html).toContain("Select one option.");
   });
 });

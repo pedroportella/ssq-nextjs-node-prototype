@@ -20,6 +20,10 @@ describe("QhdsFormField", () => {
     );
 
     expect(html).toContain('for="full-name"');
+    expect(html).toContain("qld__form-group");
+    expect(html).toContain("qld__label");
+    expect(html).toContain("qld__hint-text");
+    expect(html).toContain("qld__input--error");
     expect(html).toContain('id="full-name-hint"');
     expect(html).toContain('id="full-name-error"');
     expect(html).toContain("required");

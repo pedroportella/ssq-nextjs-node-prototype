@@ -3,7 +3,7 @@ import { useId } from "react";
 import type { ReactNode, TextareaHTMLAttributes } from "react";
 
 import { QhdsFormField } from "../QhdsFormField";
-import { getQhdsFieldIds } from "../fieldIds";
+import { getQhdsFieldIds, joinClassNames } from "../fieldIds";
 
 import "./QhdsTextarea.scss";
 
@@ -30,7 +30,7 @@ export function QhdsTextarea({
   const generatedId = useId();
   const controlId = id ?? `ssq-textarea-${generatedId}`;
   const fieldIds = getQhdsFieldIds({ controlId, describedBy: ariaDescribedBy, error, hint });
-  const classes = ["ssq-textarea", className].filter(Boolean).join(" ");
+  const classes = joinClassNames("qld__text-input", "qld__text-input--block", error ? "qld__text-input--error" : undefined, "ssq-textarea", className);
 
   return (
     <QhdsFormField

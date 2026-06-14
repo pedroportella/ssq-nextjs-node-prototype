@@ -18,6 +18,7 @@ describe("QhdsSelect", () => {
     );
 
     expect(html).toContain('for="state"');
+    expect(html).toContain("qld__select-control");
     expect(html).toContain('<option value="qld">Queensland</option>');
     expect(html).toContain('<option disabled="" value="interstate">Interstate</option>');
     expect(html).toContain("optional");

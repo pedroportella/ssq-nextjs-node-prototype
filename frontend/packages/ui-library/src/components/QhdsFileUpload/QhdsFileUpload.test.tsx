@@ -32,6 +32,15 @@ describe("QhdsFileUpload", () => {
 
     expect(html).toContain('type="file"');
     expect(html).toContain('accept="application/pdf,image/png"');
+    expect(html).toContain("qld__form-group");
+    expect(html).toContain("qld__label");
+    expect(html).toContain("qld__hint-text");
+    expect(html).toContain("qld__form-file-wrapper");
+    expect(html).toContain("qld__form-file-dropzone");
+    expect(html).toContain("qld__file-input");
+    expect(html).toContain("qld__form-file-preview");
+    expect(html).toContain("qld__form-file--success");
+    expect(html).toContain("qld__form-file--error");
     expect(html).toContain("Maximum file size: 10.0 MB");
     expect(html).toContain("identity.pdf");
     expect(html).toContain("archive.zip");
@@ -43,6 +52,7 @@ describe("QhdsFileUpload", () => {
     const html = renderToStaticMarkup(
       <QhdsFileUpload
         error="Choose a smaller file."
+        hint="Upload documents that support this request."
         label="Upload supporting documents"
         multiple
         name="documents"
@@ -55,7 +65,9 @@ describe("QhdsFileUpload", () => {
     );
 
     expect(html).toContain('aria-invalid="true"');
-    expect(html).toContain('aria-describedby="supporting-documents-hint supporting-documents-error"');
+    expect(html).toContain('aria-describedby="supporting-documents-custom-hint supporting-documents-hint supporting-documents-error"');
+    expect(html).toContain('id="supporting-documents-custom-hint"');
+    expect(html).toContain("qld__input--error");
     expect(html).toContain("Choose a smaller file.");
     expect(html).toContain("multiple");
   });
