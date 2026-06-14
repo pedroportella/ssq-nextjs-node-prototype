@@ -4,11 +4,14 @@ import {
   QhdsCard,
   QhdsCol,
   QhdsContainer,
+  QhdsContentSection,
   QhdsFooter,
   QhdsHeader,
   QhdsLayout,
   QhdsPageAlert,
-  QhdsRow
+  QhdsPageHeader,
+  QhdsRow,
+  QhdsSummaryList
 } from "@ssq/ui-library";
 
 import styles from "./SeniorsCardHomeContainer.module.scss";
@@ -20,21 +23,21 @@ export function SeniorsCardOverviewContent({ shell, workflow }: { shell: AppShel
   return (
     <QhdsLayout footer={<QhdsFooter />} header={<QhdsHeader />}>
       <QhdsContainer aria-labelledby="page-title">
-        <QhdsRow className={styles.hero}>
-          <QhdsCol lg={8} xl={8}>
-            <h1 className={styles.title} id="page-title">
-              {shell.app.label}
-            </h1>
-            <p className={`qld__abstract ${styles.lead}`}>Check eligibility and prepare a prototype Seniors Card application.</p>
-          </QhdsCol>
-          <QhdsCol lg={4} xl={4}>
-            <div className={styles.profileSummary} aria-label="Profile summary">
-              <p className={styles.eyebrow}>Applicant</p>
-              <p className={styles.profileName}>{workflow.profile.displayName}</p>
-              <p className={styles.meta}>{workflow.profile.email}</p>
-            </div>
-          </QhdsCol>
-        </QhdsRow>
+        <QhdsPageHeader
+          aside={
+            <QhdsSummaryList
+              ariaLabel="Applicant summary"
+              items={[
+                { description: workflow.profile.displayName, term: "Applicant" },
+                { description: workflow.profile.email, term: "Email" },
+                { description: workflow.profile.identityStrength, term: "Identity" }
+              ]}
+            />
+          }
+          heading={shell.app.label}
+          headingId="page-title"
+          lead="Check eligibility and prepare a prototype Seniors Card application."
+        />
 
         <QhdsPageAlert heading="Frontend-only workflow" tone="success">
           <p>
@@ -43,28 +46,30 @@ export function SeniorsCardOverviewContent({ shell, workflow }: { shell: AppShel
           </p>
         </QhdsPageAlert>
 
-        <QhdsRow className={styles.cardGrid}>
-          <QhdsCol lg={4} xl={4}>
-            <QhdsCard action={<QhdsButton href="/apply">Start application</QhdsButton>} heading="Apply for a Seniors Card">
-              <p>Check your eligibility, review prefilled details and prepare a draft application.</p>
-            </QhdsCard>
-          </QhdsCol>
-          <QhdsCol lg={4} xl={4}>
-            <QhdsCard action={<QhdsButton href="/application-status" variant="secondary">View status</QhdsButton>} heading="Track your request">
-              <p>
-                View mock submission reference <strong>{workflow.submittedRequest.referenceNumber}</strong> and recent activity.
-              </p>
-            </QhdsCard>
-          </QhdsCol>
-          <QhdsCol lg={4} xl={4}>
-            <QhdsCard heading="Saved draft">
-              <p>
-                Draft <strong>{workflow.draft.draftId}</strong> is ready to continue.
-              </p>
-              <p className={styles.meta}>Last updated {new Date(workflow.draft.lastUpdated).toLocaleString("en-AU")}</p>
-            </QhdsCard>
-          </QhdsCol>
-        </QhdsRow>
+        <QhdsContentSection heading="Manage this application">
+          <QhdsRow className={styles.sectionGrid}>
+            <QhdsCol lg={4} xl={4}>
+              <QhdsCard action={<QhdsButton href="/apply">Start application</QhdsButton>} heading="Apply for a Seniors Card">
+                <p>Check your eligibility, review prefilled details and prepare a draft application.</p>
+              </QhdsCard>
+            </QhdsCol>
+            <QhdsCol lg={4} xl={4}>
+              <QhdsCard action={<QhdsButton href="/application-status" variant="secondary">View status</QhdsButton>} heading="Track your request">
+                <p>
+                  View mock submission reference <strong>{workflow.submittedRequest.referenceNumber}</strong> and recent activity.
+                </p>
+              </QhdsCard>
+            </QhdsCol>
+            <QhdsCol lg={4} xl={4}>
+              <QhdsCard heading="Saved draft">
+                <p>
+                  Draft <strong>{workflow.draft.draftId}</strong> is ready to continue.
+                </p>
+                <p className={styles.meta}>Last updated {new Date(workflow.draft.lastUpdated).toLocaleString("en-AU")}</p>
+              </QhdsCard>
+            </QhdsCol>
+          </QhdsRow>
+        </QhdsContentSection>
       </QhdsContainer>
     </QhdsLayout>
   );

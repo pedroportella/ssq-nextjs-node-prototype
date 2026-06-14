@@ -1,0 +1,37 @@
+.ssq-summary-list {
+  margin: 0;
+}
+
+.ssq-summary-list__row {
+  border-top: 1px solid var(--ssq-color-border);
+  display: grid;
+  gap: var(--ssq-space-1);
+  padding: var(--ssq-space-3) 0;
+}
+
+.ssq-summary-list__row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ssq-summary-list__row:last-child {
+  padding-bottom: 0;
+}
+
+.ssq-summary-list__term {
+  color: var(--ssq-color-muted);
+  font-weight: 700;
+  margin: 0;
+}
+
+.ssq-summary-list__description {
+  margin: 0;
+  min-width: 0;
+}
+
+@media (min-width: 48rem) {
+  .ssq-summary-list__row {
+    gap: var(--ssq-space-4);
+    grid-template-columns: minmax(9rem, 0.45fr) minmax(0, 1fr);
+  }
+}

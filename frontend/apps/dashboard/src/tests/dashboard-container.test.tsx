@@ -63,8 +63,12 @@ describe("DashboardContent", () => {
     expect(html).toContain("qld__grid");
     expect(html).toContain("container-fluid");
     expect(html).toContain("row");
-    expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
-    expect(html).toContain("col-xs-12 col-sm-6 col-lg-3 col-xl-3");
+    expect(html).toContain("ssq-page-header");
+    expect(html).toContain("ssq-content-section");
+    expect(html).toContain("qld__summary-list");
+    expect(html).toContain("qld__table");
+    expect(html).toContain("Dashboard summary");
+    expect(html).toContain("Current records");
     expect(html).toContain("Avery Taylor");
     expect(html).toContain("Frontend mock runtime");
     expect(html).toContain("Seniors Card");

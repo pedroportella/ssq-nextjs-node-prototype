@@ -6,15 +6,15 @@ import {
 } from "@ssq/services/server";
 import {
   QhdsButton,
-  QhdsCard,
-  QhdsCol,
   QhdsContainer,
+  QhdsContentSection,
   QhdsFileUpload,
   QhdsFooter,
   QhdsHeader,
   QhdsLayout,
   QhdsPageAlert,
-  QhdsRow,
+  QhdsPageHeader,
+  QhdsSummaryList,
   QhdsTable
 } from "@ssq/ui-library";
 
@@ -44,10 +44,20 @@ export function RentalSecuritySubsidyStatusContent({
   return (
     <QhdsLayout footer={<QhdsFooter />} header={<QhdsHeader />}>
       <QhdsContainer aria-labelledby="page-title">
-        <h1 className={styles.title} id="page-title">
-          Rental Security Subsidy application status
-        </h1>
-        <p className={`qld__abstract ${styles.lead}`}>Track the mock submission produced by the frontend-only rental workflow.</p>
+        <QhdsPageHeader
+          aside={
+            <QhdsSummaryList
+              ariaLabel="Request status summary"
+              items={[
+                { description: submitResult.referenceNumber, term: "Reference" },
+                { description: formatStatus(submitResult.status), term: "Status" }
+              ]}
+            />
+          }
+          heading="Rental Security Subsidy application status"
+          headingId="page-title"
+          lead="Track the mock submission produced by the frontend-only rental workflow."
+        />
 
         <QhdsPageAlert heading="Application submitted" tone="success">
           <p>
@@ -56,51 +66,45 @@ export function RentalSecuritySubsidyStatusContent({
           </p>
         </QhdsPageAlert>
 
-        <QhdsRow className={styles.cardGrid}>
-          <QhdsCol lg={6} xl={6}>
-            <QhdsCard action={<QhdsButton href="/apply">Review application</QhdsButton>} heading="Request summary">
-              <p>
-                Applicant: <strong>{workflow.profile.displayName}</strong>
-              </p>
-              <p>
-                Summary file: <strong>{submitResult.summary.filename}</strong>
-              </p>
-              <p>
-                <a href={submitResult.summary.href}>Download submission summary</a>
-              </p>
-            </QhdsCard>
-          </QhdsCol>
+        <QhdsContentSection heading="Request summary">
+          <QhdsSummaryList
+            ariaLabel="Request summary"
+            items={[
+              { description: workflow.profile.displayName, term: "Applicant" },
+              { description: submitResult.summary.filename, term: "Summary file" }
+            ]}
+          />
+          <div className={styles.sectionActions}>
+            <QhdsButton href="/apply">Review application</QhdsButton>
+            <a href={submitResult.summary.href}>Download submission summary</a>
+          </div>
+        </QhdsContentSection>
 
-          <QhdsCol lg={6} xl={6}>
-            <QhdsCard heading="Supporting documents">
-              <QhdsFileUpload
-                hint="The mock upload policy shows accepted and rejected file states without storing real files."
-                label="Upload supporting documents"
-                name="supportingDocuments"
-                policy={uploadPolicy}
-                uploadedFiles={supportingDocuments}
-              />
-            </QhdsCard>
-          </QhdsCol>
+        <QhdsContentSection heading="Supporting documents">
+          <QhdsFileUpload
+            hint="The mock upload policy shows accepted and rejected file states without storing real files."
+            label="Upload supporting documents"
+            name="supportingDocuments"
+            policy={uploadPolicy}
+            uploadedFiles={supportingDocuments}
+          />
+        </QhdsContentSection>
 
-          <QhdsCol lg={6} xl={6}>
-            <QhdsCard heading="Recent activity">
-              <QhdsTable
-                caption="Recent activity history"
-                columns={[
-                  { header: "Activity", key: "activity" },
-                  { header: "Status", key: "status" }
-                ]}
-                rows={submitResult.activity.map((entry, index) => ({
-                  activity: entry.description,
-                  id: `${entry.at}-${index}`,
-                  status: formatStatus(entry.status)
-                }))}
-                striped
-              />
-            </QhdsCard>
-          </QhdsCol>
-        </QhdsRow>
+        <QhdsContentSection heading="Recent activity">
+          <QhdsTable
+            caption="Recent activity history"
+            columns={[
+              { header: "Activity", key: "activity" },
+              { header: "Status", key: "status" }
+            ]}
+            rows={submitResult.activity.map((entry, index) => ({
+              activity: entry.description,
+              id: `${entry.at}-${index}`,
+              status: formatStatus(entry.status)
+            }))}
+            striped
+          />
+        </QhdsContentSection>
       </QhdsContainer>
     </QhdsLayout>
   );

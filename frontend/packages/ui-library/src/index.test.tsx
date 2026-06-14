@@ -4,6 +4,7 @@ import {
   QhdsButton,
   QhdsCard,
   QhdsCheckbox,
+  QhdsContentSection,
   QhdsDirectionLink,
   QhdsFooter,
   QhdsFormField,
@@ -16,13 +17,16 @@ import {
   QhdsTextInput,
   QhdsHeader,
   QhdsLayout,
-  QhdsPageAlert
+  QhdsPageAlert,
+  QhdsPageHeader,
+  QhdsSummaryList
 } from "./index";
 
 describe("ui-library public exports", () => {
   it("exports app-facing layout and core components", () => {
     expect(QhdsButton).toBeTypeOf("function");
     expect(QhdsCard).toBeTypeOf("function");
+    expect(QhdsContentSection).toBeTypeOf("function");
     expect(QhdsDirectionLink).toBeTypeOf("function");
     expect(QhdsFooter).toBeTypeOf("function");
     expect(QhdsCol).toBeTypeOf("function");
@@ -30,7 +34,9 @@ describe("ui-library public exports", () => {
     expect(QhdsHeader).toBeTypeOf("function");
     expect(QhdsLayout).toBeTypeOf("function");
     expect(QhdsPageAlert).toBeTypeOf("function");
+    expect(QhdsPageHeader).toBeTypeOf("function");
     expect(QhdsRow).toBeTypeOf("function");
+    expect(QhdsSummaryList).toBeTypeOf("function");
   });
 
   it("exports app-facing form components", () => {

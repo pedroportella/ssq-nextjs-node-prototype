@@ -112,7 +112,9 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("qld__grid");
     expect(html).toContain("container-fluid");
     expect(html).toContain("row");
-    expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
+    expect(html).toContain("ssq-page-header");
+    expect(html).toContain("ssq-content-section");
+    expect(html).toContain("qld__summary-list");
     expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
     expect(html).toContain("Frontend-only workflow");
     expect(html).toContain('href="/apply"');
@@ -165,7 +167,9 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("qld__grid");
     expect(html).toContain("container-fluid");
     expect(html).toContain("row");
-    expect(html).toContain("col-xs-12 col-lg-6 col-xl-6");
+    expect(html).toContain("ssq-page-header");
+    expect(html).toContain("ssq-content-section");
+    expect(html).toContain("qld__summary-list");
     expect(html).toContain("qld__page-alerts--success");
     expect(html).toContain("qld__table");
     expect(html).toContain("qld__table__caption");

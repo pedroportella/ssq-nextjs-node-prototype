@@ -1,0 +1,28 @@
+.ssq-content-section {
+  margin-top: var(--ssq-space-8);
+}
+
+.ssq-content-section__header {
+  margin-bottom: var(--ssq-space-4);
+}
+
+.ssq-content-section__heading,
+.ssq-content-section__lead {
+  margin-top: 0;
+}
+
+.ssq-content-section__lead {
+  color: var(--ssq-color-muted);
+}
+
+.ssq-content-section__body {
+  min-width: 0;
+}
+
+.ssq-content-section__body > :first-child {
+  margin-top: 0;
+}
+
+.ssq-content-section__body > :last-child {
+  margin-bottom: 0;
+}

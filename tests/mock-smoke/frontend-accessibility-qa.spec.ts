@@ -148,7 +148,7 @@ async function expectQhdsGridFoundation(page: Page, viewportWidth: number) {
         .filter((container) => !container.closest(".qld__header"))
         .map((container) => container.getBoundingClientRect().width),
       desktopColumnWidths: columns
-        .filter((column) => /\bcol-lg-[1-9]\b/.test(column.className))
+        .filter((column) => /\bcol-lg-(?:[1-9]|10|11)\b/.test(column.className))
         .map((column) => {
           const row = column.closest(".row");
           return {
@@ -169,8 +169,11 @@ async function expectQhdsGridFoundation(page: Page, viewportWidth: number) {
   expect(gridState.columnClassNames.some((className) => className.includes("col-xs-12"))).toBe(true);
 
   if (viewportWidth >= 992) {
-    expect(gridState.columnClassNames.some((className) => /col-lg-[1-9]/.test(className))).toBe(true);
-    expect(gridState.desktopColumnWidths.some((widths) => widths.column > 0 && widths.column < widths.row)).toBe(true);
+    expect(gridState.columnClassNames.some((className) => /\bcol-lg-(?:[1-9]|1[0-2])\b/.test(className))).toBe(true);
+
+    if (gridState.desktopColumnWidths.length > 0) {
+      expect(gridState.desktopColumnWidths.some((widths) => widths.column > 0 && widths.column < widths.row)).toBe(true);
+    }
   }
 }
 
@@ -409,6 +412,11 @@ async function expectQhdsContrastFoundation(page: Page) {
       ".ssq-card__heading",
       ".ssq-page-alert",
       ".ssq-page-alert__heading",
+      ".ssq-page-header__context",
+      ".ssq-page-header__lead",
+      ".ssq-content-section__lead",
+      ".ssq-summary-list__term",
+      ".ssq-summary-list__description",
       ".ssq-form-field__hint",
       ".ssq-form-field__error",
       ".ssq-radio__hint",
@@ -462,17 +470,28 @@ async function expectQhdsComponentHooks(page: Page, path: string) {
     alertCount: document.querySelectorAll(".qld__page-alerts").length,
     buttonCount: document.querySelectorAll(".qld__btn").length,
     cardCount: document.querySelectorAll(".qld__card").length,
+    contentSectionCount: document.querySelectorAll(".ssq-content-section").length,
     directionLinkCount: document.querySelectorAll(".qld__direction-link").length,
+    pageHeaderCount: document.querySelectorAll(".ssq-page-header").length,
     progressCount: document.querySelectorAll(".qld__progress-indicator").length,
+    summaryListCount: document.querySelectorAll(".qld__summary-list").length,
     tableCount: document.querySelectorAll(".qld__table").length
   }));
 
-  expect(componentState.cardCount).toBeGreaterThan(0);
   expect(componentState.buttonCount).toBeGreaterThan(0);
 
   if (path === "/apply") {
+    expect(componentState.cardCount).toBeGreaterThan(0);
     expect(componentState.directionLinkCount).toBeGreaterThan(0);
     expect(componentState.progressCount).toBeGreaterThan(0);
+  } else {
+    expect(componentState.contentSectionCount).toBeGreaterThan(0);
+    expect(componentState.pageHeaderCount).toBeGreaterThan(0);
+    expect(componentState.summaryListCount).toBeGreaterThan(0);
+  }
+
+  if (path === "/") {
+    expect(componentState.cardCount).toBeGreaterThan(0);
   }
 
   if (path === "/application-status") {
