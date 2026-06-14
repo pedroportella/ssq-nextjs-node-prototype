@@ -1,4 +1,8 @@
 .ssq-header {
+  --ssq-color-link: var(--ssq-color-header-text);
+  --ssq-color-link-decoration: var(--ssq-color-header-text);
+  --ssq-color-link-visited: var(--ssq-color-header-text);
+
   background: var(--ssq-color-header-background);
   color: var(--ssq-color-header-text);
 }

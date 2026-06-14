@@ -23,6 +23,8 @@ describe("prototypeTokens", () => {
     expect(prototypeTokens.color.primitive.lightBackgroundAlt).toBe("#e3e7ea");
     expect(prototypeTokens.color.primitive.darkBackground).toBe("#005eb8");
     expect(prototypeTokens.color.primitive.darkBackgroundAlt).toBe("#001d74");
+    expect(prototypeTokens.color.primitive.darkModeBackground).toBe("#000053");
+    expect(prototypeTokens.color.primitive.darkVisitedLink).toBe("#ffffff");
   });
 
   it("exposes QHDS custom properties and stable SSQ aliases for components", () => {
@@ -33,6 +35,11 @@ describe("prototypeTokens", () => {
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-heading");
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-action");
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-link");
+    expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-error-border");
+    expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-invalid-border");
+    expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-info-text");
+    expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-success-text");
+    expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-warning-text");
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-header-background");
   });
 
@@ -68,9 +75,18 @@ describe("prototypeTokens", () => {
     expect(styles).toContain("--ssq-palette-bright-background: var(--QLD-color-light__background)");
     expect(styles).toContain("--ssq-palette-alt-background: var(--QLD-color-light__background--alt)");
     expect(styles).toContain("--ssq-palette-bold-background: var(--QLD-color-dark__background)");
+    expect(styles).toContain("--ssq-palette-bold-link-visited: var(--QLD-color-dark__link)");
     expect(styles).toContain("--ssq-palette-strong-background: var(--QLD-color-dark__background--alt)");
+    expect(styles).toContain("--ssq-palette-strong-link-visited: var(--QLD-color-dark__link)");
+    expect(styles).toContain("--ssq-palette-feedback-error: var(--QLD-color-status__error--darker)");
+    expect(styles).toContain("--ssq-palette-feedback-error-border: var(--QLD-color-status__error)");
+    expect(styles).toContain("--ssq-palette-feedback-warning-border: var(--QLD-color-status__caution--darker)");
+    expect(styles).toContain("--ssq-palette-feedback-info-text: var(--QLD-color-light__text)");
     expect(styles).toContain("@media (prefers-color-scheme: dark)");
-    expect(styles).toContain("--ssq-color-background: var(--ssq-palette-bold-background)");
+    expect(styles).toContain("--ssq-color-background: var(--ssq-primitive-color-black)");
+    expect(styles).toContain("--ssq-color-link-visited: var(--ssq-palette-bold-link-visited)");
+    expect(styles).toContain("--ssq-color-error: var(--QLD-color-status__error--lightest)");
+    expect(styles).toContain("--ssq-color-invalid-border: var(--QLD-color-status__error--lightest)");
     expect(styles).toContain("--ssq-color-focus: var(--ssq-palette-bold-focus)");
   });
 

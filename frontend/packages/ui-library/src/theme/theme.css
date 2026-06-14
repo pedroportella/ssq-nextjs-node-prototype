@@ -224,9 +224,16 @@ p.qld__abstract {
   --ssq-color-heading: var(--ssq-palette-bright-heading);
   --ssq-color-text: var(--ssq-palette-bright-text);
   --ssq-color-muted: var(--ssq-palette-bright-muted);
+  --ssq-color-border: var(--ssq-palette-bright-border);
+  --ssq-color-border-strong: var(--ssq-palette-bright-border-strong);
+  --ssq-color-action: var(--ssq-palette-bright-action);
+  --ssq-color-action-text: var(--ssq-palette-bright-action-text);
   --ssq-color-link: var(--ssq-palette-bright-link);
   --ssq-color-link-visited: var(--ssq-palette-bright-link-visited);
   --ssq-color-link-decoration: var(--ssq-palette-bright-link-decoration);
+  --ssq-color-error: var(--ssq-palette-feedback-error);
+  --ssq-color-error-border: var(--ssq-palette-feedback-error-border);
+  --ssq-color-invalid-border: var(--ssq-palette-feedback-error);
   --ssq-color-focus: var(--ssq-palette-bright-focus);
 
   background: var(--ssq-color-background);
@@ -239,9 +246,16 @@ p.qld__abstract {
   --ssq-color-heading: var(--ssq-palette-alt-heading);
   --ssq-color-text: var(--ssq-palette-alt-text);
   --ssq-color-muted: var(--ssq-palette-alt-muted);
+  --ssq-color-border: var(--ssq-palette-alt-border);
+  --ssq-color-border-strong: var(--ssq-palette-alt-border-strong);
+  --ssq-color-action: var(--ssq-palette-alt-action);
+  --ssq-color-action-text: var(--ssq-palette-alt-action-text);
   --ssq-color-link: var(--ssq-palette-bright-link);
   --ssq-color-link-visited: var(--ssq-palette-bright-link-visited);
   --ssq-color-link-decoration: var(--ssq-palette-bright-link-decoration);
+  --ssq-color-error: var(--ssq-palette-feedback-error);
+  --ssq-color-error-border: var(--ssq-palette-feedback-error-border);
+  --ssq-color-invalid-border: var(--ssq-palette-feedback-error);
   --ssq-color-focus: var(--ssq-palette-bright-focus);
 
   background: var(--ssq-color-background);
@@ -255,9 +269,15 @@ p.qld__abstract {
   --ssq-color-heading: var(--ssq-palette-bold-heading);
   --ssq-color-text: var(--ssq-palette-bold-text);
   --ssq-color-muted: var(--ssq-palette-bold-muted);
+  --ssq-color-border: var(--ssq-palette-bold-border);
+  --ssq-color-border-strong: var(--ssq-palette-bold-border-strong);
+  --ssq-color-action: var(--ssq-palette-bold-action);
+  --ssq-color-action-text: var(--ssq-palette-bold-action-text);
   --ssq-color-link: var(--ssq-palette-bold-link);
-  --ssq-color-link-visited: var(--QLD-color-dark__link--visited);
+  --ssq-color-link-visited: var(--ssq-palette-bold-link-visited);
   --ssq-color-link-decoration: var(--ssq-palette-bold-link-decoration);
+  --ssq-color-error: var(--QLD-color-status__error--lightest);
+  --ssq-color-invalid-border: var(--QLD-color-status__error--lightest);
   --ssq-color-focus: var(--ssq-palette-bold-focus);
 
   background: var(--ssq-color-background);
@@ -271,9 +291,15 @@ p.qld__abstract {
   --ssq-color-heading: var(--ssq-palette-strong-heading);
   --ssq-color-text: var(--ssq-palette-strong-text);
   --ssq-color-muted: var(--ssq-palette-strong-muted);
+  --ssq-color-border: var(--ssq-palette-strong-border);
+  --ssq-color-border-strong: var(--ssq-palette-strong-border-strong);
+  --ssq-color-action: var(--ssq-palette-strong-action);
+  --ssq-color-action-text: var(--ssq-palette-strong-action-text);
   --ssq-color-link: var(--ssq-palette-strong-link);
-  --ssq-color-link-visited: var(--QLD-color-dark__link--visited);
+  --ssq-color-link-visited: var(--ssq-palette-strong-link-visited);
   --ssq-color-link-decoration: var(--ssq-palette-strong-link-decoration);
+  --ssq-color-error: var(--QLD-color-status__error--lightest);
+  --ssq-color-invalid-border: var(--QLD-color-status__error--lightest);
   --ssq-color-focus: var(--ssq-palette-strong-focus);
 
   background: var(--ssq-color-background);
@@ -286,8 +312,10 @@ p.qld__abstract {
   --ssq-color-text: var(--ssq-palette-strong-text);
   --ssq-color-muted: var(--ssq-palette-strong-muted);
   --ssq-color-link: var(--ssq-palette-strong-link);
-  --ssq-color-link-visited: var(--QLD-color-dark__link--visited);
+  --ssq-color-link-visited: var(--ssq-palette-strong-link-visited);
   --ssq-color-link-decoration: var(--ssq-palette-strong-link-decoration);
+  --ssq-color-error: var(--QLD-color-status__error--lightest);
+  --ssq-color-invalid-border: var(--QLD-color-status__error--lightest);
   --ssq-color-focus: var(--ssq-palette-strong-focus);
 }
 

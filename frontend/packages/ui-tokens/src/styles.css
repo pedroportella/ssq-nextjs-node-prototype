@@ -112,7 +112,7 @@
   --QLD-color-contained-layout__background: #eff4f9;
 
   --ssq-primitive-color-white: #ffffff;
-  --ssq-primitive-color-black: #000000;
+  --ssq-primitive-color-black: #000053;
   --ssq-primitive-color-heading: var(--QLD-color-light__heading);
   --ssq-primitive-color-text: var(--QLD-color-light__text);
   --ssq-primitive-color-text-lighter: var(--QLD-color-light__text--lighter);
@@ -166,6 +166,7 @@
   --ssq-palette-bold-action: var(--QLD-color-dark__action--primary);
   --ssq-palette-bold-action-text: var(--QLD-color-dark__link--on-action);
   --ssq-palette-bold-link: var(--QLD-color-dark__link);
+  --ssq-palette-bold-link-visited: var(--QLD-color-dark__link);
   --ssq-palette-bold-link-decoration: var(--QLD-color-dark__underline);
   --ssq-palette-bold-focus: var(--QLD-color-dark__focus);
   --ssq-palette-bold-header-background: var(--QLD-color-dark__background);
@@ -182,6 +183,7 @@
   --ssq-palette-strong-action: var(--QLD-color-dark__action--primary);
   --ssq-palette-strong-action-text: var(--QLD-color-dark__link--on-action);
   --ssq-palette-strong-link: var(--QLD-color-dark__link);
+  --ssq-palette-strong-link-visited: var(--QLD-color-dark__link);
   --ssq-palette-strong-link-decoration: var(--QLD-color-dark__underline);
   --ssq-palette-strong-focus: var(--QLD-color-dark__focus);
 
@@ -190,9 +192,14 @@
   --ssq-palette-feedback-success-background: var(--QLD-color-status__success--lightest);
   --ssq-palette-feedback-success-border: var(--QLD-color-status__success);
   --ssq-palette-feedback-warning-background: var(--QLD-color-status__caution--lightest);
-  --ssq-palette-feedback-warning-border: var(--QLD-color-status__caution);
-  --ssq-palette-feedback-error: var(--QLD-color-status__error);
+  --ssq-palette-feedback-warning-border: var(--QLD-color-status__caution--darker);
+  --ssq-palette-feedback-error: var(--QLD-color-status__error--darker);
+  --ssq-palette-feedback-error-border: var(--QLD-color-status__error);
   --ssq-palette-feedback-error-background: var(--QLD-color-status__error--lightest);
+  --ssq-palette-feedback-info-text: var(--QLD-color-light__text);
+  --ssq-palette-feedback-success-text: var(--QLD-color-light__text);
+  --ssq-palette-feedback-warning-text: var(--QLD-color-light__text);
+  --ssq-palette-feedback-error-text: var(--QLD-color-light__text);
 
   --ssq-space-0: 0;
   --ssq-space-1: 0.25rem;
@@ -286,17 +293,23 @@
   --ssq-color-link-visited: var(--ssq-palette-bright-link-visited);
   --ssq-color-link-decoration: var(--ssq-palette-bright-link-decoration);
   --ssq-color-error: var(--ssq-palette-feedback-error);
+  --ssq-color-error-border: var(--ssq-palette-feedback-error-border);
   --ssq-color-error-background: var(--ssq-palette-feedback-error-background);
+  --ssq-color-invalid-border: var(--ssq-palette-feedback-error);
   --ssq-color-focus: var(--ssq-palette-bright-focus);
   --ssq-color-header-accent: var(--ssq-palette-bright-header-accent);
   --ssq-color-header-background: var(--ssq-palette-bright-header-background);
   --ssq-color-header-text: var(--ssq-palette-bright-header-text);
   --ssq-color-info-background: var(--ssq-palette-feedback-info-background);
   --ssq-color-info-border: var(--ssq-palette-feedback-info-border);
+  --ssq-color-info-text: var(--ssq-palette-feedback-info-text);
   --ssq-color-success-background: var(--ssq-palette-feedback-success-background);
   --ssq-color-success-border: var(--ssq-palette-feedback-success-border);
+  --ssq-color-success-text: var(--ssq-palette-feedback-success-text);
   --ssq-color-warning-background: var(--ssq-palette-feedback-warning-background);
   --ssq-color-warning-border: var(--ssq-palette-feedback-warning-border);
+  --ssq-color-warning-text: var(--ssq-palette-feedback-warning-text);
+  --ssq-color-error-text: var(--ssq-palette-feedback-error-text);
 }
 
 [data-ssq-theme="light"] {
@@ -314,12 +327,15 @@
   --ssq-color-link: var(--ssq-palette-bright-link);
   --ssq-color-link-visited: var(--ssq-palette-bright-link-visited);
   --ssq-color-link-decoration: var(--ssq-palette-bright-link-decoration);
+  --ssq-color-error: var(--ssq-palette-feedback-error);
+  --ssq-color-error-border: var(--ssq-palette-feedback-error-border);
+  --ssq-color-invalid-border: var(--ssq-palette-feedback-error);
   --ssq-color-focus: var(--ssq-palette-bright-focus);
 }
 
 [data-ssq-theme="dark"] {
   --ssq-color-scheme: dark;
-  --ssq-color-background: var(--ssq-palette-bold-background);
+  --ssq-color-background: var(--ssq-primitive-color-black);
   --ssq-color-surface: var(--ssq-palette-bold-surface);
   --ssq-color-surface-alt: var(--ssq-palette-bold-surface);
   --ssq-color-heading: var(--ssq-palette-bold-heading);
@@ -330,15 +346,17 @@
   --ssq-color-action: var(--ssq-palette-bold-action);
   --ssq-color-action-text: var(--ssq-palette-bold-action-text);
   --ssq-color-link: var(--ssq-palette-bold-link);
-  --ssq-color-link-visited: var(--QLD-color-dark__link--visited);
+  --ssq-color-link-visited: var(--ssq-palette-bold-link-visited);
   --ssq-color-link-decoration: var(--ssq-palette-bold-link-decoration);
+  --ssq-color-error: var(--QLD-color-status__error--lightest);
+  --ssq-color-invalid-border: var(--QLD-color-status__error--lightest);
   --ssq-color-focus: var(--ssq-palette-bold-focus);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --ssq-color-scheme: dark;
-    --ssq-color-background: var(--ssq-palette-bold-background);
+    --ssq-color-background: var(--ssq-primitive-color-black);
     --ssq-color-surface: var(--ssq-palette-bold-surface);
     --ssq-color-surface-alt: var(--ssq-palette-bold-surface);
     --ssq-color-heading: var(--ssq-palette-bold-heading);
@@ -349,8 +367,10 @@
     --ssq-color-action: var(--ssq-palette-bold-action);
     --ssq-color-action-text: var(--ssq-palette-bold-action-text);
     --ssq-color-link: var(--ssq-palette-bold-link);
-    --ssq-color-link-visited: var(--QLD-color-dark__link--visited);
+    --ssq-color-link-visited: var(--ssq-palette-bold-link-visited);
     --ssq-color-link-decoration: var(--ssq-palette-bold-link-decoration);
+    --ssq-color-error: var(--QLD-color-status__error--lightest);
+    --ssq-color-invalid-border: var(--QLD-color-status__error--lightest);
     --ssq-color-focus: var(--ssq-palette-bold-focus);
     --ssq-color-header-accent: var(--ssq-palette-bold-header-accent);
     --ssq-color-header-background: var(--ssq-palette-bold-header-background);

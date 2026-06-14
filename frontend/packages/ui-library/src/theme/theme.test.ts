@@ -51,5 +51,12 @@ describe("QHDS theme entrypoint", () => {
     expect(themeCss).toContain("--ssq-color-background: var(--ssq-palette-alt-background)");
     expect(themeCss).toContain("--ssq-color-background: var(--ssq-palette-bold-background)");
     expect(themeCss).toContain("--ssq-color-background: var(--ssq-palette-strong-background)");
+    expect(themeCss).toContain("--ssq-color-link-visited: var(--ssq-palette-bold-link-visited)");
+    expect(themeCss).toContain("--ssq-color-link-visited: var(--ssq-palette-strong-link-visited)");
+    expect(themeCss).toContain("--ssq-color-action: var(--ssq-palette-bright-action)");
+    expect(themeCss).toContain("--ssq-color-error: var(--ssq-palette-feedback-error)");
+    expect(themeCss).toContain("--ssq-color-error: var(--QLD-color-status__error--lightest)");
+    expect(themeCss).toContain("--ssq-color-invalid-border: var(--ssq-palette-feedback-error)");
+    expect(themeCss).toContain("--ssq-color-invalid-border: var(--QLD-color-status__error--lightest)");
   });
 });

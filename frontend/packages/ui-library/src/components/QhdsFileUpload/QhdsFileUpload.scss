@@ -25,7 +25,7 @@
 }
 
 .ssq-file-upload--invalid .ssq-file-upload__input {
-  border-color: var(--ssq-color-error);
+  border-color: var(--ssq-color-invalid-border);
 }
 
 .ssq-file-upload__error {
@@ -50,7 +50,7 @@
 }
 
 .ssq-file-upload__item--rejected {
-  border-left-color: var(--ssq-color-error);
+  border-left-color: var(--ssq-color-invalid-border);
 }
 
 .ssq-file-upload__file-name,

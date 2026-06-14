@@ -7,6 +7,8 @@ export const prototypeTokens = {
       darkBackground: "#005eb8",
       darkBackgroundAlt: "#001d74",
       darkFocus: "#c6ffff",
+      darkModeBackground: "#000053",
+      darkVisitedLink: "#ffffff",
       heading: "#000053",
       lightBackground: "#e6f6ff",
       lightBackgroundAlt: "#e3e7ea",
@@ -45,17 +47,23 @@ export const prototypeTokens = {
       "--ssq-color-link-visited",
       "--ssq-color-link-decoration",
       "--ssq-color-error",
+      "--ssq-color-error-border",
       "--ssq-color-error-background",
+      "--ssq-color-invalid-border",
       "--ssq-color-focus",
       "--ssq-color-header-accent",
       "--ssq-color-header-background",
       "--ssq-color-header-text",
       "--ssq-color-info-background",
       "--ssq-color-info-border",
+      "--ssq-color-info-text",
       "--ssq-color-success-background",
       "--ssq-color-success-border",
+      "--ssq-color-success-text",
       "--ssq-color-warning-background",
-      "--ssq-color-warning-border"
+      "--ssq-color-warning-border",
+      "--ssq-color-warning-text",
+      "--ssq-color-error-text"
     ]
   },
   radius: {
