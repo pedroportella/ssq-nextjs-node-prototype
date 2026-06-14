@@ -549,7 +549,7 @@ async function expectQhdsThemeFoundation(page: Page, viewportWidth: number, colo
   expect(themeState.h1Color).toBe(colorScheme === "dark" ? "rgb(255, 255, 255)" : "rgb(0, 0, 83)");
   expect(themeState.bodyFontSize).toBe("16px");
   expect(themeState.bodyLineHeight).toBe("24px");
-  expect(themeState.bodyBackground).toBe(colorScheme === "dark" ? "rgb(0, 0, 0)" : "rgb(255, 255, 255)");
+  expect(themeState.bodyBackground).toBe(colorScheme === "dark" ? "rgb(0, 0, 83)" : "rgb(255, 255, 255)");
   expect(themeState.focusToken).toBe(colorScheme === "dark" ? "#c6ffff" : "#002e85");
   if (colorScheme === "dark") {
     expect(["#fff", "#ffffff"]).toContain(themeState.rootVisitedToken);
