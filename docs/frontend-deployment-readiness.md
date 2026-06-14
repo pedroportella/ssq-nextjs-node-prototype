@@ -59,11 +59,13 @@ pnpm --filter @ssq/seniors-card build
 pnpm --filter @ssq/rental-security-subsidy build
 ```
 
-Run the mock browser QA suite:
+Run the default dashboard mock browser QA suite:
 
 ```bash
 pnpm test:mock-smoke
 ```
+
+Run `pnpm test:mock-smoke:all` when the release check needs all three frontend apps.
 
 For container status checks:
 

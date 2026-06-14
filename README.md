@@ -78,7 +78,7 @@ The three apps import the shared theme through `@ssq/ui-library/theme.css`. The 
 
 Frontend apps consume backend-facing service helpers through `@ssq/services/server` so private backend configuration stays on the server side.
 
-For frontend-only work, `@ssq/services/server` can run against typed mock data without Docker or the backend. Local development and tests default to mock data when `BACKEND_INTERNAL_URL` is absent; production-like runs require backend configuration unless mock mode is explicitly requested. Use `pnpm test:mock-smoke` to start all three apps in mock mode and verify that no backend/private GraphQL requests are made.
+For frontend-only work, `@ssq/services/server` can run against typed mock data without Docker or the backend. Local development and tests default to mock data when `BACKEND_INTERNAL_URL` is absent; production-like runs require backend configuration unless mock mode is explicitly requested. Use `pnpm test:mock-smoke` to start the dashboard in mock mode and verify that no backend/private GraphQL requests are made. Use the `test:mock-smoke:*` app scripts when you need the Seniors Card, Rental Security Subsidy or full three-app smoke suite.
 
 ## Planned Backend
 

@@ -105,13 +105,22 @@ Seniors Card: http://localhost:3001
 Rental Security Subsidy: http://localhost:3002
 ```
 
-Run the frontend mock smoke check:
+Run the default frontend mock smoke check:
 
 ```bash
 pnpm test:mock-smoke
 ```
 
-The smoke check starts all three Next.js apps in mock mode and verifies that their landing pages render without backend or private GraphQL requests. In managed sandboxes, the command may need permission to bind local ports `3000`, `3001` and `3002`.
+The default smoke check starts only the dashboard in mock mode and verifies that it renders without backend or private GraphQL requests. Use the app-specific scripts when you need a narrower transaction app check or the complete three-app suite:
+
+```bash
+pnpm test:mock-smoke:dashboard
+pnpm test:mock-smoke:seniors-card
+pnpm test:mock-smoke:rental-security-subsidy
+pnpm test:mock-smoke:all
+```
+
+In managed sandboxes, the command may need permission to bind the selected local app port: `3000`, `3001` or `3002`.
 
 Use backend mode only for explicit integration checks:
 

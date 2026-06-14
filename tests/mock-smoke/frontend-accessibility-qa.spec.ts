@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { isMockSmokeAppSelected, selectedMockSmokeAppNames, type MockSmokeAppName } from "./app-selection";
 
 const forbiddenRequestPatterns = [/localhost:7001/, /127\.0\.0\.1:7001/, /backend:7001/, /\/graphql(?:\?|$)/];
 
@@ -64,7 +65,15 @@ const pages = [
     path: "/application-status",
     url: "http://localhost:3002/application-status"
   }
-] as const;
+] as const satisfies readonly {
+  app: MockSmokeAppName;
+  heading: string;
+  keyText: string;
+  path: string;
+  url: string;
+}[];
+
+const selectedPages = pages.filter((page) => selectedMockSmokeAppNames.includes(page.app));
 
 function trackForbiddenRequests(page: Page) {
   const forbiddenRequests: string[] = [];
@@ -595,7 +604,7 @@ async function expectSingleVisibleH1(page: Page, name: string) {
 for (const viewport of viewports) {
   for (const scheme of colorSchemes) {
     test.describe(`frontend visual/accessibility QA - ${viewport.name} ${scheme.name}`, () => {
-      for (const pageTarget of pages) {
+      for (const pageTarget of selectedPages) {
         test(`${pageTarget.app}${pageTarget.path} has landmarks, readable layout, contrast and no backend requests`, async ({ page }) => {
           const forbiddenRequests = trackForbiddenRequests(page);
 
@@ -618,38 +627,54 @@ for (const viewport of viewports) {
   }
 }
 
-test("transaction form validation states are accessible in mock mode", async ({ page }) => {
-  const forbiddenRequests = trackForbiddenRequests(page);
+if (isMockSmokeAppSelected("seniors-card")) {
+  test("seniors-card transaction form validation states are accessible in mock mode", async ({ page }) => {
+    const forbiddenRequests = trackForbiddenRequests(page);
 
-  await page.goto("http://localhost:3001/apply");
-  const dateOfBirth = page.getByLabel("Date of birth");
-  await expect(dateOfBirth).toHaveAttribute("aria-invalid", "true");
-  await expect(dateOfBirth).toHaveAttribute("aria-describedby", /error/);
-  await expect(page.getByText("Enter a date of birth that confirms eligibility.")).toBeVisible();
-  await expect(dateOfBirth).toBeVisible();
+    await page.goto("http://localhost:3001/apply");
+    const dateOfBirth = page.getByLabel("Date of birth");
+    await expect(dateOfBirth).toHaveAttribute("aria-invalid", "true");
+    await expect(dateOfBirth).toHaveAttribute("aria-describedby", /error/);
+    await expect(page.getByText("Enter a date of birth that confirms eligibility.")).toBeVisible();
+    await expect(dateOfBirth).toBeVisible();
 
-  await page.goto("http://localhost:3002/apply");
-  const weeklyRent = page.getByLabel("Weekly rent");
-  await expect(weeklyRent).toHaveAttribute("aria-invalid", "true");
-  await expect(weeklyRent).toHaveAttribute("aria-describedby", /error/);
-  await expect(page.getByText("Enter the weekly rent amount for the property.")).toBeVisible();
-  await expect(weeklyRent).toBeVisible();
+    expect(forbiddenRequests).toEqual([]);
+  });
 
-  expect(forbiddenRequests).toEqual([]);
-});
+  test("seniors-card status page exposes upload and download controls with accessible names", async ({ page }) => {
+    const forbiddenRequests = trackForbiddenRequests(page);
 
-test("status pages expose upload and download controls with accessible names", async ({ page }) => {
-  const forbiddenRequests = trackForbiddenRequests(page);
+    await page.goto("http://localhost:3001/application-status");
+    await expect(page.getByRole("link", { name: "Download submission summary" })).toBeVisible();
+    await expect(page.getByLabel("Upload supporting documents")).toHaveAttribute("type", "file");
+    await expect(page.getByText("identity-archive.zip")).toBeVisible();
 
-  await page.goto("http://localhost:3001/application-status");
-  await expect(page.getByRole("link", { name: "Download submission summary" })).toBeVisible();
-  await expect(page.getByLabel("Upload supporting documents")).toHaveAttribute("type", "file");
-  await expect(page.getByText("identity-archive.zip")).toBeVisible();
+    expect(forbiddenRequests).toEqual([]);
+  });
+}
 
-  await page.goto("http://localhost:3002/application-status");
-  await expect(page.getByRole("link", { name: "Download submission summary" })).toBeVisible();
-  await expect(page.getByLabel("Upload supporting documents")).toHaveAttribute("type", "file");
-  await expect(page.getByText("rental-property-archive.zip")).toBeVisible();
+if (isMockSmokeAppSelected("rental-security-subsidy")) {
+  test("rental-security-subsidy transaction form validation states are accessible in mock mode", async ({ page }) => {
+    const forbiddenRequests = trackForbiddenRequests(page);
 
-  expect(forbiddenRequests).toEqual([]);
-});
+    await page.goto("http://localhost:3002/apply");
+    const weeklyRent = page.getByLabel("Weekly rent");
+    await expect(weeklyRent).toHaveAttribute("aria-invalid", "true");
+    await expect(weeklyRent).toHaveAttribute("aria-describedby", /error/);
+    await expect(page.getByText("Enter the weekly rent amount for the property.")).toBeVisible();
+    await expect(weeklyRent).toBeVisible();
+
+    expect(forbiddenRequests).toEqual([]);
+  });
+
+  test("rental-security-subsidy status page exposes upload and download controls with accessible names", async ({ page }) => {
+    const forbiddenRequests = trackForbiddenRequests(page);
+
+    await page.goto("http://localhost:3002/application-status");
+    await expect(page.getByRole("link", { name: "Download submission summary" })).toBeVisible();
+    await expect(page.getByLabel("Upload supporting documents")).toHaveAttribute("type", "file");
+    await expect(page.getByText("rental-property-archive.zip")).toBeVisible();
+
+    expect(forbiddenRequests).toEqual([]);
+  });
+}
