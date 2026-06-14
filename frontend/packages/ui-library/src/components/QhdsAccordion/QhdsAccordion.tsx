@@ -66,19 +66,20 @@ export function QhdsAccordion({ allowMultipleOpen = true, headingLevel = 2, item
   }
 
   return (
-    <div className="ssq-accordion">
+    <div className="qld__accordion-group js ssq-accordion">
       {items.map((item, index) => {
         const isOpen = openIds.includes(item.id);
         const buttonId = `${item.id}-accordion-button`;
         const panelId = `${item.id}-accordion-panel`;
+        const stateClassName = isOpen ? "qld__accordion--open" : "qld__accordion--closed";
 
         return (
-          <section className="ssq-accordion__item" key={item.id}>
+          <section className={`qld__accordion ${stateClassName} ssq-accordion__item`} key={item.id}>
             <Heading className="ssq-accordion__heading">
               <button
                 aria-controls={panelId}
                 aria-expanded={isOpen}
-                className="ssq-accordion__button"
+                className={`qld__accordion__title js-qld__accordion ${stateClassName} ssq-accordion__button`}
                 id={buttonId}
                 onClick={() => toggleItem(item.id)}
                 onKeyDown={(event) => handleButtonKeyDown(event, index)}
@@ -90,8 +91,14 @@ export function QhdsAccordion({ allowMultipleOpen = true, headingLevel = 2, item
                 </span>
               </button>
             </Heading>
-            <div aria-labelledby={buttonId} className="ssq-accordion__panel" hidden={!isOpen} id={panelId} role="region">
-              {item.content}
+            <div
+              aria-labelledby={buttonId}
+              className={`qld__accordion__body ${stateClassName} ssq-accordion__panel`}
+              hidden={!isOpen}
+              id={panelId}
+              role="region"
+            >
+              <div className="qld__accordion__body-wrapper ssq-accordion__body-wrapper">{item.content}</div>
             </div>
           </section>
         );

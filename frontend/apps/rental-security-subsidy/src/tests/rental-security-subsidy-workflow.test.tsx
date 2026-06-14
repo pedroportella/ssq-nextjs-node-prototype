@@ -138,6 +138,9 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
     expect(html).toContain("col-xs-12 col-lg-6 col-xl-6");
     expect(html).toContain("qld__form");
+    expect(html).toContain("qld__direction-link");
+    expect(html).toContain("qld__progress-indicator");
+    expect(html).toContain("qld__progress-indicator__item--current");
     expect(html).toContain("qld__form-group");
     expect(html).toContain("qld__text-input--error");
     expect(html).toContain('id="weekly-rent"');
@@ -165,6 +168,9 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("container-fluid");
     expect(html).toContain("row");
     expect(html).toContain("col-xs-12 col-lg-6 col-xl-6");
+    expect(html).toContain("qld__page-alerts--success");
+    expect(html).toContain("qld__table");
+    expect(html).toContain("qld__table__caption");
     expect(html).toContain("Application submitted");
     expect(html).toContain("RSS-2026-0001");
     expect(html).toContain("Download submission summary");

@@ -42,10 +42,10 @@
   padding-bottom: var(--ssq-space-4);
 }
 
-.ssq-accordion__panel > :first-child {
+.ssq-accordion__body-wrapper > :first-child {
   margin-top: 0;
 }
 
-.ssq-accordion__panel > :last-child {
+.ssq-accordion__body-wrapper > :last-child {
   margin-bottom: 0;
 }

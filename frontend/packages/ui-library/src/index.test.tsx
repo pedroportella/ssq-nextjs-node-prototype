@@ -4,6 +4,7 @@ import {
   QhdsButton,
   QhdsCard,
   QhdsCheckbox,
+  QhdsDirectionLink,
   QhdsFooter,
   QhdsFormField,
   QhdsCol,
@@ -22,6 +23,7 @@ describe("ui-library public exports", () => {
   it("exports app-facing layout and core components", () => {
     expect(QhdsButton).toBeTypeOf("function");
     expect(QhdsCard).toBeTypeOf("function");
+    expect(QhdsDirectionLink).toBeTypeOf("function");
     expect(QhdsFooter).toBeTypeOf("function");
     expect(QhdsCol).toBeTypeOf("function");
     expect(QhdsContainer).toBeTypeOf("function");

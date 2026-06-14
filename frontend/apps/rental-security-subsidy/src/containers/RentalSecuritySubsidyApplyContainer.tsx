@@ -10,9 +10,11 @@ import {
   QhdsCheckbox,
   QhdsCol,
   QhdsContainer,
+  QhdsDirectionLink,
   QhdsFooter,
   QhdsHeader,
   QhdsLayout,
+  QhdsProgressIndicator,
   QhdsRadioGroup,
   QhdsRow,
   QhdsSelect,
@@ -24,6 +26,7 @@ import {
 import styles from "./RentalSecuritySubsidyHomeContainer.module.scss";
 
 import type { PrototypeDraftMutationResult, PrototypeSubmitResult, PrototypeWorkflowData } from "@ssq/services";
+import type { QhdsProgressStepStatus } from "@ssq/ui-library";
 
 const workflowSteps = [
   "Before you begin",
@@ -36,6 +39,21 @@ const workflowSteps = [
   "Declaration",
   "Confirmation"
 ];
+
+const currentWorkflowStep = "Rental property";
+
+const rentalSecuritySubsidyProgressSteps = workflowSteps.map((step) => {
+  const currentStepIndex = workflowSteps.indexOf(currentWorkflowStep);
+  const stepIndex = workflowSteps.indexOf(step);
+  const status: QhdsProgressStepStatus =
+    step === currentWorkflowStep ? "current" : stepIndex < currentStepIndex ? "completed" : "upcoming";
+
+  return {
+    id: step.toLowerCase().replaceAll(" ", "-"),
+    label: step,
+    status
+  };
+});
 
 export function RentalSecuritySubsidyApplyContent({
   createdDraft,
@@ -60,19 +78,11 @@ export function RentalSecuritySubsidyApplyContent({
               <QhdsButton href="/" variant="secondary">Back to overview</QhdsButton>
             </>
           }
-          backLink={<a href="/">Back to rental support overview</a>}
+          backLink={<QhdsDirectionLink href="/">Back to rental support overview</QhdsDirectionLink>}
           contextLabel="Rental Security Subsidy"
           heading="Prepare your rental support application"
           lead="This frontend-only slice shows the deeper rental workflow using F13 mock draft, validation and submit services."
-          progress={
-            <ol className={styles.progressList}>
-              {workflowSteps.map((step) => (
-                <li aria-current={step === "Rental property" ? "step" : undefined} key={step}>
-                  {step}
-                </li>
-              ))}
-            </ol>
-          }
+          progress={<QhdsProgressIndicator label="Rental Security Subsidy application progress" steps={rentalSecuritySubsidyProgressSteps} />}
           requiredText="All fields are required unless marked optional."
         >
           <form aria-label="Rental Security Subsidy application details" className={`qld__form ${styles.workflowForm}`} noValidate>

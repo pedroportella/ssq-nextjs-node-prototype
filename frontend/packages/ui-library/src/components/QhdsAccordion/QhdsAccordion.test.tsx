@@ -41,6 +41,10 @@ describe("QhdsAccordion", () => {
     const eligibilityButton = element.querySelector<HTMLButtonElement>("#eligibility-accordion-button");
     const eligibilityPanel = element.querySelector<HTMLElement>("#eligibility-accordion-panel");
 
+    expect(element.querySelector(".qld__accordion-group")).not.toBeNull();
+    expect(element.querySelector(".qld__accordion")).not.toBeNull();
+    expect(eligibilityButton?.className).toContain("qld__accordion__title");
+    expect(eligibilityPanel?.className).toContain("qld__accordion__body");
     expect(eligibilityButton?.getAttribute("aria-expanded")).toBe("false");
     expect(eligibilityPanel?.hidden).toBe(true);
 

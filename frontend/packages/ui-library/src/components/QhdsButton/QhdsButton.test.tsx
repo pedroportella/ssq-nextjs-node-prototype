@@ -13,6 +13,9 @@ describe("QhdsButton", () => {
     );
 
     expect(html).toContain('href="/start"');
+    expect(html).toContain("qld__btn");
+    expect(html).toContain("qld__btn--primary");
+    expect(html).toContain("qld__btn--secondary");
     expect(html).toContain("ssq-button--primary");
     expect(html).toContain("ssq-button--secondary");
     expect(html).toContain('type="button"');

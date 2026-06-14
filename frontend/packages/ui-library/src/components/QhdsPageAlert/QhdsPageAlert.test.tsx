@@ -18,6 +18,9 @@ describe("QhdsPageAlert", () => {
     );
 
     expect(html).toContain('role="status"');
+    expect(html).toContain("qld__page-alerts");
+    expect(html).toContain("qld__page-alerts--success");
+    expect(html).toContain("qld__page-alerts--heading");
     expect(html).toContain("ssq-page-alert--success");
     expect(html).toContain("Saved");
     expect(html).toContain("Your draft was saved.");

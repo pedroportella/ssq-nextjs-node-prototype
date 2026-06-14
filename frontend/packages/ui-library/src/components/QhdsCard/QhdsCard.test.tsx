@@ -13,6 +13,9 @@ describe("QhdsCard", () => {
     );
 
     expect(html).toContain("<article");
+    expect(html).toContain("qld__card");
+    expect(html).toContain("qld__card__title");
+    expect(html).toContain("qld__card__footer");
     expect(html).toContain("Apply online");
     expect(html).toContain("Prepare your details.");
     expect(html).toContain('href="/start"');

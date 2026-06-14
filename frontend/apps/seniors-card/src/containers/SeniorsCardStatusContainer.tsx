@@ -14,7 +14,8 @@ import {
   QhdsHeader,
   QhdsLayout,
   QhdsPageAlert,
-  QhdsRow
+  QhdsRow,
+  QhdsTable
 } from "@ssq/ui-library";
 
 import styles from "./SeniorsCardHomeContainer.module.scss";
@@ -84,14 +85,19 @@ export function SeniorsCardStatusContent({
 
           <QhdsCol lg={6} xl={6}>
             <QhdsCard heading="Recent activity">
-              <ol className={styles.activityList}>
-                {submitResult.activity.map((entry, index) => (
-                  <li className={styles.activityItem} key={`${entry.at}-${entry.description}-${index}`}>
-                    <span className={styles.activityDescription}>{entry.description}</span>
-                    <span className={styles.meta}>{formatStatus(entry.status)}</span>
-                  </li>
-                ))}
-              </ol>
+              <QhdsTable
+                caption="Recent activity history"
+                columns={[
+                  { header: "Activity", key: "activity" },
+                  { header: "Status", key: "status" }
+                ]}
+                rows={submitResult.activity.map((entry, index) => ({
+                  activity: entry.description,
+                  id: `${entry.at}-${index}`,
+                  status: formatStatus(entry.status)
+                }))}
+                striped
+              />
             </QhdsCard>
           </QhdsCol>
         </QhdsRow>

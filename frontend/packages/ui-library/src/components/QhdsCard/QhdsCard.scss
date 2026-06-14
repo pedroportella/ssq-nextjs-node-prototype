@@ -6,8 +6,16 @@
   display: grid;
   gap: var(--ssq-space-4);
   margin-block: var(--ssq-space-4);
+  min-width: 0;
   padding: var(--ssq-space-6);
   width: 100%;
+}
+
+.ssq-card__body,
+.ssq-card__content,
+.ssq-card__content-inner,
+.ssq-card__content-body {
+  min-width: 0;
 }
 
 .ssq-card__heading {
@@ -16,10 +24,10 @@
   margin: 0 0 var(--ssq-space-2);
 }
 
-.ssq-card__content > :first-child {
+.ssq-card__content-body > :first-child {
   margin-top: 0;
 }
 
-.ssq-card__content > :last-child {
+.ssq-card__content-body > :last-child {
   margin-bottom: 0;
 }

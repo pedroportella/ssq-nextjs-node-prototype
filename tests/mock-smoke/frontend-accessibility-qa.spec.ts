@@ -93,6 +93,25 @@ async function expectNoVisibleHorizontalOverflow(page: Page) {
   const overflowingElements = await page.locator("body *").evaluateAll((elements) => {
     const viewportWidth = document.documentElement.clientWidth;
 
+    function hasContainedHorizontalScroller(element: HTMLElement) {
+      let current = element.parentElement;
+
+      while (current && current !== document.body) {
+        const style = window.getComputedStyle(current);
+        const rect = current.getBoundingClientRect();
+        const allowsHorizontalScroll = style.overflowX === "auto" || style.overflowX === "scroll";
+        const isContained = rect.left >= -1 && rect.right <= viewportWidth + 1;
+
+        if (allowsHorizontalScroll && isContained && current.scrollWidth > current.clientWidth) {
+          return true;
+        }
+
+        current = current.parentElement;
+      }
+
+      return false;
+    }
+
     return elements
       .flatMap((element) => {
         if (!(element instanceof HTMLElement)) {
@@ -104,7 +123,9 @@ async function expectNoVisibleHorizontalOverflow(page: Page) {
         const isVisible = rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
         const overflows = rect.left < -1 || rect.right > viewportWidth + 1;
 
-        return isVisible && overflows ? [`${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}.${Array.from(element.classList).join(".")}`] : [];
+        return isVisible && overflows && !hasContainedHorizontalScroller(element)
+          ? [`${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}.${Array.from(element.classList).join(".")}`]
+          : [];
       })
       .slice(0, 10);
   });
@@ -436,6 +457,30 @@ async function expectQhdsContrastFoundation(page: Page) {
   expectContrastSamplesToPass(samples);
 }
 
+async function expectQhdsComponentHooks(page: Page, path: string) {
+  const componentState = await page.evaluate(() => ({
+    alertCount: document.querySelectorAll(".qld__page-alerts").length,
+    buttonCount: document.querySelectorAll(".qld__btn").length,
+    cardCount: document.querySelectorAll(".qld__card").length,
+    directionLinkCount: document.querySelectorAll(".qld__direction-link").length,
+    progressCount: document.querySelectorAll(".qld__progress-indicator").length,
+    tableCount: document.querySelectorAll(".qld__table").length
+  }));
+
+  expect(componentState.cardCount).toBeGreaterThan(0);
+  expect(componentState.buttonCount).toBeGreaterThan(0);
+
+  if (path === "/apply") {
+    expect(componentState.directionLinkCount).toBeGreaterThan(0);
+    expect(componentState.progressCount).toBeGreaterThan(0);
+  }
+
+  if (path === "/application-status") {
+    expect(componentState.alertCount).toBeGreaterThan(0);
+    expect(componentState.tableCount).toBeGreaterThan(0);
+  }
+}
+
 async function expectQhdsThemeFoundation(page: Page, viewportWidth: number, colorScheme: TestedColorScheme) {
   const themeState = await page.evaluate(() => {
     const h1 = document.querySelector("h1");
@@ -633,6 +678,7 @@ for (const viewport of viewports) {
           await expect(page.getByRole("main")).toBeVisible();
           await expectNoVisibleHorizontalOverflow(page);
           await expectQhdsGridFoundation(page, viewport.width);
+          await expectQhdsComponentHooks(page, pageTarget.path);
           await expectQhdsThemeFoundation(page, viewport.width, scheme.colorScheme);
           await expectQhdsContrastFoundation(page);
           await expectFocusedElementHasVisibleFocus(page);

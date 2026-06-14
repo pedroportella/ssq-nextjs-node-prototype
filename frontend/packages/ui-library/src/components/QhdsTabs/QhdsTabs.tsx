@@ -54,16 +54,17 @@ export function QhdsTabs({ defaultSelectedId, items, label }: QhdsTabsProps) {
   }
 
   return (
-    <div className="ssq-tabs">
-      <div aria-label={label} className="ssq-tabs__list" role="tablist">
+    <div className="qld__tab-container qld__tab-container__fixed ssq-tabs">
+      <div aria-label={label} className="qld__tabs ssq-tabs__list" role="tablist">
         {items.map((item, index) => {
           const isSelected = item.id === selectedId;
+          const className = ["qld__tab-button", isSelected ? "qld__tab-button--active" : "", "ssq-tabs__tab"].filter(Boolean).join(" ");
 
           return (
             <button
               aria-controls={`${item.id}-tabpanel`}
               aria-selected={isSelected}
-              className="ssq-tabs__tab"
+              className={className}
               id={`${item.id}-tab`}
               key={item.id}
               onClick={() => selectTab(item.id)}
@@ -83,7 +84,7 @@ export function QhdsTabs({ defaultSelectedId, items, label }: QhdsTabsProps) {
         return (
           <div
             aria-labelledby={`${item.id}-tab`}
-            className="ssq-tabs__panel"
+            className="qld__tab-panel qld__tab_panel ssq-tabs__panel"
             hidden={!isSelected}
             id={`${item.id}-tabpanel`}
             key={item.id}

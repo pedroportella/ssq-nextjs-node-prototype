@@ -44,6 +44,10 @@ describe("QhdsTabs", () => {
     const summaryPanel = element.querySelector<HTMLElement>("#summary-tabpanel");
     const historyPanel = element.querySelector<HTMLElement>("#history-tabpanel");
 
+    expect(element.querySelector(".qld__tab-container")).not.toBeNull();
+    expect(element.querySelector(".qld__tabs")).not.toBeNull();
+    expect(summaryTab?.className).toContain("qld__tab-button");
+    expect(summaryPanel?.className).toContain("qld__tab-panel");
     expect(summaryTab?.getAttribute("aria-selected")).toBe("true");
     expect(summaryPanel?.hidden).toBe(false);
     expect(historyPanel?.hidden).toBe(true);

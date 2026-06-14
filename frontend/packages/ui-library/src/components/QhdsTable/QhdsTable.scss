@@ -1,7 +1,9 @@
 .ssq-table {
   margin-block: var(--ssq-space-4);
   max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
+  width: 100%;
 }
 
 .ssq-table:focus-visible {

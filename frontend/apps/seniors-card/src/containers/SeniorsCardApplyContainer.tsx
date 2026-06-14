@@ -10,9 +10,11 @@ import {
   QhdsCheckbox,
   QhdsCol,
   QhdsContainer,
+  QhdsDirectionLink,
   QhdsFooter,
   QhdsHeader,
   QhdsLayout,
+  QhdsProgressIndicator,
   QhdsRadioGroup,
   QhdsRow,
   QhdsSelect,
@@ -23,6 +25,13 @@ import {
 import styles from "./SeniorsCardHomeContainer.module.scss";
 
 import type { PrototypeDraftMutationResult, PrototypeSubmitResult, PrototypeWorkflowData } from "@ssq/services";
+
+const seniorsCardProgressSteps = [
+  { id: "eligibility", label: "Eligibility", status: "current" as const },
+  { id: "review-details", label: "Review details", status: "upcoming" as const },
+  { id: "declaration", label: "Declaration", status: "upcoming" as const },
+  { id: "confirmation", label: "Confirmation", status: "upcoming" as const }
+];
 
 export function SeniorsCardApplyContent({
   createdDraft,
@@ -47,18 +56,11 @@ export function SeniorsCardApplyContent({
               <QhdsButton href="/" variant="secondary">Back to overview</QhdsButton>
             </>
           }
-          backLink={<a href="/">Back to Seniors Card overview</a>}
+          backLink={<QhdsDirectionLink href="/">Back to Seniors Card overview</QhdsDirectionLink>}
           contextLabel="Seniors Card"
           heading="Check your eligibility"
           lead="This frontend-only slice shows the draft, validation and submit states using F13 mock services."
-          progress={
-            <ol className={styles.progressList}>
-              <li aria-current="step">Eligibility</li>
-              <li>Review details</li>
-              <li>Declaration</li>
-              <li>Confirmation</li>
-            </ol>
-          }
+          progress={<QhdsProgressIndicator label="Seniors Card application progress" steps={seniorsCardProgressSteps} />}
           requiredText="All fields are required unless marked optional."
         >
           <form aria-label="Seniors Card application details" className={`qld__form ${styles.workflowForm}`} noValidate>

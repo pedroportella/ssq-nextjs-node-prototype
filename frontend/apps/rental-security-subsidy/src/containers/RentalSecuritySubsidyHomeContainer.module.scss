@@ -63,30 +63,6 @@
   align-items: start;
 }
 
-.progressList,
-.activityList {
-  display: grid;
-  gap: var(--ssq-space-2);
-  margin: 0;
-  padding-left: var(--ssq-space-6);
-}
-
-.activityItem {
-  border-top: 1px solid var(--ssq-color-border);
-  display: grid;
-  gap: var(--ssq-space-1);
-  padding-top: var(--ssq-space-3);
-}
-
-.activityItem:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.activityDescription {
-  font-weight: 700;
-}
-
 @media (max-width: 48rem) {
   .title {
     font-size: var(--ssq-font-size-h1-mobile);

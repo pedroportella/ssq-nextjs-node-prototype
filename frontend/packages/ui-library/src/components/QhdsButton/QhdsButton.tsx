@@ -14,7 +14,9 @@ export type QhdsButtonProps =
   | (ButtonBaseProps & AnchorHTMLAttributes<HTMLAnchorElement> & { href: string });
 
 export function QhdsButton({ children, className, variant = "primary", ...props }: QhdsButtonProps) {
-  const classes = ["ssq-button", `ssq-button--${variant}`, className].filter(Boolean).join(" ");
+  const classes = ["qld__btn", `qld__btn--${variant}`, "ssq-button", `ssq-button--${variant}`, className]
+    .filter(Boolean)
+    .join(" ");
 
   if ("href" in props && props.href) {
     return (
