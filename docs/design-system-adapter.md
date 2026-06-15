@@ -77,3 +77,7 @@ The prototype should not reintroduce local web components or generated custom-el
 ## Radio Group Contract
 
 `QhdsRadioGroup` renders native radio inputs inside a QHDS-style fieldset with `.qld__radio-buttons`, `.qld__control-group`, `.qld__control-input`, `.qld__control-input__input` and `.qld__control-input__text` hooks. The adapter keeps one stable group `name`, labels the fieldset through `aria-labelledby`, composes external, hint and error ids into `aria-describedby`, and includes option hint ids on the relevant input. It supports controlled `value`, uncontrolled `defaultValue`, disabled groups and disabled options. Required state is expressed on the fieldset with `aria-required` and on the first enabled native radio only, so the group keeps native validation without repeating the requirement across every option. Controlled read-only displays are marked `readOnly` when no change handler is supplied.
+
+## Table Contract
+
+`QhdsTable` follows the restored QHDS-New static data-table reference. The outer wrapper emits `.qld__table__wrapper` plus the optional `.qld__table--contained` and `.qld__table--scroll` modifiers; the table itself emits `.qld__table`, `.qld__align-middle` and `.qld__table--striped` when requested. Captions support optional explanatory text through `.qld__caption`. The adapter intentionally remains static and does not reintroduce the old QHDS-Old DataTables runtime.

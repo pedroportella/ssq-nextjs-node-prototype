@@ -12,18 +12,40 @@ export type QhdsTableRow = Record<string, ReactNode>;
 
 export interface QhdsTableProps {
   caption: ReactNode;
+  captionDescription?: ReactNode;
   columns: QhdsTableColumn[];
+  contained?: boolean;
   rows: QhdsTableRow[];
+  scroll?: boolean;
   striped?: boolean;
 }
 
-export function QhdsTable({ caption, columns, rows, striped = false }: QhdsTableProps) {
-  const tableClassName = ["qld__table", "qld__table--contained", striped ? "qld__table--striped" : ""].filter(Boolean).join(" ");
+export function QhdsTable({
+  caption,
+  captionDescription,
+  columns,
+  contained = true,
+  rows,
+  scroll = true,
+  striped = false
+}: QhdsTableProps) {
+  const wrapperClassName = [
+    "qld__table__wrapper",
+    contained ? "qld__table--contained" : undefined,
+    scroll ? "qld__table--scroll" : undefined,
+    "ssq-table"
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const tableClassName = ["qld__table", "qld__align-middle", striped ? "qld__table--striped" : undefined].filter(Boolean).join(" ");
 
   return (
-    <div className="qld__table__container qld__table--scroll ssq-table" tabIndex={0}>
+    <div className={wrapperClassName} tabIndex={scroll ? 0 : undefined}>
       <table className={tableClassName}>
-        <caption className="qld__table__caption">{caption}</caption>
+        <caption className="qld__table__caption">
+          {caption}
+          {captionDescription ? <span className="qld__caption">{captionDescription}</span> : null}
+        </caption>
         <thead className="qld__table__head">
           <tr className="qld__table__row">
             {columns.map((column) => (

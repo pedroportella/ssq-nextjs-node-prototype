@@ -57,20 +57,23 @@ describe("QhdsButton", () => {
     expect(html).toContain('type="button"');
   });
 
-  it("keeps secondary and tertiary link-button labels on QHDS colours after visit", () => {
+  it("keeps link-button colours scoped to the active QHDS surface", () => {
     const stylesheet = readFileSync("src/components/QhdsButton/QhdsButton.scss", "utf8");
 
     expect(stylesheet).toMatch(
-      /\.ssq-button--secondary,\na\.ssq-button--secondary:visited \{[\s\S]*?color: var\(--QLD-color-light__link\);/
+      /@media \(prefers-color-scheme: dark\) \{[\s\S]*?\.ssq-button \{[\s\S]*?--ssq-button-secondary-color: var\(--QLD-color-dark__link\);/
     );
     expect(stylesheet).toMatch(
-      /\.ssq-button--tertiary,\na\.ssq-button--tertiary:visited \{[\s\S]*?color: var\(--QLD-color-light__link\);/
+      /\.qld__body--light \.ssq-button,[\s\S]*?\.qld__body--alt \.ssq-button \{[\s\S]*?--ssq-button-secondary-color: var\(--QLD-color-light__link\);/
     );
     expect(stylesheet).toMatch(
-      /\.qld__body--dark a\.ssq-button--secondary:visited,[\s\S]*?color: var\(--QLD-color-dark__link\);/
+      /\.qld__body--dark \.ssq-button,[\s\S]*?\.qld__footer--dark-alt \.ssq-button \{[\s\S]*?--ssq-button-secondary-color: var\(--QLD-color-dark__link\);/
     );
     expect(stylesheet).toMatch(
-      /\.qld__body--dark a\.ssq-button--tertiary:visited,[\s\S]*?color: var\(--QLD-color-dark__link\);/
+      /\.ssq-button--secondary,\na\.ssq-button--secondary:visited \{[\s\S]*?color: var\(--ssq-button-secondary-color\);/
+    );
+    expect(stylesheet).toMatch(
+      /\.ssq-button--tertiary,\na\.ssq-button--tertiary:visited \{[\s\S]*?color: var\(--ssq-button-tertiary-color\);/
     );
   });
 

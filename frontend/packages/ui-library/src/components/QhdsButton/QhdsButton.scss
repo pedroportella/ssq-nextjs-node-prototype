@@ -1,6 +1,25 @@
 .ssq-button {
+  --ssq-button-primary-background: var(--QLD-color-light__action--primary);
+  --ssq-button-primary-border: var(--QLD-color-light__action--primary);
+  --ssq-button-primary-color: var(--QLD-color-light__link--on-action);
+  --ssq-button-primary-hover-background: var(--QLD-color-light__action--primary-hover);
+  --ssq-button-primary-hover-border: var(--QLD-color-light__action--primary-hover);
+  --ssq-button-primary-hover-color: var(--QLD-color-light__link--on-action);
+  --ssq-button-secondary-border: var(--QLD-color-light__action--secondary);
+  --ssq-button-secondary-color: var(--QLD-color-light__link);
+  --ssq-button-secondary-hover-border: var(--QLD-color-light__action--secondary-hover);
+  --ssq-button-secondary-icon-color: var(--QLD-color-light__action--secondary);
+  --ssq-button-secondary-icon-hover-color: var(--QLD-color-light__action--secondary-hover);
+  --ssq-button-tertiary-color: var(--QLD-color-light__link);
+  --ssq-button-tertiary-icon-color: var(--QLD-color-light__action--secondary);
+  --ssq-button-tertiary-icon-hover-color: var(--QLD-color-light__action--secondary);
+  --ssq-button-disabled-background: var(--QLD-color-light__background--alt-shade);
+  --ssq-button-disabled-border: transparent;
+  --ssq-button-disabled-color: var(--QLD-color-light__text--lighter);
+  --ssq-button-secondary-disabled-border: var(--QLD-color-light__background--alt-shade);
+
   align-items: center;
-  border: var(--QLD-border-width-medium) solid var(--QLD-color-light__action--primary);
+  border: var(--QLD-border-width-medium) solid var(--ssq-button-primary-border);
   border-radius: var(--QLD-border-radius-xs);
   box-sizing: border-box;
   cursor: pointer;
@@ -14,6 +33,75 @@
   text-decoration: none;
 }
 
+@media (prefers-color-scheme: dark) {
+  .ssq-button {
+    --ssq-button-primary-background: var(--QLD-color-dark__action--primary);
+    --ssq-button-primary-border: var(--QLD-color-dark__action--primary);
+    --ssq-button-primary-color: var(--QLD-color-dark__link--on-action);
+    --ssq-button-primary-hover-background: var(--QLD-color-dark__action--primary-hover);
+    --ssq-button-primary-hover-border: var(--QLD-color-dark__action--primary-hover);
+    --ssq-button-primary-hover-color: var(--QLD-color-dark__link--on-action);
+    --ssq-button-secondary-border: var(--QLD-color-dark__action--secondary);
+    --ssq-button-secondary-color: var(--QLD-color-dark__link);
+    --ssq-button-secondary-hover-border: var(--QLD-color-dark__action--secondary-hover);
+    --ssq-button-secondary-icon-color: var(--QLD-color-dark__action--secondary);
+    --ssq-button-secondary-icon-hover-color: var(--QLD-color-dark__action--secondary-hover);
+    --ssq-button-tertiary-color: var(--QLD-color-dark__link);
+    --ssq-button-tertiary-icon-color: var(--QLD-color-dark__action--secondary);
+    --ssq-button-tertiary-icon-hover-color: var(--QLD-color-dark__action--secondary-hover);
+    --ssq-button-disabled-background: rgb(224 224 224 / 10%);
+    --ssq-button-disabled-border: transparent;
+    --ssq-button-disabled-color: var(--QLD-color-dark__text--lighter);
+    --ssq-button-secondary-disabled-border: rgb(224 224 224 / 10%);
+  }
+}
+
+.qld__body--light .ssq-button,
+.qld__body--alt .ssq-button {
+  --ssq-button-primary-background: var(--QLD-color-light__action--primary);
+  --ssq-button-primary-border: var(--QLD-color-light__action--primary);
+  --ssq-button-primary-color: var(--QLD-color-light__link--on-action);
+  --ssq-button-primary-hover-background: var(--QLD-color-light__action--primary-hover);
+  --ssq-button-primary-hover-border: var(--QLD-color-light__action--primary-hover);
+  --ssq-button-primary-hover-color: var(--QLD-color-light__link--on-action);
+  --ssq-button-secondary-border: var(--QLD-color-light__action--secondary);
+  --ssq-button-secondary-color: var(--QLD-color-light__link);
+  --ssq-button-secondary-hover-border: var(--QLD-color-light__action--secondary-hover);
+  --ssq-button-secondary-icon-color: var(--QLD-color-light__action--secondary);
+  --ssq-button-secondary-icon-hover-color: var(--QLD-color-light__action--secondary-hover);
+  --ssq-button-tertiary-color: var(--QLD-color-light__link);
+  --ssq-button-tertiary-icon-color: var(--QLD-color-light__action--secondary);
+  --ssq-button-tertiary-icon-hover-color: var(--QLD-color-light__action--secondary);
+  --ssq-button-disabled-background: var(--QLD-color-light__background--alt-shade);
+  --ssq-button-disabled-border: transparent;
+  --ssq-button-disabled-color: var(--QLD-color-light__text--lighter);
+  --ssq-button-secondary-disabled-border: var(--QLD-color-light__background--alt-shade);
+}
+
+.qld__body--dark .ssq-button,
+.qld__body--dark-alt .ssq-button,
+.qld__footer--dark .ssq-button,
+.qld__footer--dark-alt .ssq-button {
+  --ssq-button-primary-background: var(--QLD-color-dark__action--primary);
+  --ssq-button-primary-border: var(--QLD-color-dark__action--primary);
+  --ssq-button-primary-color: var(--QLD-color-dark__link--on-action);
+  --ssq-button-primary-hover-background: var(--QLD-color-dark__action--primary-hover);
+  --ssq-button-primary-hover-border: var(--QLD-color-dark__action--primary-hover);
+  --ssq-button-primary-hover-color: var(--QLD-color-dark__link--on-action);
+  --ssq-button-secondary-border: var(--QLD-color-dark__action--secondary);
+  --ssq-button-secondary-color: var(--QLD-color-dark__link);
+  --ssq-button-secondary-hover-border: var(--QLD-color-dark__action--secondary-hover);
+  --ssq-button-secondary-icon-color: var(--QLD-color-dark__action--secondary);
+  --ssq-button-secondary-icon-hover-color: var(--QLD-color-dark__action--secondary-hover);
+  --ssq-button-tertiary-color: var(--QLD-color-dark__link);
+  --ssq-button-tertiary-icon-color: var(--QLD-color-dark__action--secondary);
+  --ssq-button-tertiary-icon-hover-color: var(--QLD-color-dark__action--secondary-hover);
+  --ssq-button-disabled-background: rgb(224 224 224 / 10%);
+  --ssq-button-disabled-border: transparent;
+  --ssq-button-disabled-color: var(--QLD-color-dark__text--lighter);
+  --ssq-button-secondary-disabled-border: rgb(224 224 224 / 10%);
+}
+
 .ssq-button:hover {
   box-shadow: 0 0.125rem 0.25rem rgb(0 0 0 / 20%);
 }
@@ -22,18 +110,21 @@
   flex: 0 0 auto;
 }
 
-.ssq-button--primary {
-  background: var(--QLD-color-light__action--primary);
-  border-color: var(--QLD-color-light__action--primary);
-  color: var(--QLD-color-light__link--on-action);
+.ssq-button--primary,
+a.ssq-button--primary:visited {
+  background: var(--ssq-button-primary-background);
+  border-color: var(--ssq-button-primary-border);
+  color: var(--ssq-button-primary-color);
 }
 
 .ssq-button--primary:hover,
-.ssq-button--primary:focus {
-  background: var(--QLD-color-light__action--primary-hover);
-  border-color: var(--QLD-color-light__action--primary-hover);
-  color: var(--QLD-color-light__link--on-action);
-  text-decoration-color: var(--QLD-color-light__link--on-action);
+.ssq-button--primary:focus,
+a.ssq-button--primary:visited:hover,
+a.ssq-button--primary:visited:focus {
+  background: var(--ssq-button-primary-hover-background);
+  border-color: var(--ssq-button-primary-hover-border);
+  color: var(--ssq-button-primary-hover-color);
+  text-decoration-color: var(--ssq-button-primary-hover-color);
   text-decoration-line: underline;
   text-decoration-thickness: var(--QLD-underline__thickness-thick);
   text-underline-offset: var(--QLD-underline__offset);
@@ -42,23 +133,23 @@
 .ssq-button--secondary,
 a.ssq-button--secondary:visited {
   background: transparent;
-  border-color: var(--QLD-color-light__action--secondary);
-  color: var(--QLD-color-light__link);
+  border-color: var(--ssq-button-secondary-border);
+  color: var(--ssq-button-secondary-color);
 }
 
 .ssq-button--secondary:hover,
 .ssq-button--secondary:focus,
 a.ssq-button--secondary:visited:hover,
 a.ssq-button--secondary:visited:focus {
-  border-color: var(--QLD-color-light__action--secondary-hover);
-  color: var(--QLD-color-light__link);
+  border-color: var(--ssq-button-secondary-hover-border);
+  color: var(--ssq-button-secondary-color);
 }
 
 .ssq-button--tertiary,
 a.ssq-button--tertiary:visited {
   background: transparent;
   border-color: transparent;
-  color: var(--QLD-color-light__link);
+  color: var(--ssq-button-tertiary-color);
   text-decoration-line: underline;
 }
 
@@ -67,16 +158,30 @@ a.ssq-button--tertiary:visited {
 a.ssq-button--tertiary:visited:hover,
 a.ssq-button--tertiary:visited:focus {
   background: rgb(0 0 0 / 10%);
-  color: var(--QLD-color-light__link);
+  color: var(--ssq-button-tertiary-color);
 }
 
 .ssq-button--primary .ssq-button__icon {
-  color: var(--QLD-color-light__link--on-action);
+  color: var(--ssq-button-primary-color);
 }
 
 .ssq-button--secondary .ssq-button__icon,
 .ssq-button--tertiary .ssq-button__icon {
-  color: var(--QLD-color-light__action--secondary);
+  color: var(--ssq-button-secondary-icon-color);
+}
+
+.ssq-button--secondary:hover .ssq-button__icon,
+.ssq-button--secondary:focus .ssq-button__icon {
+  color: var(--ssq-button-secondary-icon-hover-color);
+}
+
+.ssq-button--tertiary .ssq-button__icon {
+  color: var(--ssq-button-tertiary-icon-color);
+}
+
+.ssq-button--tertiary:hover .ssq-button__icon,
+.ssq-button--tertiary:focus .ssq-button__icon {
+  color: var(--ssq-button-tertiary-icon-hover-color);
 }
 
 .ssq-button--icon-lead .ssq-button__icon {
@@ -96,17 +201,17 @@ a.ssq-button--tertiary:visited:focus {
 
 a.ssq-button[aria-disabled="true"],
 .ssq-button:disabled {
-  background: var(--QLD-color-light__background--alt-shade);
-  border-color: transparent;
+  background: var(--ssq-button-disabled-background);
+  border-color: var(--ssq-button-disabled-border);
   box-shadow: none;
-  color: var(--QLD-color-light__text--lighter);
+  color: var(--ssq-button-disabled-color);
   pointer-events: none;
 }
 
 a.ssq-button--secondary[aria-disabled="true"],
 .ssq-button--secondary:disabled {
-  background: var(--QLD-color-light__background--alt-shade);
-  border-color: var(--QLD-color-light__background--alt-shade);
+  background: var(--ssq-button-disabled-background);
+  border-color: var(--ssq-button-secondary-disabled-border);
 }
 
 a.ssq-button--tertiary[aria-disabled="true"],
@@ -119,9 +224,9 @@ a.ssq-button--tertiary[aria-disabled="true"],
 .qld__body--dark-alt .ssq-button--primary,
 .qld__footer--dark .ssq-button--primary,
 .qld__footer--dark-alt .ssq-button--primary {
-  background: var(--QLD-color-dark__action--primary);
-  border-color: var(--QLD-color-dark__action--primary);
-  color: var(--QLD-color-dark__link--on-action);
+  --ssq-button-primary-background: var(--QLD-color-dark__action--primary);
+  --ssq-button-primary-border: var(--QLD-color-dark__action--primary);
+  --ssq-button-primary-color: var(--QLD-color-dark__link--on-action);
 }
 
 .qld__body--dark .ssq-button--primary:hover,
@@ -132,10 +237,9 @@ a.ssq-button--tertiary[aria-disabled="true"],
 .qld__footer--dark .ssq-button--primary:focus,
 .qld__footer--dark-alt .ssq-button--primary:hover,
 .qld__footer--dark-alt .ssq-button--primary:focus {
-  background: var(--QLD-color-dark__action--primary-hover);
-  border-color: var(--QLD-color-dark__action--primary-hover);
-  color: var(--QLD-color-dark__link--on-action);
-  text-decoration-color: var(--QLD-color-dark__link--on-action);
+  --ssq-button-primary-hover-background: var(--QLD-color-dark__action--primary-hover);
+  --ssq-button-primary-hover-border: var(--QLD-color-dark__action--primary-hover);
+  --ssq-button-primary-hover-color: var(--QLD-color-dark__link--on-action);
 }
 
 .qld__body--dark .ssq-button--secondary,
@@ -146,9 +250,9 @@ a.ssq-button--tertiary[aria-disabled="true"],
 .qld__body--dark-alt a.ssq-button--secondary:visited,
 .qld__footer--dark a.ssq-button--secondary:visited,
 .qld__footer--dark-alt a.ssq-button--secondary:visited {
-  background: transparent;
-  border-color: var(--QLD-color-dark__action--secondary);
-  color: var(--QLD-color-dark__link);
+  --ssq-button-secondary-border: var(--QLD-color-dark__action--secondary);
+  --ssq-button-secondary-color: var(--QLD-color-dark__link);
+  --ssq-button-secondary-icon-color: var(--QLD-color-dark__action--secondary);
 }
 
 .qld__body--dark .ssq-button--secondary:hover,
@@ -167,8 +271,8 @@ a.ssq-button--tertiary[aria-disabled="true"],
 .qld__footer--dark a.ssq-button--secondary:visited:focus,
 .qld__footer--dark-alt a.ssq-button--secondary:visited:hover,
 .qld__footer--dark-alt a.ssq-button--secondary:visited:focus {
-  border-color: var(--QLD-color-dark__action--secondary-hover);
-  color: var(--QLD-color-dark__link);
+  --ssq-button-secondary-hover-border: var(--QLD-color-dark__action--secondary-hover);
+  --ssq-button-secondary-icon-hover-color: var(--QLD-color-dark__action--secondary-hover);
 }
 
 .qld__body--dark .ssq-button--tertiary,
@@ -179,60 +283,7 @@ a.ssq-button--tertiary[aria-disabled="true"],
 .qld__body--dark-alt a.ssq-button--tertiary:visited,
 .qld__footer--dark a.ssq-button--tertiary:visited,
 .qld__footer--dark-alt a.ssq-button--tertiary:visited {
-  color: var(--QLD-color-dark__link);
-}
-
-@media (prefers-color-scheme: dark) {
-  .ssq-button--primary {
-    background: var(--QLD-color-dark__action--primary);
-    border-color: var(--QLD-color-dark__action--primary);
-    color: var(--QLD-color-dark__link--on-action);
-  }
-
-  .ssq-button--primary:hover,
-  .ssq-button--primary:focus {
-    background: var(--QLD-color-dark__action--primary-hover);
-    border-color: var(--QLD-color-dark__action--primary-hover);
-    color: var(--QLD-color-dark__link--on-action);
-    text-decoration-color: var(--QLD-color-dark__link--on-action);
-  }
-
-  .ssq-button--secondary,
-  a.ssq-button--secondary:visited {
-    background: transparent;
-    border-color: var(--QLD-color-dark__action--secondary);
-    color: var(--QLD-color-dark__link);
-  }
-
-  .ssq-button--secondary:hover,
-  .ssq-button--secondary:focus,
-  a.ssq-button--secondary:visited:hover,
-  a.ssq-button--secondary:visited:focus {
-    border-color: var(--QLD-color-dark__action--secondary-hover);
-    color: var(--QLD-color-dark__link);
-  }
-
-  .ssq-button--tertiary,
-  a.ssq-button--tertiary:visited {
-    color: var(--QLD-color-dark__link);
-  }
-
-  a.ssq-button[aria-disabled="true"],
-  .ssq-button:disabled {
-    background: rgb(224 224 224 / 10%);
-    border-color: transparent;
-    color: var(--QLD-color-dark__text--lighter);
-  }
-
-  a.ssq-button--secondary[aria-disabled="true"],
-  .ssq-button--secondary:disabled {
-    background: transparent;
-    border-color: rgb(224 224 224 / 10%);
-  }
-
-  a.ssq-button--tertiary[aria-disabled="true"],
-  .ssq-button--tertiary:disabled {
-    background: transparent;
-    border-color: transparent;
-  }
+  --ssq-button-tertiary-color: var(--QLD-color-dark__link);
+  --ssq-button-tertiary-icon-color: var(--QLD-color-dark__action--secondary);
+  --ssq-button-tertiary-icon-hover-color: var(--QLD-color-dark__action--secondary-hover);
 }
