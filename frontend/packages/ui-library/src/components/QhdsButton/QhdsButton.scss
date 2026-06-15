@@ -11,6 +11,10 @@
   text-decoration: none;
 }
 
+.ssq-button__icon {
+  flex: 0 0 auto;
+}
+
 .ssq-button--primary {
   background: var(--ssq-color-action);
   color: var(--ssq-color-action-text);
@@ -20,4 +24,41 @@
   background: var(--ssq-color-surface);
   border-color: var(--ssq-color-action);
   color: var(--ssq-color-action);
+}
+
+.ssq-button--tertiary {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ssq-color-action);
+  text-decoration-line: underline;
+}
+
+.ssq-button--icon-lead .ssq-button__icon {
+  margin-right: var(--ssq-space-2);
+}
+
+.ssq-button--icon-trail .ssq-button__icon {
+  margin-left: var(--ssq-space-2);
+}
+
+.ssq-button--disabled,
+.ssq-button[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+a.ssq-button[aria-disabled="true"] {
+  background: var(--ssq-color-surface-alt);
+  border-color: transparent;
+  color: var(--ssq-color-muted);
+  pointer-events: none;
+  text-decoration: none;
+}
+
+a.ssq-button--secondary[aria-disabled="true"] {
+  border-color: var(--ssq-color-surface-alt);
+}
+
+a.ssq-button--tertiary[aria-disabled="true"] {
+  background: transparent;
+  border-color: transparent;
 }
