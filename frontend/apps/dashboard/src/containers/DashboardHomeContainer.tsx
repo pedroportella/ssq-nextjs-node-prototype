@@ -6,10 +6,12 @@ import {
   QhdsContentSection,
   QhdsFooter,
   QhdsHeader,
+  QhdsIcon,
   QhdsLayout,
   QhdsPageAlert,
   QhdsPageHeader,
   QhdsRow,
+  QhdsSideNav,
   QhdsSummaryList,
   QhdsTable
 } from "@ssq/ui-library";
@@ -37,6 +39,45 @@ function formatStatus(status: string): string {
 
 function renderEmptyState(message: string) {
   return <p className={styles.empty}>{message}</p>;
+}
+
+function DashboardSideNav({ services }: { services: PrototypeServiceCatalogueEntry[] }) {
+  return (
+    <QhdsSideNav
+      activeHref="/"
+      ariaLabel="Dashboard navigation"
+      heading="Home"
+      headingHref="/"
+      headingIcon={<QhdsIcon size="md" symbol="home" />}
+      items={[
+        {
+          expanded: true,
+          href: "#available-services",
+          icon: <QhdsIcon size="md" symbol="document" />,
+          items: services.map((service) => ({
+            href: service.href,
+            label: service.label
+          })),
+          label: "Services"
+        },
+        {
+          expanded: true,
+          href: "#current-records",
+          icon: <QhdsIcon size="md" symbol="document" />,
+          items: [
+            { href: "#saved-drafts", label: "Saved drafts" },
+            { href: "#submitted-requests", label: "Submitted requests" }
+          ],
+          label: "Current records"
+        },
+        {
+          href: "#recent-activity",
+          icon: <QhdsIcon size="md" symbol="clock" />,
+          label: "Recent activity"
+        }
+      ]}
+    />
+  );
 }
 
 function ServiceCards({ services }: { services: PrototypeServiceCatalogueEntry[] }) {
@@ -143,7 +184,12 @@ export function DashboardContent({ shell, summary }: { shell: AppShellData; summ
   const activeRequests = summary.drafts.length + summary.submittedRequests.length;
 
   return (
-    <QhdsLayout contentLabelledBy="page-title" footer={<QhdsFooter />} header={<QhdsHeader />}>
+    <QhdsLayout
+      contentLabelledBy="page-title"
+      footer={<QhdsFooter />}
+      header={<QhdsHeader />}
+      sideNav={<DashboardSideNav services={summary.availableServices} />}
+    >
       <QhdsPageHeader
         aside={
           <QhdsSummaryList
@@ -179,22 +225,26 @@ export function DashboardContent({ shell, summary }: { shell: AppShellData; summ
         />
       </QhdsContentSection>
 
-      <QhdsContentSection heading="Available services">
+      <QhdsContentSection heading="Available services" id="available-services">
         <ServiceCards services={summary.availableServices} />
       </QhdsContentSection>
 
-      <QhdsContentSection heading="Current records">
+      <QhdsContentSection heading="Current records" id="current-records">
         <QhdsRow className={styles.sectionGrid}>
-          <QhdsCol lg={6} xl={6}>
-            <DraftsTable summary={summary} />
+          <QhdsCol lg={12} xl={6}>
+            <div id="saved-drafts">
+              <DraftsTable summary={summary} />
+            </div>
           </QhdsCol>
-          <QhdsCol lg={6} xl={6}>
-            <SubmittedRequestsTable summary={summary} />
+          <QhdsCol lg={12} xl={6}>
+            <div id="submitted-requests">
+              <SubmittedRequestsTable summary={summary} />
+            </div>
           </QhdsCol>
         </QhdsRow>
       </QhdsContentSection>
 
-      <QhdsContentSection heading="Recent activity">
+      <QhdsContentSection heading="Recent activity" id="recent-activity">
         <ActivityTable activity={summary.activity} />
       </QhdsContentSection>
     </QhdsLayout>

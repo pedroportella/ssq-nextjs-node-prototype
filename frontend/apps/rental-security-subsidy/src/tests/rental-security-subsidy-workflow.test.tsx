@@ -105,11 +105,28 @@ const submitResult: PrototypeSubmitResult = {
 };
 
 describe("Rental Security Subsidy workflow containers", () => {
-  it("renders the overview with apply and status entry points", () => {
+  it("renders the landing page with side navigation and application entry points", () => {
     const html = renderToStaticMarkup(<RentalSecuritySubsidyOverviewContent shell={shell} workflow={workflow} />);
 
     expect(html).toContain("Rental Security Subsidy");
     expect(html).toContain("qld__grid");
+    expect(html).toContain("vertical-nav");
+    expect(html).toContain("qld__left-nav");
+    expect(html).toContain("qld__left-nav__content");
+    expect(html).toContain("qld__left-nav__item-link");
+    expect(html).toContain("qld__left-nav__item-text");
+    expect(html).toContain("qld__left-nav__item-icon");
+    expect(html).toContain('aria-label="Rental Security Subsidy navigation"');
+    expect(html).toContain('aria-current="page"');
+    expect(html).toContain('href="/#about-service"');
+    expect(html).toContain('href="/#eligibility"');
+    expect(html).toContain('href="/#before-you-start"');
+    expect(html).toContain('href="/apply"');
+    expect(html).toContain('href="/application-status"');
+    expect(html).toContain('id="about-service"');
+    expect(html).toContain('id="eligibility"');
+    expect(html).toContain('id="before-you-start"');
+    expect(html).toContain('id="start-application"');
     expect(html).toContain("container-fluid");
     expect(html).toContain("ssq-layout__container");
     expect(html).toContain("ssq-layout__content--full");
@@ -118,10 +135,10 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("ssq-page-header");
     expect(html).toContain("ssq-content-section");
     expect(html).toContain("qld__summary-list");
-    expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
     expect(html).toContain("Frontend-only rental workflow");
-    expect(html).toContain('href="/apply"');
-    expect(html).toContain('href="/application-status"');
+    expect(html).toContain("About this service");
+    expect(html).toContain("Before you start");
+    expect(html).toContain("The next step opens the multistep form without the landing page side navigation.");
     expect(html).toContain("rental-security-subsidy-draft-001");
   });
 
@@ -137,6 +154,9 @@ describe("Rental Security Subsidy workflow containers", () => {
 
     expect(html).toContain("Prepare your rental support application");
     expect(html).toContain("qld__grid");
+    expect(html).toContain("ssq-layout--focus");
+    expect(html).not.toContain("vertical-nav");
+    expect(html).not.toContain("qld__left-nav");
     expect(html).toContain("container-fluid");
     expect(html).toContain("ssq-layout__content--task");
     expect(html).toContain("row");
@@ -145,6 +165,8 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("col-xs-12 col-lg-6 col-xl-6");
     expect(html).toContain("qld__form");
     expect(html).toContain("qld__direction-link");
+    expect(html).toContain("Back to Rental Security Subsidy landing page");
+    expect(html).toContain("Back to landing page");
     expect(html).toContain("qld__progress-indicator");
     expect(html).toContain("qld__progress-indicator__item--current");
     expect(html).toContain("qld__form-group");
@@ -188,6 +210,26 @@ describe("Rental Security Subsidy workflow containers", () => {
 
     expect(html).toContain("Rental Security Subsidy application status");
     expect(html).toContain("qld__grid");
+    expect(html).toContain("vertical-nav");
+    expect(html).toContain("qld__left-nav");
+    expect(html).toContain("qld__left-nav__content");
+    expect(html).toContain("qld__left-nav__item-link");
+    expect(html).toContain("qld__left-nav__item-text");
+    expect(html).toContain("qld__left-nav__item-icon");
+    expect(html).toContain("qld__accordion--open");
+    expect(html).toContain('aria-label="Rental Security Subsidy navigation"');
+    expect(html).toContain('aria-current="page"');
+    expect(html).toContain('href="/#about-service"');
+    expect(html).toContain('href="/#eligibility"');
+    expect(html).toContain('href="/#before-you-start"');
+    expect(html).toContain('href="/application-status#request-summary"');
+    expect(html).toContain('href="/application-status#supporting-documents"');
+    expect(html).toContain('href="/application-status#recent-activity"');
+    expect(html).toContain('id="request-summary"');
+    expect(html).toContain('id="supporting-documents"');
+    expect(html).toContain('id="supporting-documents-upload"');
+    expect(html).toContain('for="supporting-documents-upload"');
+    expect(html).toContain('id="recent-activity"');
     expect(html).toContain("container-fluid");
     expect(html).toContain("ssq-layout__container");
     expect(html).toContain("ssq-layout__content--full");

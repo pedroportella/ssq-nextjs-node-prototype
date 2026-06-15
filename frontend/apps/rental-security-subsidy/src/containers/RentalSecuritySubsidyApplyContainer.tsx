@@ -73,10 +73,10 @@ export function RentalSecuritySubsidyApplyContent({
         actions={
           <>
             <QhdsButton href="/application-status">Review mock submission</QhdsButton>
-            <QhdsButton href="/" variant="secondary">Back to overview</QhdsButton>
+            <QhdsButton href="/" variant="secondary">Back to landing page</QhdsButton>
           </>
         }
-        backLink={<QhdsDirectionLink href="/">Back to rental support overview</QhdsDirectionLink>}
+        backLink={<QhdsDirectionLink href="/">Back to Rental Security Subsidy landing page</QhdsDirectionLink>}
         contextLabel="Rental Security Subsidy"
         heading="Prepare your rental support application"
         lead="This frontend-only slice shows the deeper rental workflow using F13 mock draft, validation and submit services."

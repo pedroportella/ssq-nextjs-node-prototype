@@ -474,7 +474,9 @@ async function expectQhdsComponentHooks(page: Page, path: string) {
     cardCount: document.querySelectorAll(".qld__card").length,
     contentSectionCount: document.querySelectorAll(".ssq-content-section").length,
     directionLinkCount: document.querySelectorAll(".qld__direction-link").length,
+    landingSectionCount: document.querySelectorAll("#about-service, #eligibility, #before-you-start, #start-application").length,
     pageHeaderCount: document.querySelectorAll(".ssq-page-header").length,
+    port: location.port,
     progressCount: document.querySelectorAll(".qld__progress-indicator").length,
     summaryListCount: document.querySelectorAll(".qld__summary-list").length,
     tableCount: document.querySelectorAll(".qld__table").length
@@ -493,7 +495,11 @@ async function expectQhdsComponentHooks(page: Page, path: string) {
   }
 
   if (path === "/") {
-    expect(componentState.cardCount).toBeGreaterThan(0);
+    if (componentState.port === "3001" || componentState.port === "3002") {
+      expect(componentState.landingSectionCount).toBe(4);
+    } else {
+      expect(componentState.cardCount).toBeGreaterThan(0);
+    }
   }
 
   if (path === "/application-status") {

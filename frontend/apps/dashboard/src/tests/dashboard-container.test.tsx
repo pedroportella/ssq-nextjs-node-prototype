@@ -61,8 +61,21 @@ describe("DashboardContent", () => {
 
     expect(html).toContain("SSQ Service Dashboard");
     expect(html).toContain("qld__grid");
+    expect(html).toContain("vertical-nav");
     expect(html).toContain("container-fluid");
     expect(html).toContain("ssq-layout__container");
+    expect(html).toContain("qld__left-nav");
+    expect(html).toContain("qld__left-nav__content");
+    expect(html).toContain("qld__left-nav__item-link");
+    expect(html).toContain("qld__left-nav__item-text");
+    expect(html).toContain("qld__left-nav__item-icon");
+    expect(html).toContain("qld__accordion--open");
+    expect(html).toContain("qld__body--left-nav");
+    expect(html).toContain('aria-label="Dashboard navigation"');
+    expect(html).toContain('aria-current="page"');
+    expect(html).toContain('href="#available-services"');
+    expect(html).toContain('href="#current-records"');
+    expect(html).toContain('href="#recent-activity"');
     expect(html).toContain("ssq-layout__content--full");
     expect(html).toContain('aria-labelledby="page-title"');
     expect(html).toContain("row");
@@ -76,6 +89,8 @@ describe("DashboardContent", () => {
     expect(html).toContain("Frontend mock runtime");
     expect(html).toContain("Seniors Card");
     expect(html).toContain('href="https://example.test/seniors-card"');
+    expect(html).toContain("Saved drafts");
+    expect(html).toContain("Submitted requests");
     expect(html).toContain("SC-2026-0001");
   });
 

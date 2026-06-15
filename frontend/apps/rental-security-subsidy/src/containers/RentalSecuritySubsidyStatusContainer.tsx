@@ -18,6 +18,7 @@ import {
 } from "@ssq/ui-library";
 
 import styles from "./RentalSecuritySubsidyHomeContainer.module.scss";
+import { RentalSecuritySubsidySideNav } from "./RentalSecuritySubsidySideNav";
 
 import type { PrototypeSubmitResult, PrototypeUploadedDocument, PrototypeUploadPolicy, PrototypeWorkflowData } from "@ssq/services";
 
@@ -41,7 +42,12 @@ export function RentalSecuritySubsidyStatusContent({
   workflow: PrototypeWorkflowData;
 }) {
   return (
-    <QhdsLayout contentLabelledBy="page-title" footer={<QhdsFooter />} header={<QhdsHeader />}>
+    <QhdsLayout
+      contentLabelledBy="page-title"
+      footer={<QhdsFooter />}
+      header={<QhdsHeader />}
+      sideNav={<RentalSecuritySubsidySideNav activeHref="/application-status" />}
+    >
       <QhdsPageHeader
         aside={
           <QhdsSummaryList
@@ -64,7 +70,7 @@ export function RentalSecuritySubsidyStatusContent({
         </p>
       </QhdsPageAlert>
 
-      <QhdsContentSection heading="Request summary">
+      <QhdsContentSection heading="Request summary" id="request-summary">
         <QhdsSummaryList
           ariaLabel="Request summary"
           items={[
@@ -78,9 +84,10 @@ export function RentalSecuritySubsidyStatusContent({
         </div>
       </QhdsContentSection>
 
-      <QhdsContentSection heading="Supporting documents">
+      <QhdsContentSection heading="Supporting documents" id="supporting-documents">
         <QhdsFileUpload
           hint="The mock upload policy shows accepted and rejected file states without storing real files."
+          id="supporting-documents-upload"
           label="Upload supporting documents"
           name="supportingDocuments"
           policy={uploadPolicy}
@@ -88,7 +95,7 @@ export function RentalSecuritySubsidyStatusContent({
         />
       </QhdsContentSection>
 
-      <QhdsContentSection heading="Recent activity">
+      <QhdsContentSection heading="Recent activity" id="recent-activity">
         <QhdsTable
           caption="Recent activity history"
           columns={[

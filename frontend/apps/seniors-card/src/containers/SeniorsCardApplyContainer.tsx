@@ -51,10 +51,10 @@ export function SeniorsCardApplyContent({
         actions={
           <>
             <QhdsButton href="/application-status">Review mock submission</QhdsButton>
-            <QhdsButton href="/" variant="secondary">Back to overview</QhdsButton>
+            <QhdsButton href="/" variant="secondary">Back to landing page</QhdsButton>
           </>
         }
-        backLink={<QhdsDirectionLink href="/">Back to Seniors Card overview</QhdsDirectionLink>}
+        backLink={<QhdsDirectionLink href="/">Back to Seniors Card landing page</QhdsDirectionLink>}
         contextLabel="Seniors Card"
         heading="Check your eligibility"
         lead="This frontend-only slice shows the draft, validation and submit states using F13 mock services."

@@ -1,19 +1,17 @@
 import { getRentalSecuritySubsidyShellData, getRentalSecuritySubsidyWorkflowData } from "@ssq/services/server";
 import {
   QhdsButton,
-  QhdsCard,
-  QhdsCol,
   QhdsContentSection,
   QhdsFooter,
   QhdsHeader,
   QhdsLayout,
   QhdsPageAlert,
   QhdsPageHeader,
-  QhdsRow,
   QhdsSummaryList
 } from "@ssq/ui-library";
 
 import styles from "./RentalSecuritySubsidyHomeContainer.module.scss";
+import { RentalSecuritySubsidySideNav } from "./RentalSecuritySubsidySideNav";
 
 import type { PrototypeWorkflowData } from "@ssq/services";
 import type { AppShellData } from "@ssq/services/server";
@@ -26,7 +24,12 @@ export function RentalSecuritySubsidyOverviewContent({
   workflow: PrototypeWorkflowData;
 }) {
   return (
-    <QhdsLayout contentLabelledBy="page-title" footer={<QhdsFooter />} header={<QhdsHeader />}>
+    <QhdsLayout
+      contentLabelledBy="page-title"
+      footer={<QhdsFooter />}
+      header={<QhdsHeader />}
+      sideNav={<RentalSecuritySubsidySideNav activeHref="/" />}
+    >
       <QhdsPageHeader
         aside={
           <QhdsSummaryList
@@ -40,7 +43,7 @@ export function RentalSecuritySubsidyOverviewContent({
         }
         heading={shell.app.label}
         headingId="page-title"
-        lead="Prepare a prototype rental support application and track its progress."
+        lead="Check what you need before starting the focused Rental Security Subsidy application form."
       />
 
       <QhdsPageAlert heading="Frontend-only rental workflow" tone="success">
@@ -50,29 +53,47 @@ export function RentalSecuritySubsidyOverviewContent({
         </p>
       </QhdsPageAlert>
 
-      <QhdsContentSection heading="Manage this application">
-        <QhdsRow className={styles.sectionGrid}>
-          <QhdsCol lg={4} xl={4}>
-            <QhdsCard action={<QhdsButton href="/apply">Start application</QhdsButton>} heading="Apply for rental support">
-              <p>Complete a multi-step prototype workflow covering household, income and rental property details.</p>
-            </QhdsCard>
-          </QhdsCol>
-          <QhdsCol lg={4} xl={4}>
-            <QhdsCard action={<QhdsButton href="/application-status" variant="secondary">View status</QhdsButton>} heading="Track your request">
-              <p>
-                View mock submission reference <strong>{workflow.submittedRequest.referenceNumber}</strong> and recent activity.
-              </p>
-            </QhdsCard>
-          </QhdsCol>
-          <QhdsCol lg={4} xl={4}>
-            <QhdsCard heading="Saved draft">
-              <p>
-                Draft <strong>{workflow.draft.draftId}</strong> is ready to continue.
-              </p>
-              <p className={styles.meta}>Last updated {new Date(workflow.draft.lastUpdated).toLocaleString("en-AU")}</p>
-            </QhdsCard>
-          </QhdsCol>
-        </QhdsRow>
+      <QhdsContentSection
+        heading="About this service"
+        id="about-service"
+        lead="Use this landing page to confirm the service context before entering the multistep form."
+      >
+        <p>
+          You can start a rental support application, review the prefilled household details and return to this landing page before
+          continuing the focused form.
+        </p>
+        <QhdsSummaryList
+          ariaLabel="Saved Rental Security Subsidy application"
+          items={[
+            { description: workflow.draft.draftId, term: "Saved draft" },
+            { description: workflow.submittedRequest.referenceNumber, term: "Latest reference" },
+            { description: workflow.profile.identityStrength, term: "Identity" }
+          ]}
+        />
+      </QhdsContentSection>
+
+      <QhdsContentSection heading="Eligibility" id="eligibility">
+        <ul>
+          <li>You rent in Queensland or are preparing to enter a private rental arrangement.</li>
+          <li>You can provide household and income details for this prototype request.</li>
+          <li>You can review rental property details before submitting the focused form.</li>
+        </ul>
+      </QhdsContentSection>
+
+      <QhdsContentSection heading="Before you start" id="before-you-start">
+        <p>
+          The form opens in focus mode with progress, validation and draft submission states. Keep rental evidence nearby if supporting
+          documents are requested later.
+        </p>
+        <p className={styles.meta}>Last draft update: {new Date(workflow.draft.lastUpdated).toLocaleString("en-AU")}</p>
+      </QhdsContentSection>
+
+      <QhdsContentSection heading="Start application" id="start-application">
+        <p>The next step opens the multistep form without the landing page side navigation.</p>
+        <div className={styles.sectionActions}>
+          <QhdsButton href="/apply">Start application</QhdsButton>
+          <QhdsButton href="/application-status" variant="secondary">View application status</QhdsButton>
+        </div>
       </QhdsContentSection>
     </QhdsLayout>
   );

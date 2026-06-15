@@ -38,11 +38,30 @@ export function QhdsLayout({
   const resolvedContentWidth = contentWidth ?? (focusMode ? "task" : "full");
   const contentClasses = [
     "col-xs-12",
-    hasSideNav ? "col-lg-9 col-xl-9" : "col-lg-12 col-xl-12",
+    "col-lg-12 col-xl-12",
     "ssq-layout__content",
     `ssq-layout__content--${resolvedContentWidth}`
   ];
-  const layoutClasses = ["qld__grid", "ssq-layout", `ssq-layout--${width}`, focusMode ? "ssq-layout--focus" : "", className];
+  const layoutClasses = [
+    "qld__grid",
+    hasSideNav ? "vertical-nav" : "",
+    "ssq-layout",
+    `ssq-layout--${width}`,
+    hasSideNav ? "ssq-layout--has-left-nav" : "",
+    focusMode ? "ssq-layout--focus" : "",
+    className
+  ];
+  const bodyContent = (
+    <section className="qld__body ssq-layout__body">
+      <div className="container-fluid ssq-layout__container">
+        <div className="row">
+          <div aria-labelledby={contentLabelledBy} className={contentClasses.filter(Boolean).join(" ")} id={mainId}>
+            {children}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 
   return (
     <div className={layoutClasses.filter(Boolean).join(" ")}>
@@ -58,20 +77,8 @@ export function QhdsLayout({
       </nav>
       {header}
       <main aria-label={mainLabel} className="main ssq-layout__main" tabIndex={-1}>
-        <section className="qld__body ssq-layout__body">
-          <div className="container-fluid ssq-layout__container">
-            <div className="row">
-              {hasSideNav ? (
-                <div className="col-xs-12 col-lg-3 col-xl-3 ssq-layout__sidebar" id="section-navigation">
-                  {sideNav}
-                </div>
-              ) : null}
-              <div aria-labelledby={contentLabelledBy} className={contentClasses.filter(Boolean).join(" ")} id={mainId}>
-                {children}
-              </div>
-            </div>
-          </div>
-        </section>
+        {hasSideNav ? <div className="ssq-layout__left-nav" id="section-navigation">{sideNav}</div> : null}
+        {hasSideNav ? <div className="qld__body--left-nav ssq-layout__left-nav-content">{bodyContent}</div> : bodyContent}
       </main>
       {footer}
     </div>

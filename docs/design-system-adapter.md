@@ -66,6 +66,12 @@ The prototype should not reintroduce local web components or generated custom-el
 
 `QhdsIcon` renders server-compatible QHDS sprite icons with the base `.qld__icon` class. It defaults to the general `QLD-icons.svg` sprite, supports explicit `sprite="qld-health"` and `sprite="utility"` modes, and maps QHDS `extended_` ids to the health sprite by stripping the prefix. It also emits QHDS size hooks such as `.qld__icon--sm` when callers pass `size`. Icons are decorative by default with `aria-hidden`; callers can provide `label` to render an accessible `role="img"` icon. The QHDS core, health and utility sprite URL helpers and required icon-name manifests live in `@ssq/ui-assets`; Next apps load these symbol sprites as static resources rather than image imports.
 
+## Left Nav Contract
+
+`QhdsSideNav` now renders the QHDS left-navigation shell from `inner-with-nav.html`, not the older `qld__side-nav` class family. The root emits `.qld__left-nav`, the inner `nav` defaults to `id="left-nav"` and `.qld__left-nav__content`, links use `.qld__left-nav__item-link`, labels use `.qld__left-nav__item-text`, icon links wrap QHDS sprite icons in `.qld__left-nav__item-icon`, and current pages render as `li.active[aria-current="page"]` with a non-link span. Branches emit QHDS accordion state hooks through `.qld__left-nav__item-toggle`, `aria-controls`, `aria-expanded`, `.qld__accordion--open` / `.qld__accordion--closed` and `.qld__accordion__body`; the adapter stays server-renderable and does not import upstream QHDS runtime JavaScript, so callers should set `expanded` for branches that must be visible in the current shell.
+
+`QhdsLayout` applies `vertical-nav` when `sideNav` is present outside focus mode, renders the nav before the content wrapper inside `main`, and wraps the content side with `.qld__body--left-nav` while preserving skip links and the stable `#content` target. The left nav pins its internal colours to the QHDS light left-nav palette so it remains accessible when the surrounding app is rendered in dark mode.
+
 ## Select Contract
 
 `QhdsSelect` and its `QhdsSelectInput` alias render a native server-compatible `<select>` inside the QHDS-style `.qld__select` wrapper. The adapter supports options from data or children, placeholder empty options, disabled and multiple states, QHDS width class hooks, and `QhdsFormField` label, optional, required, hint and error wiring. It composes existing `aria-describedby` values with generated hint/error ids and applies invalid classes without importing upstream QHDS runtime JavaScript.

@@ -27,6 +27,7 @@
 .ssq-summary-list__description {
   margin: 0;
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 @media (min-width: 48rem) {

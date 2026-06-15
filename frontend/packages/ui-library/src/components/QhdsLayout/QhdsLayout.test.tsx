@@ -31,17 +31,21 @@ describe("QhdsLayout", () => {
     expect(html).toContain("Footer");
   });
 
-  it("renders optional section navigation outside the main region", () => {
+  it("renders optional left navigation as a QHDS vertical-nav shell", () => {
     const html = renderToStaticMarkup(
       <QhdsLayout sideNav={<nav aria-label="Account sections">Navigation</nav>}>
         <h1>Body</h1>
       </QhdsLayout>
     );
 
+    expect(html).toContain("vertical-nav");
+    expect(html).toContain("ssq-layout--has-left-nav");
     expect(html).toContain('href="#section-navigation"');
-    expect(html).toContain('class="col-xs-12 col-lg-3 col-xl-3 ssq-layout__sidebar" id="section-navigation"');
-    expect(html).toContain('class="col-xs-12 col-lg-9 col-xl-9 ssq-layout__content ssq-layout__content--full" id="content"');
+    expect(html).toContain('class="ssq-layout__left-nav" id="section-navigation"');
+    expect(html).toContain('class="qld__body--left-nav ssq-layout__left-nav-content"');
+    expect(html).toContain('class="col-xs-12 col-lg-12 col-xl-12 ssq-layout__content ssq-layout__content--full" id="content"');
     expect(html).toContain('<nav aria-label="Account sections">Navigation</nav>');
+    expect(html).not.toContain("ssq-layout__sidebar");
   });
 
   it("hides section navigation in focus mode", () => {
@@ -53,7 +57,8 @@ describe("QhdsLayout", () => {
 
     expect(html).toContain("ssq-layout--focus");
     expect(html).toContain("ssq-layout__content--task");
-    expect(html).not.toContain("ssq-layout__sidebar");
+    expect(html).not.toContain("vertical-nav");
+    expect(html).not.toContain("ssq-layout__left-nav");
   });
 
   it("supports contained body-width content while preserving the stable content target", () => {
@@ -74,6 +79,8 @@ describe("QhdsLayout", () => {
     expect(styles).toContain("max-width: var(--qld-grid-container-max-width)");
     expect(styles).toContain(".ssq-layout__content--task");
     expect(styles).toContain("max-width: 76rem");
+    expect(styles).toContain(".ssq-layout--has-left-nav .ssq-layout__main");
+    expect(styles).toContain(".qld__body--left-nav .ssq-layout__container");
   });
 
   it("keeps skip-link ownership in the layout when composed with QhdsHeader", () => {
