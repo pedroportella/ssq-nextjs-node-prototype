@@ -8,6 +8,7 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./icons/qld-health-icons-url": "./icons/qld-health-icons-url.ts",
     "./icons/qld-icons-url": "./icons/qld-icons-url.ts",
     "./icons/svg-icons-url": "./icons/svg-icons-url.ts",
     "./icons/*": "./icons/*",

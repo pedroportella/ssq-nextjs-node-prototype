@@ -12,6 +12,7 @@ import {
   QhdsCol,
   QhdsContainer,
   QhdsRow,
+  QhdsIcon,
   QhdsRadioGroup,
   QhdsSelect,
   QhdsSelectInput,
@@ -34,6 +35,7 @@ describe("ui-library public exports", () => {
     expect(QhdsCol).toBeTypeOf("function");
     expect(QhdsContainer).toBeTypeOf("function");
     expect(QhdsHeader).toBeTypeOf("function");
+    expect(QhdsIcon).toBeTypeOf("function");
     expect(QhdsLayout).toBeTypeOf("function");
     expect(QhdsPageAlert).toBeTypeOf("function");
     expect(QhdsPageHeader).toBeTypeOf("function");

@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
+import { QhdsHeader } from "../QhdsHeader";
 import { QhdsLayout } from "./QhdsLayout";
 
 describe("QhdsLayout", () => {
@@ -45,5 +46,16 @@ describe("QhdsLayout", () => {
 
     expect(html).toContain("ssq-layout--focus");
     expect(html).not.toContain("ssq-layout__sidebar");
+  });
+
+  it("keeps skip-link ownership in the layout when composed with QhdsHeader", () => {
+    const html = renderToStaticMarkup(
+      <QhdsLayout header={<QhdsHeader />}>
+        <h1>Body</h1>
+      </QhdsLayout>
+    );
+
+    expect((html.match(/class="qld__skip-link ssq-layout__skip-links"/g) ?? []).length).toBe(1);
+    expect((html.match(/role="banner"/g) ?? []).length).toBe(1);
   });
 });

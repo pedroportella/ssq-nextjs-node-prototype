@@ -6,6 +6,7 @@ export * from "./components/QhdsDirectionLink";
 export * from "./components/QhdsFooter";
 export * from "./components/QhdsGrid";
 export * from "./components/QhdsHeader";
+export * from "./components/QhdsIcon";
 export * from "./components/QhdsLayout";
 export * from "./components/QhdsPageAlert";
 export * from "./components/QhdsFileUpload";

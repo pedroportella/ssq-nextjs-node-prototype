@@ -24,6 +24,7 @@ The current workflow-facing adapter surface includes:
 
 - `QhdsLayout`
 - `QhdsHeader`
+- `QhdsIcon`
 - `QhdsFooter`
 - `QhdsSideNav`
 - `QhdsWorkflowLayout`
@@ -56,6 +57,14 @@ The prototype should not reintroduce local web components or generated custom-el
 ## Button Contract
 
 `QhdsButton` supports QHDS-style anchor buttons, native buttons and route-style anchors without importing an app router. It preserves native `href`, `target`, `rel` and button `type` semantics, defaults native buttons to `type="button"`, supports `leadingIcon` and `trailingIcon` class hooks, and treats disabled anchor-style buttons with `aria-disabled`, no `href`, no tab stop and suppressed click navigation. Primary buttons emit the reference `.qld__btn` class without a primary modifier; secondary and tertiary buttons add the matching QHDS modifier classes. Static server-rendered buttons and links must not receive synthetic event handlers; handlers are attached only when an interactive caller supplies `onClick` or `onNavigate`.
+
+## Header Contract
+
+`QhdsHeader` renders the single app banner landmark and keeps skip-link ownership in `QhdsLayout`. It uses QHDS/RBDM header hooks for the pre-header, base URL link, CTA wrapper, CTA links, CTA icon/text spans, main header and brand link, while defaulting to web-application width: full-width chrome with 32px desktop side padding, following RBDM and Services Australia rather than website-contained QHDS pages. A `width="contained"` mode remains available for future website-style uses. The pre-header base URL and CTA links are real anchors. The current prototype defaults to mocked account controls, showing `Avery Taylor` and `Logout` in the RBDM CTA pattern with QLD sprite icons for `profile` and `log-out`; pre-header CTA icons use the QHDS dark action secondary token (`#84d3ff` in the current QLD Health palette). The general `QLD-icons.svg` sprite and the QHDS `QLD-Health-icons.svg` extended sprite are both available through `@ssq/ui-assets` URL helpers. QHDS rewrites `extended_` icon ids at runtime, for example `extended_health_alert` becomes `QLD-Health-icons.svg#health_alert`. Callers can replace the account name and logout href or disable these controls when real auth owns the shell. Optional `onNavigate` handlers are attached only when supplied so static server-rendered app headers stay router-free.
+
+## Icon Contract
+
+`QhdsIcon` renders server-compatible QHDS sprite icons with the base `.qld__icon` class. It defaults to the general `QLD-icons.svg` sprite, supports an explicit `sprite="qld-health"` mode, and maps QHDS `extended_` ids to the health sprite by stripping the prefix. Icons are decorative by default with `aria-hidden`; callers can provide `label` to render an accessible `role="img"` icon.
 
 ## Select Contract
 

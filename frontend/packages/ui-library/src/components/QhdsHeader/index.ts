@@ -1,2 +1,2 @@
 export { QhdsHeader } from "./QhdsHeader";
-export type { QhdsHeaderNavItem, QhdsHeaderProps } from "./QhdsHeader";
+export type { QhdsHeaderCtaItem, QhdsHeaderNavItem, QhdsHeaderProps } from "./QhdsHeader";

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { prototypeAssetManifest } from "./index";
 import qgovLogoUrlBrand from "../logos/header-logo-qgov-url";
+import qldHealthIconsUrl from "../icons/qld-health-icons-url";
 import qldIconsUrl from "../icons/qld-icons-url";
 import svgIconsUrl from "../icons/svg-icons-url";
 
@@ -13,6 +14,7 @@ describe("prototypeAssetManifest", () => {
 
   it("exports copied RBDM QGov logo and icon sprite URL helpers", () => {
     expect(qgovLogoUrlBrand).toContain("header-logo-qgov--brand.svg");
+    expect(qldHealthIconsUrl).toContain("QLD-Health-icons.svg");
     expect(qldIconsUrl).toContain("QLD-icons.svg");
     expect(svgIconsUrl).toContain("svg-icons.svg");
   });
