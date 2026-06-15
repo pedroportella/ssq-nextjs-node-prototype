@@ -143,6 +143,10 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("qld__progress-indicator");
     expect(html).toContain("qld__progress-indicator__item--current");
     expect(html).toContain("qld__form-group");
+    expect(html).toContain("qld__select");
+    expect(html).toContain("qld__select-control");
+    expect(html).toContain('id="residential-state"');
+    expect(html).toContain('<option value="qld" selected="">Queensland</option>');
     expect(html).toContain("qld__text-input--error");
     expect(html).toContain('id="date-of-birth"');
     expect(html).toContain('for="date-of-birth"');

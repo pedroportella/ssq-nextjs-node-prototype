@@ -48,9 +48,11 @@ function getButtonClasses({
   trailingIcon?: ReactNode;
   variant: ButtonVariant;
 }) {
+  const variantClass = variant === "primary" ? undefined : `qld__btn--${variant}`;
+
   return [
     "qld__btn",
-    `qld__btn--${variant}`,
+    variantClass,
     leadingIcon ? "qld__btn--icon-lead" : undefined,
     trailingIcon ? "qld__btn--icon-trail" : undefined,
     "ssq-button",

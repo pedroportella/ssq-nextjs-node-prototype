@@ -1,4 +1,5 @@
 import { act } from "react";
+import { readFileSync } from "node:fs";
 import type { ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -38,6 +39,9 @@ describe("QhdsButton", () => {
           Start
         </QhdsButton>
         <QhdsButton variant="secondary">Cancel</QhdsButton>
+        <QhdsButton href="/more" variant="tertiary">
+          More
+        </QhdsButton>
       </>
     );
 
@@ -45,11 +49,29 @@ describe("QhdsButton", () => {
     expect(html).toContain('target="_blank"');
     expect(html).toContain('rel="noreferrer"');
     expect(html).toContain("qld__btn");
-    expect(html).toContain("qld__btn--primary");
+    expect(html).not.toContain("qld__btn--primary");
     expect(html).toContain("qld__btn--secondary");
     expect(html).toContain("ssq-button--primary");
     expect(html).toContain("ssq-button--secondary");
+    expect(html).toContain("ssq-button--tertiary");
     expect(html).toContain('type="button"');
+  });
+
+  it("keeps secondary and tertiary link-button labels on QHDS colours after visit", () => {
+    const stylesheet = readFileSync("src/components/QhdsButton/QhdsButton.scss", "utf8");
+
+    expect(stylesheet).toMatch(
+      /\.ssq-button--secondary,\na\.ssq-button--secondary:visited \{[\s\S]*?color: var\(--QLD-color-light__link\);/
+    );
+    expect(stylesheet).toMatch(
+      /\.ssq-button--tertiary,\na\.ssq-button--tertiary:visited \{[\s\S]*?color: var\(--QLD-color-light__link\);/
+    );
+    expect(stylesheet).toMatch(
+      /\.qld__body--dark a\.ssq-button--secondary:visited,[\s\S]*?color: var\(--QLD-color-dark__link\);/
+    );
+    expect(stylesheet).toMatch(
+      /\.qld__body--dark a\.ssq-button--tertiary:visited,[\s\S]*?color: var\(--QLD-color-dark__link\);/
+    );
   });
 
   it("preserves explicit button types", () => {

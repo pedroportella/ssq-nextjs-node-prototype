@@ -1,4 +1,29 @@
+.ssq-select-wrapper {
+  display: flex;
+  max-width: 32rem;
+  position: relative;
+  width: 100%;
+}
+
+.ssq-select-wrapper::after {
+  border-bottom: 2px solid var(--ssq-color-action);
+  border-right: 2px solid var(--ssq-color-action);
+  content: "";
+  height: 0.55rem;
+  pointer-events: none;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-65%) rotate(45deg);
+  width: 0.55rem;
+}
+
+.ssq-select-wrapper--multiple::after {
+  content: none;
+}
+
 .ssq-select {
+  appearance: none;
   background: var(--ssq-color-surface);
   border: 2px solid var(--ssq-color-border-strong);
   border-radius: var(--ssq-radius-sm);
@@ -6,10 +31,82 @@
   color: var(--ssq-color-text);
   display: block;
   min-height: 2.75rem;
-  padding: var(--ssq-space-2) var(--ssq-space-3);
-  width: min(100%, 32rem);
+  padding: var(--ssq-space-2) 3rem var(--ssq-space-2) var(--ssq-space-3);
+  width: 100%;
+}
+
+.ssq-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 
 .ssq-form-field--invalid .ssq-select {
   border-color: var(--ssq-color-invalid-border);
+}
+
+.ssq-form-field--invalid .ssq-select-wrapper::after,
+.qld__select-error::after {
+  border-color: var(--ssq-color-invalid-border);
+}
+
+.ssq-select-wrapper--2char {
+  max-width: 4rem;
+}
+
+.ssq-select-wrapper--3char {
+  max-width: 5rem;
+}
+
+.ssq-select-wrapper--4char {
+  max-width: 6rem;
+}
+
+.ssq-select-wrapper--5char {
+  max-width: 7rem;
+}
+
+.ssq-select-wrapper--10char {
+  max-width: 12rem;
+}
+
+.ssq-select-wrapper--20char,
+.ssq-select-wrapper--md {
+  max-width: 20rem;
+}
+
+.ssq-select-wrapper--xs {
+  max-width: 8rem;
+}
+
+.ssq-select-wrapper--sm {
+  max-width: 12rem;
+}
+
+.ssq-select-wrapper--lg {
+  max-width: 32rem;
+}
+
+.ssq-select-wrapper--xl {
+  max-width: 40rem;
+}
+
+.ssq-select-wrapper--full,
+.ssq-select-wrapper--3-quarters,
+.ssq-select-wrapper--half,
+.ssq-select-wrapper--1-quarter {
+  max-width: 100%;
+}
+
+@media (min-width: 48rem) {
+  .ssq-select-wrapper--3-quarters {
+    max-width: 75%;
+  }
+
+  .ssq-select-wrapper--half {
+    max-width: 50%;
+  }
+
+  .ssq-select-wrapper--1-quarter {
+    max-width: 25%;
+  }
 }

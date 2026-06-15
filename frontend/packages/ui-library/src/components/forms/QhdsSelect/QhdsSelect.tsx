@@ -13,12 +13,33 @@ export interface QhdsSelectOption {
   value: string;
 }
 
+export type QhdsSelectWidth =
+  | "2char"
+  | "3char"
+  | "4char"
+  | "5char"
+  | "10char"
+  | "20char"
+  | "xs"
+  | "sm"
+  | "md"
+  | "lg"
+  | "xl"
+  | "full"
+  | "3-quarters"
+  | "half"
+  | "1-quarter";
+
 export interface QhdsSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   error?: ReactNode;
   hint?: ReactNode;
   label: ReactNode;
   optional?: boolean;
   options?: QhdsSelectOption[];
+  placeholder?: string;
+  placeholderDisabled?: boolean;
+  placeholderValue?: string;
+  width?: QhdsSelectWidth;
 }
 
 export function QhdsSelect({
@@ -31,15 +52,35 @@ export function QhdsSelect({
   hint,
   id,
   label,
+  multiple = false,
   optional = false,
   options = [],
+  placeholder,
+  placeholderDisabled = false,
+  placeholderValue = "",
   required = false,
+  width,
   ...selectProps
 }: QhdsSelectProps) {
   const generatedId = useId();
   const controlId = id ?? `ssq-select-${generatedId}`;
   const fieldIds = getQhdsFieldIds({ controlId, describedBy: ariaDescribedBy, error, hint });
-  const classes = joinClassNames("qld__select-control", error ? "qld__text-input--error" : undefined, "ssq-select", className);
+  const widthClass = width ? `qld__field-width--${width}` : undefined;
+  const classes = joinClassNames(
+    "qld__select-control",
+    "qld__text-input--block",
+    widthClass,
+    error ? "qld__text-input--error" : undefined,
+    "ssq-select",
+    className
+  );
+  const wrapperClasses = joinClassNames(
+    "qld__select",
+    error ? "qld__select-error" : undefined,
+    multiple ? "ssq-select-wrapper--multiple" : undefined,
+    width ? `ssq-select-wrapper--${width}` : undefined,
+    "ssq-select-wrapper"
+  );
 
   return (
     <QhdsFormField
@@ -53,22 +94,33 @@ export function QhdsSelect({
       optional={optional}
       required={required}
     >
-      <select
-        aria-describedby={fieldIds.describedBy}
-        aria-invalid={ariaInvalid ?? (error ? true : undefined)}
-        className={classes}
-        disabled={disabled}
-        id={controlId}
-        required={required}
-        {...selectProps}
-      >
-        {children ??
-          options.map((option) => (
-            <option disabled={option.disabled} key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-      </select>
+      <div className={wrapperClasses}>
+        <select
+          aria-describedby={fieldIds.describedBy}
+          aria-invalid={ariaInvalid ?? (error ? true : undefined)}
+          className={classes}
+          disabled={disabled}
+          id={controlId}
+          multiple={multiple}
+          required={required}
+          {...selectProps}
+        >
+          {children ?? (
+            <>
+              {placeholder !== undefined ? (
+                <option disabled={placeholderDisabled} value={placeholderValue}>
+                  {placeholder}
+                </option>
+              ) : null}
+              {options.map((option) => (
+                <option disabled={option.disabled} key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </>
+          )}
+        </select>
+      </div>
     </QhdsFormField>
   );
 }

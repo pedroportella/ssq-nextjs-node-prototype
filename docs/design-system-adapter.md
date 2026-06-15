@@ -55,4 +55,8 @@ The prototype should not reintroduce local web components or generated custom-el
 
 ## Button Contract
 
-`QhdsButton` supports QHDS-style anchor buttons, native buttons and route-style anchors without importing an app router. It preserves native `href`, `target`, `rel` and button `type` semantics, defaults native buttons to `type="button"`, supports `leadingIcon` and `trailingIcon` class hooks, and treats disabled anchor-style buttons with `aria-disabled`, no `href`, no tab stop and suppressed click navigation. Static server-rendered buttons and links must not receive synthetic event handlers; handlers are attached only when an interactive caller supplies `onClick` or `onNavigate`.
+`QhdsButton` supports QHDS-style anchor buttons, native buttons and route-style anchors without importing an app router. It preserves native `href`, `target`, `rel` and button `type` semantics, defaults native buttons to `type="button"`, supports `leadingIcon` and `trailingIcon` class hooks, and treats disabled anchor-style buttons with `aria-disabled`, no `href`, no tab stop and suppressed click navigation. Primary buttons emit the reference `.qld__btn` class without a primary modifier; secondary and tertiary buttons add the matching QHDS modifier classes. Static server-rendered buttons and links must not receive synthetic event handlers; handlers are attached only when an interactive caller supplies `onClick` or `onNavigate`.
+
+## Select Contract
+
+`QhdsSelect` and its `QhdsSelectInput` alias render a native server-compatible `<select>` inside the QHDS-style `.qld__select` wrapper. The adapter supports options from data or children, placeholder empty options, disabled and multiple states, QHDS width class hooks, and `QhdsFormField` label, optional, required, hint and error wiring. It composes existing `aria-describedby` values with generated hint/error ids and applies invalid classes without importing upstream QHDS runtime JavaScript.

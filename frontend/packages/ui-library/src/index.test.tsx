@@ -13,6 +13,7 @@ import {
   QhdsRow,
   QhdsRadioGroup,
   QhdsSelect,
+  QhdsSelectInput,
   QhdsTextarea,
   QhdsTextInput,
   QhdsHeader,
@@ -44,6 +45,7 @@ describe("ui-library public exports", () => {
     expect(QhdsFormField).toBeTypeOf("function");
     expect(QhdsRadioGroup).toBeTypeOf("function");
     expect(QhdsSelect).toBeTypeOf("function");
+    expect(QhdsSelectInput).toBeTypeOf("function");
     expect(QhdsTextarea).toBeTypeOf("function");
     expect(QhdsTextInput).toBeTypeOf("function");
   });
