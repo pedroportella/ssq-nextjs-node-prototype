@@ -6,7 +6,6 @@ import {
 } from "@ssq/services/server";
 import {
   QhdsButton,
-  QhdsContainer,
   QhdsContentSection,
   QhdsFileUpload,
   QhdsFooter,
@@ -42,70 +41,68 @@ export function SeniorsCardStatusContent({
   workflow: PrototypeWorkflowData;
 }) {
   return (
-    <QhdsLayout footer={<QhdsFooter />} header={<QhdsHeader />}>
-      <QhdsContainer aria-labelledby="page-title">
-        <QhdsPageHeader
-          aside={
-            <QhdsSummaryList
-              ariaLabel="Request status summary"
-              items={[
-                { description: submitResult.referenceNumber, term: "Reference" },
-                { description: formatStatus(submitResult.status), term: "Status" }
-              ]}
-            />
-          }
-          heading="Seniors Card application status"
-          headingId="page-title"
-          lead="Track the mock submission produced by the frontend-only workflow."
-        />
-
-        <QhdsPageAlert heading="Application submitted" tone="success">
-          <p>
-            Reference <strong>{submitResult.referenceNumber}</strong> is currently{" "}
-            <strong>{formatStatus(submitResult.status)}</strong>.
-          </p>
-        </QhdsPageAlert>
-
-        <QhdsContentSection heading="Request summary">
+    <QhdsLayout contentLabelledBy="page-title" footer={<QhdsFooter />} header={<QhdsHeader />}>
+      <QhdsPageHeader
+        aside={
           <QhdsSummaryList
-            ariaLabel="Request summary"
+            ariaLabel="Request status summary"
             items={[
-              { description: workflow.profile.displayName, term: "Applicant" },
-              { description: submitResult.summary.filename, term: "Summary file" }
+              { description: submitResult.referenceNumber, term: "Reference" },
+              { description: formatStatus(submitResult.status), term: "Status" }
             ]}
           />
-          <div className={styles.sectionActions}>
-            <QhdsButton href="/apply">Review application</QhdsButton>
-            <a href={submitResult.summary.href}>Download submission summary</a>
-          </div>
-        </QhdsContentSection>
+        }
+        heading="Seniors Card application status"
+        headingId="page-title"
+        lead="Track the mock submission produced by the frontend-only workflow."
+      />
 
-        <QhdsContentSection heading="Supporting documents">
-          <QhdsFileUpload
-            hint="The mock upload policy shows accepted and rejected file states without storing real files."
-            label="Upload supporting documents"
-            name="supportingDocuments"
-            policy={uploadPolicy}
-            uploadedFiles={supportingDocuments}
-          />
-        </QhdsContentSection>
+      <QhdsPageAlert heading="Application submitted" tone="success">
+        <p>
+          Reference <strong>{submitResult.referenceNumber}</strong> is currently{" "}
+          <strong>{formatStatus(submitResult.status)}</strong>.
+        </p>
+      </QhdsPageAlert>
 
-        <QhdsContentSection heading="Recent activity">
-          <QhdsTable
-            caption="Recent activity history"
-            columns={[
-              { header: "Activity", key: "activity" },
-              { header: "Status", key: "status" }
-            ]}
-            rows={submitResult.activity.map((entry, index) => ({
-              activity: entry.description,
-              id: `${entry.at}-${index}`,
-              status: formatStatus(entry.status)
-            }))}
-            striped
-          />
-        </QhdsContentSection>
-      </QhdsContainer>
+      <QhdsContentSection heading="Request summary">
+        <QhdsSummaryList
+          ariaLabel="Request summary"
+          items={[
+            { description: workflow.profile.displayName, term: "Applicant" },
+            { description: submitResult.summary.filename, term: "Summary file" }
+          ]}
+        />
+        <div className={styles.sectionActions}>
+          <QhdsButton href="/apply">Review application</QhdsButton>
+          <a href={submitResult.summary.href}>Download submission summary</a>
+        </div>
+      </QhdsContentSection>
+
+      <QhdsContentSection heading="Supporting documents">
+        <QhdsFileUpload
+          hint="The mock upload policy shows accepted and rejected file states without storing real files."
+          label="Upload supporting documents"
+          name="supportingDocuments"
+          policy={uploadPolicy}
+          uploadedFiles={supportingDocuments}
+        />
+      </QhdsContentSection>
+
+      <QhdsContentSection heading="Recent activity">
+        <QhdsTable
+          caption="Recent activity history"
+          columns={[
+            { header: "Activity", key: "activity" },
+            { header: "Status", key: "status" }
+          ]}
+          rows={submitResult.activity.map((entry, index) => ({
+            activity: entry.description,
+            id: `${entry.at}-${index}`,
+            status: formatStatus(entry.status)
+          }))}
+          striped
+        />
+      </QhdsContentSection>
     </QhdsLayout>
   );
 }

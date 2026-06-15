@@ -1,6 +1,13 @@
 .ssq-workflow-layout {
+  --ssq-workflow-content-width: 50.167rem;
+  --ssq-workflow-page-width: 76rem;
+  --ssq-workflow-progress-width: 17.875rem;
+  --ssq-workflow-wide-column-gap: 8rem;
+
   display: grid;
   gap: var(--ssq-space-8);
+  max-width: var(--ssq-workflow-page-width);
+  width: 100%;
 }
 
 .ssq-workflow-layout--with-progress {
@@ -13,7 +20,9 @@
 }
 
 .ssq-workflow-layout__content {
+  max-width: var(--ssq-workflow-content-width);
   min-width: 0;
+  width: 100%;
 }
 
 .ssq-workflow-layout__back {
@@ -62,6 +71,17 @@
 
 @media (min-width: 64rem) {
   .ssq-workflow-layout--with-progress {
-    grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+    column-gap: var(--ssq-space-8);
+    grid-template-columns: minmax(14rem, var(--ssq-workflow-progress-width)) minmax(0, 1fr);
+  }
+
+  .ssq-workflow-layout--with-progress .ssq-workflow-layout__content {
+    max-width: none;
+  }
+}
+
+@media (min-width: 80rem) {
+  .ssq-workflow-layout--with-progress {
+    column-gap: var(--ssq-workflow-wide-column-gap);
   }
 }

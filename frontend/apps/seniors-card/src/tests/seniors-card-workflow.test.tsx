@@ -111,6 +111,9 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("Seniors Card");
     expect(html).toContain("qld__grid");
     expect(html).toContain("container-fluid");
+    expect(html).toContain("ssq-layout__container");
+    expect(html).toContain("ssq-layout__content--full");
+    expect(html).toContain('aria-labelledby="page-title"');
     expect(html).toContain("row");
     expect(html).toContain("ssq-page-header");
     expect(html).toContain("ssq-content-section");
@@ -135,6 +138,7 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("Check your eligibility");
     expect(html).toContain("qld__grid");
     expect(html).toContain("container-fluid");
+    expect(html).toContain("ssq-layout__content--task");
     expect(html).toContain("row");
     expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
     expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
@@ -183,6 +187,9 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("Seniors Card application status");
     expect(html).toContain("qld__grid");
     expect(html).toContain("container-fluid");
+    expect(html).toContain("ssq-layout__container");
+    expect(html).toContain("ssq-layout__content--full");
+    expect(html).toContain('aria-labelledby="page-title"');
     expect(html).toContain("row");
     expect(html).toContain("ssq-page-header");
     expect(html).toContain("ssq-content-section");

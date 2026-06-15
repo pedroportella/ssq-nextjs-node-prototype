@@ -62,6 +62,9 @@ describe("DashboardContent", () => {
     expect(html).toContain("SSQ Service Dashboard");
     expect(html).toContain("qld__grid");
     expect(html).toContain("container-fluid");
+    expect(html).toContain("ssq-layout__container");
+    expect(html).toContain("ssq-layout__content--full");
+    expect(html).toContain('aria-labelledby="page-title"');
     expect(html).toContain("row");
     expect(html).toContain("ssq-page-header");
     expect(html).toContain("ssq-content-section");

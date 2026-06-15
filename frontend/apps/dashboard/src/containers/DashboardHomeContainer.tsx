@@ -3,7 +3,6 @@ import {
   QhdsButton,
   QhdsCard,
   QhdsCol,
-  QhdsContainer,
   QhdsContentSection,
   QhdsFooter,
   QhdsHeader,
@@ -144,62 +143,60 @@ export function DashboardContent({ shell, summary }: { shell: AppShellData; summ
   const activeRequests = summary.drafts.length + summary.submittedRequests.length;
 
   return (
-    <QhdsLayout footer={<QhdsFooter />} header={<QhdsHeader />}>
-      <QhdsContainer aria-labelledby="page-title">
-        <QhdsPageHeader
-          aside={
-            <QhdsSummaryList
-              ariaLabel="Profile summary"
-              items={[
-                { description: summary.profile.displayName, term: "Signed in as" },
-                { description: summary.profile.email, term: "Email" },
-                { description: formatStatus(summary.profile.identityStrength), term: "Identity" }
-              ]}
-            />
-          }
-          heading={shell.app.label}
-          headingId="page-title"
-          lead="Review digital transaction activity across the prototype services."
-        />
-
-        <QhdsPageAlert heading="Frontend mock runtime" tone={shell.dataSource === "mock" ? "success" : "info"}>
-          <p>
-            Dashboard data is currently served from the {shell.dataSource} frontend service layer, so this page can be developed
-            without Docker or a live backend.
-          </p>
-        </QhdsPageAlert>
-
-        <QhdsContentSection heading="Dashboard summary">
+    <QhdsLayout contentLabelledBy="page-title" footer={<QhdsFooter />} header={<QhdsHeader />}>
+      <QhdsPageHeader
+        aside={
           <QhdsSummaryList
-            ariaLabel="Dashboard summary"
+            ariaLabel="Profile summary"
             items={[
-              { description: summary.availableServices.length, term: "Available services" },
-              { description: summary.drafts.length, term: "Drafts" },
-              { description: summary.submittedRequests.length, term: "Submitted requests" },
-              { description: activeRequests, term: "Active records" }
+              { description: summary.profile.displayName, term: "Signed in as" },
+              { description: summary.profile.email, term: "Email" },
+              { description: formatStatus(summary.profile.identityStrength), term: "Identity" }
             ]}
           />
-        </QhdsContentSection>
+        }
+        heading={shell.app.label}
+        headingId="page-title"
+        lead="Review digital transaction activity across the prototype services."
+      />
 
-        <QhdsContentSection heading="Available services">
-          <ServiceCards services={summary.availableServices} />
-        </QhdsContentSection>
+      <QhdsPageAlert heading="Frontend mock runtime" tone={shell.dataSource === "mock" ? "success" : "info"}>
+        <p>
+          Dashboard data is currently served from the {shell.dataSource} frontend service layer, so this page can be developed
+          without Docker or a live backend.
+        </p>
+      </QhdsPageAlert>
 
-        <QhdsContentSection heading="Current records">
-          <QhdsRow className={styles.sectionGrid}>
-            <QhdsCol lg={6} xl={6}>
-              <DraftsTable summary={summary} />
-            </QhdsCol>
-            <QhdsCol lg={6} xl={6}>
-              <SubmittedRequestsTable summary={summary} />
-            </QhdsCol>
-          </QhdsRow>
-        </QhdsContentSection>
+      <QhdsContentSection heading="Dashboard summary">
+        <QhdsSummaryList
+          ariaLabel="Dashboard summary"
+          items={[
+            { description: summary.availableServices.length, term: "Available services" },
+            { description: summary.drafts.length, term: "Drafts" },
+            { description: summary.submittedRequests.length, term: "Submitted requests" },
+            { description: activeRequests, term: "Active records" }
+          ]}
+        />
+      </QhdsContentSection>
 
-        <QhdsContentSection heading="Recent activity">
-          <ActivityTable activity={summary.activity} />
-        </QhdsContentSection>
-      </QhdsContainer>
+      <QhdsContentSection heading="Available services">
+        <ServiceCards services={summary.availableServices} />
+      </QhdsContentSection>
+
+      <QhdsContentSection heading="Current records">
+        <QhdsRow className={styles.sectionGrid}>
+          <QhdsCol lg={6} xl={6}>
+            <DraftsTable summary={summary} />
+          </QhdsCol>
+          <QhdsCol lg={6} xl={6}>
+            <SubmittedRequestsTable summary={summary} />
+          </QhdsCol>
+        </QhdsRow>
+      </QhdsContentSection>
+
+      <QhdsContentSection heading="Recent activity">
+        <ActivityTable activity={summary.activity} />
+      </QhdsContentSection>
     </QhdsLayout>
   );
 }

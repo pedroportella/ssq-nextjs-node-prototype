@@ -157,13 +157,15 @@ async function expectQhdsGridFoundation(page: Page, viewportWidth: number) {
           };
         }),
       hasGridRoot: Boolean(document.querySelector(".qld__grid")),
-      rowCount: rows.length
+      rowCount: rows.length,
+      usesAppShellWidth: Boolean(document.querySelector(".ssq-layout--app"))
     };
   });
+  const expectedContentMaxWidth = gridState.usesAppShellWidth ? viewportWidth : Math.min(viewportWidth, 1376);
 
   expect(gridState.hasGridRoot).toBe(true);
   expect(gridState.contentContainerWidths.length + gridState.headerContainerWidths.length).toBeGreaterThanOrEqual(1);
-  expect(Math.max(...gridState.contentContainerWidths)).toBeLessThanOrEqual(Math.min(viewportWidth, 1376) + 1);
+  expect(Math.max(...gridState.contentContainerWidths)).toBeLessThanOrEqual(expectedContentMaxWidth + 1);
   expect(Math.max(...gridState.headerContainerWidths)).toBeLessThanOrEqual(viewportWidth + 1);
   expect(gridState.rowCount).toBeGreaterThanOrEqual(1);
   expect(gridState.columnClassNames.some((className) => className.includes("col-xs-12"))).toBe(true);

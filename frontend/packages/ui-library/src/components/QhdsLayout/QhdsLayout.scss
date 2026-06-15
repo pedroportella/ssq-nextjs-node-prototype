@@ -4,6 +4,16 @@
   min-height: 100vh;
 }
 
+.ssq-layout--app .ssq-layout__container {
+  max-width: none;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.ssq-layout--contained .ssq-layout__container {
+  max-width: var(--qld-grid-container-max-width);
+}
+
 .ssq-layout__skip-link {
   background: var(--ssq-color-action);
   color: var(--ssq-color-action-text);
@@ -44,8 +54,23 @@
   min-width: 0;
 }
 
+.ssq-layout__content--body {
+  max-width: 64rem;
+}
+
+.ssq-layout__content--task {
+  max-width: 76rem;
+}
+
 .ssq-layout__sidebar {
   margin-bottom: var(--ssq-space-6);
+}
+
+@media (max-width: 40rem) {
+  .ssq-layout--app .ssq-layout__container {
+    padding-left: var(--ssq-space-4);
+    padding-right: var(--ssq-space-4);
+  }
 }
 
 @media (max-width: 48rem) {
