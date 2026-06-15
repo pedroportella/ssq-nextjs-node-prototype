@@ -120,6 +120,15 @@ pnpm test:mock-smoke:rental-security-subsidy
 pnpm test:mock-smoke:all
 ```
 
+Run visual baseline checks when reviewing QHDS-facing layout changes:
+
+```bash
+pnpm test:visual
+pnpm test:visual:update
+```
+
+See `docs/qhds-visual-baselines.md` for the captured page list and screenshot update workflow.
+
 In managed sandboxes, the command may need permission to bind the selected local app port: `3000`, `3001` or `3002`.
 
 Use backend mode only for explicit integration checks:

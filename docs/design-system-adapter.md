@@ -27,6 +27,9 @@ The current workflow-facing adapter surface includes:
 - `QhdsFooter`
 - `QhdsSideNav`
 - `QhdsWorkflowLayout`
+- `QhdsPageHeader`
+- `QhdsContentSection`
+- `QhdsSummaryList`
 - `QhdsCard`
 - `QhdsPageAlert`
 - `QhdsButton`
