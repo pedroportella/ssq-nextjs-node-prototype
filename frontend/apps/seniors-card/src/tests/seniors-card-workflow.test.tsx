@@ -147,6 +147,14 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("qld__select-control");
     expect(html).toContain('id="residential-state"');
     expect(html).toContain('<option value="qld" selected="">Queensland</option>');
+    expect(html).toContain("qld__radio-buttons");
+    expect(html).toContain('role="radiogroup"');
+    expect(html).toContain('aria-labelledby="age-eligible-legend"');
+    expect(html).toContain('id="age-eligible-yes"');
+    expect(html).toContain('for="age-eligible-yes"');
+    expect(html).toContain('name="ageEligible"');
+    expect(html).toContain('value="yes"');
+    expect(html).toContain("Are you 65 years or older?");
     expect(html).toContain("qld__control-input qld__control-input--block ssq-checkbox__control");
     expect(html).toContain('type="checkbox"');
     expect(html).toContain('id="declaration"');

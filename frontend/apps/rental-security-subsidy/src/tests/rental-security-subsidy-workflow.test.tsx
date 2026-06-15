@@ -148,6 +148,14 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("qld__select-control");
     expect(html).toContain('id="support-type"');
     expect(html).toContain('<option value="bond" selected="">Bond assistance</option>');
+    expect(html).toContain("qld__radio-buttons");
+    expect(html).toContain('role="radiogroup"');
+    expect(html).toContain('aria-labelledby="housing-situation-legend"');
+    expect(html).toContain('id="housing-situation-private-rental"');
+    expect(html).toContain('for="housing-situation-private-rental"');
+    expect(html).toContain('name="housingSituation"');
+    expect(html).toContain('value="private-rental"');
+    expect(html).toContain("You rent from a private owner or real estate agent.");
     expect(html).toContain("qld__control-input qld__control-input--block ssq-checkbox__control");
     expect(html).toContain('type="checkbox"');
     expect(html).toContain('id="declaration"');
