@@ -147,6 +147,11 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("qld__select-control");
     expect(html).toContain('id="residential-state"');
     expect(html).toContain('<option value="qld" selected="">Queensland</option>');
+    expect(html).toContain("qld__control-input qld__control-input--block ssq-checkbox__control");
+    expect(html).toContain('type="checkbox"');
+    expect(html).toContain('id="declaration"');
+    expect(html).toContain('for="declaration"');
+    expect(html).toContain("I declare this prototype information is ready for review.");
     expect(html).toContain("qld__text-input--error");
     expect(html).toContain('id="date-of-birth"');
     expect(html).toContain('for="date-of-birth"');

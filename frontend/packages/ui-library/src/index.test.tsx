@@ -4,6 +4,7 @@ import {
   QhdsButton,
   QhdsCard,
   QhdsCheckbox,
+  QhdsCheckboxGroup,
   QhdsContentSection,
   QhdsDirectionLink,
   QhdsFooter,
@@ -42,6 +43,7 @@ describe("ui-library public exports", () => {
 
   it("exports app-facing form components", () => {
     expect(QhdsCheckbox).toBeTypeOf("function");
+    expect(QhdsCheckboxGroup).toBeTypeOf("function");
     expect(QhdsFormField).toBeTypeOf("function");
     expect(QhdsRadioGroup).toBeTypeOf("function");
     expect(QhdsSelect).toBeTypeOf("function");

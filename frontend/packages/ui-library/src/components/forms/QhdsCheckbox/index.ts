@@ -1,2 +1,2 @@
-export { QhdsCheckbox } from "./QhdsCheckbox";
-export type { QhdsCheckboxProps } from "./QhdsCheckbox";
+export { QhdsCheckbox, QhdsCheckboxGroup } from "./QhdsCheckbox";
+export type { QhdsCheckboxGroupProps, QhdsCheckboxOption, QhdsCheckboxProps } from "./QhdsCheckbox";

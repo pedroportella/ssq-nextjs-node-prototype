@@ -60,3 +60,7 @@ The prototype should not reintroduce local web components or generated custom-el
 ## Select Contract
 
 `QhdsSelect` and its `QhdsSelectInput` alias render a native server-compatible `<select>` inside the QHDS-style `.qld__select` wrapper. The adapter supports options from data or children, placeholder empty options, disabled and multiple states, QHDS width class hooks, and `QhdsFormField` label, optional, required, hint and error wiring. It composes existing `aria-describedby` values with generated hint/error ids and applies invalid classes without importing upstream QHDS runtime JavaScript.
+
+## Checkbox Contract
+
+`QhdsCheckbox` renders a native checkbox with the QHDS control-input hooks while keeping the `input + label` adjacency required for the QHDS visual treatment. It supports required, optional, hint, error, disabled, controlled `checked` and uncontrolled `defaultChecked` states, composing hint/error ids into `aria-describedby`. `QhdsCheckboxGroup` provides the multi-option fieldset contract with `.qld__checkboxes`, legend, group hint/error text, option hints, disabled options, controlled `value` arrays and uncontrolled `defaultValue` or option-level checked defaults. Controlled read-only displays are marked `readOnly` when no change handler is supplied so React does not warn in client-rendered tests.
