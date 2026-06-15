@@ -35,4 +35,11 @@ describe("QhdsIcon", () => {
 
     expect(html).toContain("QLD-Health-icons.svg#health_alert");
   });
+
+  it("can render QHDS utility sprite icons with size hooks", () => {
+    const html = renderToStaticMarkup(<QhdsIcon size="sm" sprite="utility" symbol="qld__icon__search" />);
+
+    expect(html).toContain('class="qld__icon qld__icon--sm"');
+    expect(html).toContain("svg-icons.svg#qld__icon__search");
+  });
 });

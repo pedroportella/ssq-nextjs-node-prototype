@@ -1,2 +1,2 @@
 export { getQhdsIconReference, QhdsIcon } from "./QhdsIcon";
-export type { QhdsIconProps, QhdsIconSprite } from "./QhdsIcon";
+export type { QhdsIconProps, QhdsIconSize, QhdsIconSprite } from "./QhdsIcon";

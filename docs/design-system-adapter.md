@@ -64,7 +64,7 @@ The prototype should not reintroduce local web components or generated custom-el
 
 ## Icon Contract
 
-`QhdsIcon` renders server-compatible QHDS sprite icons with the base `.qld__icon` class. It defaults to the general `QLD-icons.svg` sprite, supports an explicit `sprite="qld-health"` mode, and maps QHDS `extended_` ids to the health sprite by stripping the prefix. Icons are decorative by default with `aria-hidden`; callers can provide `label` to render an accessible `role="img"` icon.
+`QhdsIcon` renders server-compatible QHDS sprite icons with the base `.qld__icon` class. It defaults to the general `QLD-icons.svg` sprite, supports explicit `sprite="qld-health"` and `sprite="utility"` modes, and maps QHDS `extended_` ids to the health sprite by stripping the prefix. It also emits QHDS size hooks such as `.qld__icon--sm` when callers pass `size`. Icons are decorative by default with `aria-hidden`; callers can provide `label` to render an accessible `role="img"` icon. The QHDS core, health and utility sprite URL helpers and required icon-name manifests live in `@ssq/ui-assets`; Next apps load these symbol sprites as static resources rather than image imports.
 
 ## Select Contract
 

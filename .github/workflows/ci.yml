@@ -57,7 +57,7 @@ jobs:
         run: pnpm --filter @ssq/backend build
 
       - name: Build shared frontend packages
-        run: pnpm --filter @ssq/services --filter @ssq/ui-library --filter @ssq/ui-tokens --filter @ssq/ui-assets --filter @ssq/utils --filter @ssq/web-components build
+        run: pnpm --filter @ssq/services --filter @ssq/ui-library --filter @ssq/ui-tokens --filter @ssq/ui-assets --filter @ssq/utils build
 
       - name: Build dashboard app
         run: pnpm --filter @ssq/dashboard build
