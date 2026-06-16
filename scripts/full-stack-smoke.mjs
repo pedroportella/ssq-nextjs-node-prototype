@@ -4,11 +4,11 @@ const DEFAULT_TIMEOUT_MS = 120_000;
 const RETRY_DELAY_MS = 2_000;
 
 const endpoints = {
-  backendReady: process.env.SSQ_SMOKE_BACKEND_READY_URL ?? "http://localhost:7001/health/ready",
-  dashboard: process.env.SSQ_SMOKE_DASHBOARD_URL ?? "http://localhost:3000",
-  graphql: process.env.SSQ_SMOKE_GRAPHQL_URL ?? "http://localhost:7001/graphql",
-  rentalSecuritySubsidy: process.env.SSQ_SMOKE_RENTAL_SECURITY_SUBSIDY_URL ?? "http://localhost:3002",
-  seniorsCard: process.env.SSQ_SMOKE_SENIORS_CARD_URL ?? "http://localhost:3001"
+  backendReady: process.env.SSQ_SMOKE_BACKEND_READY_URL ?? "http://127.0.0.1:7001/health/ready",
+  dashboard: process.env.SSQ_SMOKE_DASHBOARD_URL ?? "http://127.0.0.1:3000",
+  graphql: process.env.SSQ_SMOKE_GRAPHQL_URL ?? "http://127.0.0.1:7001/graphql",
+  rentalSecuritySubsidy: process.env.SSQ_SMOKE_RENTAL_SECURITY_SUBSIDY_URL ?? "http://127.0.0.1:3002",
+  seniorsCard: process.env.SSQ_SMOKE_SENIORS_CARD_URL ?? "http://127.0.0.1:3001"
 };
 
 const checks = [
@@ -56,28 +56,42 @@ const checks = [
     name: "dashboard backend-rendered page",
     run: async () => {
       const html = await fetchText(endpoints.dashboard);
+      const text = extractVisibleText(html);
 
-      assert(html.includes("Taylor Queensland"), "dashboard should render the backend seeded customer");
-      assert(html.includes("backend frontend service layer"), "dashboard should render in backend data-source mode");
-      assert(!html.includes("Avery Taylor"), "dashboard should not render frontend mock profile data");
+      assert(text.includes("Taylor Queensland"), "dashboard should render the backend seeded customer");
+      assert(
+        text.includes("Dashboard data is currently served from the backend frontend service layer"),
+        "dashboard should render in backend data-source mode"
+      );
+      assert(!text.includes("avery.taylor@example.test"), "dashboard should not render frontend mock profile data");
     }
   },
   {
     name: "seniors card backend-rendered page",
     run: async () => {
       const html = await fetchText(endpoints.seniorsCard);
+      const text = extractVisibleText(html);
 
-      assert(html.includes("Taylor Queensland"), "Seniors Card should render the backend seeded customer");
-      assert(html.includes("SSQ-DEMO-0001"), "Seniors Card should render the seeded backend service request");
+      assert(text.includes("Taylor Queensland"), "Seniors Card should render the backend seeded customer");
+      assert(text.includes("SSQ-DEMO-0001"), "Seniors Card should render the seeded backend service request");
+      assert(
+        text.includes("This Seniors Card journey is using backend data from the frontend service layer"),
+        "Seniors Card should render in backend data-source mode"
+      );
     }
   },
   {
     name: "rental security subsidy backend-rendered page",
     run: async () => {
       const html = await fetchText(endpoints.rentalSecuritySubsidy);
+      const text = extractVisibleText(html);
 
-      assert(html.includes("Taylor Queensland"), "Rental Security Subsidy should render the backend seeded customer");
-      assert(html.includes("Rental Security Subsidy"), "Rental Security Subsidy page should render");
+      assert(text.includes("Taylor Queensland"), "Rental Security Subsidy should render the backend seeded customer");
+      assert(text.includes("Rental Security Subsidy"), "Rental Security Subsidy page should render");
+      assert(
+        text.includes("This rental support journey is using backend data from the frontend service layer"),
+        "Rental Security Subsidy should render in backend data-source mode"
+      );
     }
   }
 ];
@@ -151,6 +165,14 @@ async function fetchText(url) {
   assert(response.ok, `${url} returned ${response.status}`);
 
   return response.text();
+}
+
+function extractVisibleText(html) {
+  return html
+    .replaceAll(/<!--[\s\S]*?-->/g, "")
+    .replaceAll(/<[^>]+>/g, " ")
+    .replaceAll(/\s+/g, " ")
+    .trim();
 }
 
 function assert(condition, message) {
