@@ -6,6 +6,12 @@ import type { PrototypeRepository } from "../repositories/prototypeRepository.js
 
 function createRepository(options: {
   draftOwner?: boolean;
+  existingDocuments?: Array<{
+    metadata?: Record<string, unknown>;
+    scanStatus?: string;
+    sizeBytes: number;
+    uploadStatus?: string;
+  }>;
   requestOwner?: boolean;
 } = {}): PrototypeRepository {
   return {
@@ -33,6 +39,25 @@ function createRepository(options: {
             payload: {}
           }
         : undefined;
+    },
+    async listSupportingDocumentsForCustomer() {
+      return (options.existingDocuments ?? []).map((document, index) => ({
+        id: `90000000-0000-4000-8000-00000000000${index}`,
+        customerId: "10000000-0000-4000-8000-000000000001",
+        serviceRequestDraftId: "70000000-0000-4000-8000-000000000001",
+        category: "identity",
+        fileName: `existing-${index}.pdf`,
+        fileExtension: ".pdf",
+        mimeType: "application/pdf",
+        sizeBytes: document.sizeBytes,
+        storageKey: `local-review/existing-${index}.pdf`,
+        uploadStatus: document.uploadStatus ?? "METADATA_RECORDED",
+        scanStatus: document.scanStatus ?? "NOT_SCANNED_PROTOTYPE",
+        retentionPolicy: "PRODUCTION_NEXT_REQUIRED",
+        metadata: document.metadata ?? {},
+        createdAt: "2026-06-10T00:00:00.000Z",
+        updatedAt: "2026-06-10T00:00:00.000Z"
+      }));
     },
     async createSupportingDocument(input: {
       customerId: string;
@@ -98,6 +123,12 @@ describe("SupportingDocumentUploadService", () => {
         scanStatus: "NOT_SCANNED_PROTOTYPE",
         retentionPolicy: "PRODUCTION_NEXT_REQUIRED",
         metadata: {
+          personKey: "applicant",
+          policy: {
+            maxFilesPerPerson: 5,
+            maxSizeBytes: 5242880,
+            maxTotalSizeBytesPerPerson: 10485760
+          },
           localStorageMode: "metadata-only",
           productionNext: {
             malwareScanning: "required",
@@ -141,6 +172,28 @@ describe("SupportingDocumentUploadService", () => {
           draftId: "70000000-0000-4000-8000-000000000001"
         },
         category: "identity",
+        fileName: "photo.jpg",
+        mimeType: "application/pdf",
+        sizeBytes: 2048
+      }
+    })).resolves.toMatchObject({
+      ok: false,
+      code: "UNSUPPORTED_FILE_TYPE",
+      fieldErrors: [
+        {
+          field: "mimeType"
+        }
+      ]
+    });
+
+    await expect(service.recordUpload({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      upload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "identity",
         fileName: "proof.pdf",
         mimeType: "text/plain" as "application/pdf",
         sizeBytes: 2048
@@ -169,6 +222,73 @@ describe("SupportingDocumentUploadService", () => {
     })).resolves.toMatchObject({
       ok: false,
       code: "FILE_TOO_LARGE"
+    });
+  });
+
+  it("enforces per-person count and total size limits", async () => {
+    const countLimitedService = new SupportingDocumentUploadService(createRepository({
+      existingDocuments: Array.from({ length: 5 }, () => ({
+        metadata: {
+          personKey: "partner"
+        },
+        sizeBytes: 1024
+      }))
+    }));
+
+    await expect(countLimitedService.recordUpload({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      upload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "identity",
+        fileName: "partner-extra.pdf",
+        mimeType: "application/pdf",
+        personKey: "partner",
+        sizeBytes: 1024
+      }
+    })).resolves.toMatchObject({
+      ok: false,
+      code: "PERSON_LIMIT_EXCEEDED",
+      fieldErrors: [
+        {
+          field: "personKey"
+        }
+      ]
+    });
+
+    const sizeLimitedService = new SupportingDocumentUploadService(createRepository({
+      existingDocuments: [
+        {
+          metadata: {
+            personKey: "applicant"
+          },
+          sizeBytes: 9 * 1024 * 1024
+        }
+      ]
+    }));
+
+    await expect(sizeLimitedService.recordUpload({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      upload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "identity",
+        fileName: "large-top-up.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 2 * 1024 * 1024
+      }
+    })).resolves.toMatchObject({
+      ok: false,
+      code: "PERSON_LIMIT_EXCEEDED",
+      fieldErrors: [
+        {
+          field: "sizeBytes"
+        }
+      ]
     });
   });
 

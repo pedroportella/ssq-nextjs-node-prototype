@@ -55,6 +55,17 @@ function createUploadTestDatabase(): DatabaseClient {
           return result<T>([]);
         }
 
+        if (normalizedSql.includes("FROM supporting_documents")) {
+          const customerId = String(values[0]);
+          const targetId = String(values[1]);
+
+          return result<T>(supportingDocuments.filter(
+            (document) =>
+              document.customer_id === customerId &&
+              (document.service_request_draft_id === targetId || document.service_request_id === targetId)
+          ) as T[]);
+        }
+
         if (normalizedSql.startsWith("INSERT INTO supporting_documents")) {
           const row = {
             id: "90000000-0000-4000-8000-000000000001",
@@ -133,11 +144,21 @@ describe("supporting document upload route", () => {
         scanStatus: "NOT_SCANNED_PROTOTYPE",
         retentionPolicy: "PRODUCTION_NEXT_REQUIRED",
         metadata: {
-          localStorageMode: "metadata-only"
+          localStorageMode: "metadata-only",
+          personKey: "applicant",
+          policy: {
+            maxFilesPerPerson: 5,
+            maxSizeBytes: 5242880,
+            maxTotalSizeBytesPerPerson: 10485760
+          }
         }
       },
       policy: {
-        maxSizeBytes: 5242880
+        allowedCategories: expect.arrayContaining(["identity", "concession", "supporting-evidence"]),
+        defaultPersonKey: "applicant",
+        maxFilesPerPerson: 5,
+        maxSizeBytes: 5242880,
+        maxTotalSizeBytesPerPerson: 10485760
       }
     });
 
@@ -182,6 +203,73 @@ describe("supporting document upload route", () => {
           field: "fileName"
         }
       ]
+    });
+
+    await app.close();
+  });
+
+  it("rejects upload metadata that exceeds the per-person file limit", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createUploadTestDatabase()
+    });
+    const basePayload = {
+      target: {
+        type: "DRAFT",
+        draftId: "70000000-0000-4000-8000-000000000001"
+      },
+      category: "identity",
+      mimeType: "application/pdf",
+      personKey: "applicant",
+      sizeBytes: 2048
+    };
+
+    for (let index = 0; index < 5; index += 1) {
+      const response = await app.inject({
+        headers: {
+          "content-type": "application/json"
+        },
+        method: "POST",
+        payload: {
+          ...basePayload,
+          fileName: `proof-${index}.pdf`
+        },
+        url: "/uploads/supporting-documents"
+      });
+
+      expect(response.statusCode).toBe(201);
+    }
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        ...basePayload,
+        fileName: "proof-extra.pdf"
+      },
+      url: "/uploads/supporting-documents"
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({
+      ok: false,
+      error: {
+        code: "PERSON_LIMIT_EXCEEDED"
+      },
+      fieldErrors: [
+        {
+          field: "personKey"
+        }
+      ],
+      policy: {
+        maxFilesPerPerson: 5,
+        maxTotalSizeBytesPerPerson: 10485760
+      }
     });
 
     await app.close();
