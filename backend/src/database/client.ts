@@ -48,33 +48,53 @@ export class PostgresDatabaseClient implements DatabaseClient {
 }
 
 export function createPostgresPoolConfig(connectionString: string): PoolConfig {
+  const postgresConnectionConfig = resolvePostgresConnectionConfig(connectionString);
+
   return {
-    connectionString,
+    connectionString: postgresConnectionConfig.connectionString,
     max: 10,
-    ssl: resolvePostgresSsl(connectionString)
+    ssl: postgresConnectionConfig.ssl
   };
 }
 
-function resolvePostgresSsl(connectionString: string): PoolConfig["ssl"] {
+function resolvePostgresConnectionConfig(connectionString: string): Pick<PoolConfig, "connectionString" | "ssl"> {
   let sslMode: string | null = null;
+  let parsedUrl: URL;
 
   try {
-    sslMode = new URL(connectionString).searchParams.get("sslmode")?.toLowerCase() ?? null;
+    parsedUrl = new URL(connectionString);
+    sslMode = parsedUrl.searchParams.get("sslmode")?.toLowerCase() ?? null;
   } catch {
-    return false;
+    return {
+      connectionString,
+      ssl: false
+    };
+  }
+
+  if (sslMode) {
+    parsedUrl.searchParams.delete("sslmode");
   }
 
   if (sslMode === "require" || sslMode === "prefer" || sslMode === "no-verify") {
     return {
-      rejectUnauthorized: false
+      connectionString: parsedUrl.toString(),
+      ssl: {
+        rejectUnauthorized: false
+      }
     };
   }
 
   if (sslMode === "verify-ca" || sslMode === "verify-full") {
-    return true;
+    return {
+      connectionString: parsedUrl.toString(),
+      ssl: true
+    };
   }
 
-  return false;
+  return {
+    connectionString,
+    ssl: false
+  };
 }
 
 export function createDatabaseClient(config: AppConfig): DatabaseClient {

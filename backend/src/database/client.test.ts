@@ -13,6 +13,7 @@ describe("Postgres database client config", () => {
     expect(
       createPostgresPoolConfig("postgresql://user:password@db.example.test:25060/defaultdb?sslmode=require")
     ).toMatchObject({
+      connectionString: "postgresql://user:password@db.example.test:25060/defaultdb",
       ssl: {
         rejectUnauthorized: false
       }
@@ -21,6 +22,7 @@ describe("Postgres database client config", () => {
 
   it("preserves strict SSL verification when explicitly requested", () => {
     expect(createPostgresPoolConfig("postgresql://user:password@db.example.test/defaultdb?sslmode=verify-full")).toMatchObject({
+      connectionString: "postgresql://user:password@db.example.test/defaultdb",
       ssl: true
     });
   });
