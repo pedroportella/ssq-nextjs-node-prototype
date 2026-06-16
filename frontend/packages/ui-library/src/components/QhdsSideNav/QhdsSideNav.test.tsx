@@ -83,8 +83,8 @@ describe("QhdsSideNav", () => {
   });
 
   it("matches QGDS left navigation shell and accordion control styling", () => {
-    expect(styles).toContain("--ssq-left-nav-background: rgb(245 245 245)");
-    expect(styles).toContain("--ssq-left-nav-border: rgb(235 235 235)");
+    expect(styles).toContain("--ssq-left-nav-background: var(--ssq-color-left-nav-background)");
+    expect(styles).toContain("--ssq-left-nav-border: var(--ssq-color-left-nav-border)");
     expect(styles).toContain("box-sizing: border-box");
     expect(styles).toContain("border-right: var(--QLD-border-width-default) solid var(--ssq-left-nav-border)");
     expect(styles).toContain("box-shadow:\n    rgb(0 0 0 / 20%) 0 1px 2px,\n    rgb(0 0 0 / 10%) 0 1px 3px 1px");

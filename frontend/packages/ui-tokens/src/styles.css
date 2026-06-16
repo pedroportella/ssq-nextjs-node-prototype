@@ -112,6 +112,8 @@
   --QLD-color-contained-layout__background: #eff4f9;
 
   --ssq-primitive-color-white: #ffffff;
+  --ssq-primitive-color-neutral-50: #f5f5f5;
+  --ssq-primitive-color-neutral-100: #ebebeb;
   --ssq-primitive-color-black: #000053;
   --ssq-primitive-color-heading: var(--QLD-color-light__heading);
   --ssq-primitive-color-text: var(--QLD-color-light__text);
@@ -145,6 +147,8 @@
   --ssq-palette-bright-header-background: var(--QLD-color-dark__background);
   --ssq-palette-bright-header-accent: var(--QLD-color-light__design-accent);
   --ssq-palette-bright-header-text: var(--QLD-color-dark__text);
+  --ssq-palette-left-nav-background: var(--ssq-primitive-color-neutral-50);
+  --ssq-palette-left-nav-border: var(--ssq-primitive-color-neutral-100);
 
   --ssq-palette-alt-background: var(--QLD-color-light__background--alt);
   --ssq-palette-alt-surface: var(--QLD-color-light__background--alt);
@@ -300,6 +304,8 @@
   --ssq-color-header-accent: var(--ssq-palette-bright-header-accent);
   --ssq-color-header-background: var(--ssq-palette-bright-header-background);
   --ssq-color-header-text: var(--ssq-palette-bright-header-text);
+  --ssq-color-left-nav-background: var(--ssq-palette-left-nav-background);
+  --ssq-color-left-nav-border: var(--ssq-palette-left-nav-border);
   --ssq-color-info-background: var(--ssq-palette-feedback-info-background);
   --ssq-color-info-border: var(--ssq-palette-feedback-info-border);
   --ssq-color-info-text: var(--ssq-palette-feedback-info-text);

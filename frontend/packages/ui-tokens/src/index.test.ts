@@ -19,6 +19,8 @@ describe("prototypeTokens", () => {
     expect(prototypeTokens.color.primitive.text).toBe("#353535");
     expect(prototypeTokens.color.primitive.link).toBe("#005eb8");
     expect(prototypeTokens.color.primitive.lightFocus).toBe("#002e85");
+    expect(prototypeTokens.color.primitive.neutral50).toBe("#f5f5f5");
+    expect(prototypeTokens.color.primitive.neutral100).toBe("#ebebeb");
     expect(prototypeTokens.color.primitive.lightBackground).toBe("#e6f6ff");
     expect(prototypeTokens.color.primitive.lightBackgroundAlt).toBe("#e3e7ea");
     expect(prototypeTokens.color.primitive.darkBackground).toBe("#005eb8");
@@ -41,6 +43,8 @@ describe("prototypeTokens", () => {
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-success-text");
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-warning-text");
     expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-header-background");
+    expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-left-nav-background");
+    expect(prototypeTokens.color.semanticVariables).toContain("--ssq-color-left-nav-border");
   });
 
   it("documents QHDS typography and spacing tokens", () => {
@@ -73,6 +77,10 @@ describe("prototypeTokens", () => {
     expect(styles).toContain("--QLD-color-dark__background--alt: #001d74");
     expect(styles).toContain("--ssq-color-background: var(--ssq-palette-default-background)");
     expect(styles).toContain("--ssq-palette-bright-background: var(--QLD-color-light__background)");
+    expect(styles).toContain("--ssq-palette-left-nav-background: var(--ssq-primitive-color-neutral-50)");
+    expect(styles).toContain("--ssq-palette-left-nav-border: var(--ssq-primitive-color-neutral-100)");
+    expect(styles).toContain("--ssq-color-left-nav-background: var(--ssq-palette-left-nav-background)");
+    expect(styles).toContain("--ssq-color-left-nav-border: var(--ssq-palette-left-nav-border)");
     expect(styles).toContain("--ssq-palette-alt-background: var(--QLD-color-light__background--alt)");
     expect(styles).toContain("--ssq-palette-bold-background: var(--QLD-color-dark__background)");
     expect(styles).toContain("--ssq-palette-bold-link-visited: var(--QLD-color-dark__link)");

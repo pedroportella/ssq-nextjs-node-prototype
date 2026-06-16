@@ -86,8 +86,8 @@
   }
 
   .ssq-layout__left-nav {
-    background-color: rgb(245 245 245);
-    border-right: var(--QLD-border-width-default) solid rgb(235 235 235);
+    background-color: var(--ssq-color-left-nav-background);
+    border-right: var(--QLD-border-width-default) solid var(--ssq-color-left-nav-border);
     box-sizing: border-box;
     flex: 0 0 17.5rem;
     max-width: 17.5rem;

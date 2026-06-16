@@ -1,7 +1,7 @@
 .ssq-side-nav.qld__left-nav {
   --ssq-left-nav-action: var(--QLD-color-light__action--secondary);
-  --ssq-left-nav-background: rgb(245 245 245);
-  --ssq-left-nav-border: rgb(235 235 235);
+  --ssq-left-nav-background: var(--ssq-color-left-nav-background);
+  --ssq-left-nav-border: var(--ssq-color-left-nav-border);
   --ssq-left-nav-focus: var(--QLD-color-light__focus);
   --ssq-left-nav-heading: var(--QLD-color-light__heading);
   --ssq-left-nav-link: var(--QLD-color-light__link);

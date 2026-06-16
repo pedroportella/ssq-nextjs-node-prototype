@@ -75,6 +75,7 @@ You are working in the SSQ Next.js + Node.js prototype.
 - Every routed page should preserve one clear `h1`, useful landmarks, readable contrast and no text overflow at supported viewport widths.
 - Avoid marketing-page composition. The UI should feel like a clear public-service workflow, not a product landing page.
 - Do not scatter colours, shadows, radii, spacing or focus styles through route pages when a token, theme rule or shared component is more appropriate.
+- Define static palette colour primitives in `frontend/packages/ui-tokens` with hex values. Use functional CSS colour notation only when alpha, channel composition or runtime colour math is required.
 - Keep token and style layering clear:
   1. `frontend/packages/ui-tokens`
   2. `frontend/packages/ui-library/theme`

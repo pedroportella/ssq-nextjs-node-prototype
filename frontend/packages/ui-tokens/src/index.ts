@@ -14,6 +14,8 @@ export const prototypeTokens = {
       lightBackgroundAlt: "#e3e7ea",
       lightFocus: "#002e85",
       link: "#005eb8",
+      neutral50: "#f5f5f5",
+      neutral100: "#ebebeb",
       text: "#353535",
       textLighter: "#636363",
       white: "#ffffff"
@@ -54,6 +56,8 @@ export const prototypeTokens = {
       "--ssq-color-header-accent",
       "--ssq-color-header-background",
       "--ssq-color-header-text",
+      "--ssq-color-left-nav-background",
+      "--ssq-color-left-nav-border",
       "--ssq-color-info-background",
       "--ssq-color-info-border",
       "--ssq-color-info-text",
