@@ -1,6 +1,16 @@
 import "server-only";
 
-import { createBackendAppShellData } from "./backendServices";
+import {
+  createBackendAppShellData,
+  createBackendTransactionDraft,
+  getBackendDashboardSummaryData,
+  getBackendSubmissionSummaryDownload,
+  getBackendSupportingDocumentUploadPolicy,
+  getBackendUploadedDocuments,
+  getBackendWorkflowData,
+  submitBackendTransactionDraft,
+  updateBackendDraftWithValidationError
+} from "./backendServices";
 import {
   createMockAppShellData,
   createMockDraft,
@@ -64,7 +74,7 @@ export async function getDashboardSummaryData(config?: FrontendRuntimeConfig): P
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    throw new Error("Backend dashboard summary data is not implemented in the frontend service layer yet.");
+    return getBackendDashboardSummaryData(runtimeConfig);
   }
 
   return getMockDashboardSummaryData();
@@ -74,7 +84,7 @@ export async function getSeniorsCardWorkflowData(config?: FrontendRuntimeConfig)
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    throw new Error("Backend Seniors Card workflow data is not implemented in the frontend service layer yet.");
+    return getBackendWorkflowData("seniors-card", runtimeConfig);
   }
 
   return getMockSeniorsCardWorkflowData();
@@ -84,7 +94,7 @@ export async function getRentalSecuritySubsidyWorkflowData(config?: FrontendRunt
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    throw new Error("Backend rental subsidy workflow data is not implemented in the frontend service layer yet.");
+    return getBackendWorkflowData("rental-security-subsidy", runtimeConfig);
   }
 
   return getMockRentalSecuritySubsidyWorkflowData();
@@ -97,7 +107,7 @@ export async function createTransactionDraft(
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    throw new Error("Backend draft creation is not implemented in the frontend service layer yet.");
+    return createBackendTransactionDraft(appKey, runtimeConfig);
   }
 
   return createMockDraft(appKey);
@@ -110,7 +120,7 @@ export async function updateTransactionDraftWithValidationError(
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    throw new Error("Backend draft validation is not implemented in the frontend service layer yet.");
+    return updateBackendDraftWithValidationError(appKey, runtimeConfig);
   }
 
   return updateMockDraftWithValidationError(appKey);
@@ -123,7 +133,7 @@ export async function submitTransactionDraft(
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    throw new Error("Backend draft submission is not implemented in the frontend service layer yet.");
+    return submitBackendTransactionDraft(appKey, runtimeConfig);
   }
 
   return submitMockDraft(appKey);
@@ -133,7 +143,7 @@ export async function getSupportingDocumentUploadPolicy(config?: FrontendRuntime
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    throw new Error("Backend upload policy reads are not implemented in the frontend service layer yet.");
+    return getBackendSupportingDocumentUploadPolicy();
   }
 
   return getMockSupportingDocumentUploadPolicy();
@@ -146,7 +156,7 @@ export async function getUploadedDocuments(
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    throw new Error("Backend uploaded document reads are not implemented in the frontend service layer yet.");
+    return getBackendUploadedDocuments(appKey, runtimeConfig);
   }
 
   return getMockUploadedDocuments(appKey);
@@ -160,7 +170,7 @@ export async function getSubmissionSummaryDownload(
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    throw new Error("Backend submission summary downloads are not implemented in the frontend service layer yet.");
+    return getBackendSubmissionSummaryDownload(appKey, referenceNumber, runtimeConfig);
   }
 
   return getMockSubmissionSummaryDownload(appKey, referenceNumber);
