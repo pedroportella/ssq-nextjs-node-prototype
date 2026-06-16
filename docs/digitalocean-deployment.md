@@ -38,7 +38,7 @@ cp .do/ssq-rental-security-subsidy.template.yml .do/ssq-rental-security-subsidy.
 Replace these values in local specs:
 
 - `region`: defaults to `syd`; change only if the review account needs another App Platform region.
-- `deploy_on_push`: defaults to `false`; keep this for manual review deployments unless automatic deploys are explicitly wanted.
+- The templates use the public Git clone URL for this repository so the review deployment does not depend on a connected DigitalOcean GitHub integration.
 - `BACKEND_INTERNAL_URL`: set this on all three frontend apps to the backend App Platform URL, for example `https://ssq-node-api-xxxxx.ondigitalocean.app`.
 - `DASHBOARD_PUBLIC_URL`, `SENIORS_CARD_PUBLIC_URL`, `RENTAL_SECURITY_SUBSIDY_PUBLIC_URL`: set these to the live public URLs for the three frontend apps.
 - `CORS_ALLOWED_ORIGINS`: set this on the backend to the comma-separated live frontend origins. This is mainly for manual API review because browser app code should not call the backend directly.
@@ -80,6 +80,7 @@ With `doctl`, the create/update shape is:
 ```bash
 doctl apps create --spec .do/ssq-node-api.local.yml
 doctl apps update <app-id> --spec .do/ssq-node-api.local.yml
+doctl apps create-deployment <app-id> --force-rebuild
 ```
 
 The same pattern applies to the three frontend specs.
