@@ -29,8 +29,8 @@ Expected result: each app returns HTTP `200` with `status: UP`.
 Maintainers with the private backend review URL can also run the deployed full-stack smoke by setting:
 
 ```bash
-SSQ_SMOKE_BACKEND_READY_URL=https://<backend-review-host>/health/ready \
-SSQ_SMOKE_GRAPHQL_URL=https://<backend-review-host>/graphql \
+SSQ_SMOKE_BACKEND_READY_URL=https://<private-backend-host>/health/ready \
+SSQ_SMOKE_GRAPHQL_URL=https://<private-backend-host>/graphql \
 SSQ_SMOKE_DASHBOARD_URL=https://ssq-dashboard-swgsm.ondigitalocean.app \
 SSQ_SMOKE_SENIORS_CARD_URL=https://ssq-seniors-card-lfzpt.ondigitalocean.app \
 SSQ_SMOKE_RENTAL_SECURITY_SUBSIDY_URL=https://ssq-rental-security-subsidy-kgbzf.ondigitalocean.app \
@@ -117,4 +117,4 @@ pnpm check
 - Commit only `.do/*.template.yml` specs and reviewer-facing docs.
 - Keep backend/admin/ops URLs and DigitalOcean app IDs in private operational notes.
 - Use `docs/digitalocean-deployment.md` for deployment mechanics and `docs/live-review-links.md` for public frontend links.
-- Use `docs/backend-production-readiness.md` and `docs/frontend-deployment-readiness.md` for deeper readiness notes.
+- Use `docs/backend-production-readiness.md`, `docs/frontend-deployment-readiness.md` and `docs/operational-reliability-support-evidence.md` for deeper readiness, support and production-next notes.
