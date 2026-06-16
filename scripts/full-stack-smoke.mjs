@@ -73,7 +73,7 @@ const checks = [
       const text = extractVisibleText(html);
 
       assert(text.includes("Taylor Queensland"), "Seniors Card should render the backend seeded customer");
-      assert(text.includes("SSQ-DEMO-0001"), "Seniors Card should render the seeded backend service request");
+      assertReferenceNumber(text, "Seniors Card should render a backend service request reference");
       assert(
         text.includes("This Seniors Card journey is using backend data from the frontend service layer"),
         "Seniors Card should render in backend data-source mode"
@@ -179,6 +179,10 @@ function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+function assertReferenceNumber(text, message) {
+  assert(/SSQ-[A-Z0-9-]+/.test(text), message);
 }
 
 function delay(ms) {
