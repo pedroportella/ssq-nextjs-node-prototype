@@ -123,6 +123,20 @@ export const schema = createSchema<GraphqlContext>({
       referenceNumber: String!
       status: String!
       payload: JSON!
+      createdAt: String!
+      updatedAt: String!
+    }
+
+    type SupportingDocument {
+      id: ID!
+      category: String!
+      fileName: String!
+      mimeType: String!
+      sizeBytes: Int!
+      uploadStatus: String!
+      scanStatus: String!
+      createdAt: String!
+      updatedAt: String!
     }
 
     type PageInfo {
@@ -262,6 +276,7 @@ export const schema = createSchema<GraphqlContext>({
       submittedServiceRequestConnection(input: ServiceRequestListInput): ServiceRequestConnectionResult!
       serviceRequest(referenceNumber: String!): ServiceRequest
       submissionSummary(referenceNumber: String!): SubmissionSummary
+      supportingDocuments(referenceNumber: String, draftId: ID): [SupportingDocument!]!
       customerProfileEvidence(serviceRequestId: ID!): [CustomerProfileEvidence!]!
       activityLogs(serviceRequestId: ID!): [ActivityLog!]!
     }
@@ -460,6 +475,51 @@ export const schema = createSchema<GraphqlContext>({
               referenceNumber: args.referenceNumber
             })
           : null;
+      },
+      async supportingDocuments(
+        _parent: unknown,
+        args: { referenceNumber?: string | null; draftId?: string | null },
+        context: GraphqlContext
+      ) {
+        if (!isCitizen(context.demoIdentity)) {
+          return [];
+        }
+
+        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
+
+        if (!customer) {
+          return [];
+        }
+
+        if (args.referenceNumber) {
+          const serviceRequest = await context.repository.getServiceRequestByReferenceForCustomer({
+            customerId: customer.id,
+            referenceNumber: args.referenceNumber
+          });
+
+          return serviceRequest
+            ? context.repository.listSupportingDocumentsForCustomer({
+                customerId: customer.id,
+                serviceRequestId: serviceRequest.id
+              })
+            : [];
+        }
+
+        if (args.draftId) {
+          const draft = await context.repository.getServiceRequestDraftForCustomer({
+            customerId: customer.id,
+            draftId: args.draftId
+          });
+
+          return draft
+            ? context.repository.listSupportingDocumentsForCustomer({
+                customerId: customer.id,
+                serviceRequestDraftId: draft.id
+              })
+            : [];
+        }
+
+        return [];
       },
       customerProfileEvidence(_parent: unknown, args: { serviceRequestId: string }, context: GraphqlContext) {
         return context.repository.listCustomerProfileEvidence(args.serviceRequestId);

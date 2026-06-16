@@ -40,7 +40,7 @@ Private deployment notes and generated DigitalOcean specs stay out of Git. Commi
 
 ```bash
 pnpm docker:config
-pnpm docker:up
+pnpm docker:up:backend
 pnpm docker:down
 ```
 
@@ -51,6 +51,12 @@ The frontend apps are available on:
 - Dashboard: `http://localhost:3000`
 - Seniors Card: `http://localhost:3001`
 - Rental Security Subsidy: `http://localhost:3002`
+
+Run the backend-mode local review smoke after the containers are up:
+
+```bash
+pnpm test:full-stack-smoke
+```
 
 See `docs/local-development.md` for local runtime details.
 

@@ -13,6 +13,26 @@ function createGraphqlTestDatabase(): DatabaseClient {
   const serviceRequests: QueryResultRow[] = [];
   const serviceRequestDrafts: QueryResultRow[] = [];
   const submissionSummaries: QueryResultRow[] = [];
+  const supportingDocuments: QueryResultRow[] = [
+    {
+      id: "93000000-0000-4000-8000-000000000001",
+      customer_id: "10000000-0000-4000-8000-000000000001",
+      service_request_draft_id: null,
+      service_request_id: "30000000-0000-4000-8000-000000000001",
+      category: "identity",
+      file_name: "identity-evidence.pdf",
+      file_extension: ".pdf",
+      mime_type: "application/pdf",
+      size_bytes: 512000,
+      storage_key: "supporting-documents/identity-evidence.pdf",
+      upload_status: "UPLOADED",
+      scan_status: "PASSED",
+      retention_policy: "prototype",
+      metadata: {},
+      created_at: "2026-06-10T00:35:00.000Z",
+      updated_at: "2026-06-10T00:35:00.000Z"
+    }
+  ];
 
   return {
     queryable: {
@@ -112,7 +132,9 @@ function createGraphqlTestDatabase(): DatabaseClient {
             transaction_definition_id: String(values[1]),
             reference_number: String(values[2]),
             status: String(values[3]),
-            payload: JSON.parse(String(values[4]))
+            payload: JSON.parse(String(values[4])),
+            created_at: "2026-06-10T00:00:00.000Z",
+            updated_at: "2026-06-10T00:00:00.000Z"
           };
 
           serviceRequests.push(row);
@@ -223,7 +245,9 @@ function createGraphqlTestDatabase(): DatabaseClient {
                 status: values[2],
                 payload: {
                   prototype: true
-                }
+                },
+                created_at: "2026-06-10T00:00:00.000Z",
+                updated_at: "2026-06-10T00:30:00.000Z"
               } as unknown as T
             ]);
           }
@@ -268,7 +292,9 @@ function createGraphqlTestDatabase(): DatabaseClient {
               status: "SUBMITTED",
               payload: {
                 prototype: true
-              }
+              },
+              created_at: "2026-06-10T00:00:00.000Z",
+              updated_at: "2026-06-10T00:00:00.000Z"
             }
           ];
           const submittedRows: QueryResultRow[] = serviceRequests.map((row) => ({
@@ -350,6 +376,16 @@ function createGraphqlTestDatabase(): DatabaseClient {
 
         if (normalizedSql.includes("FROM customer_profile_evidence")) {
           return result<T>(customerProfileEvidence.filter((row) => row.service_request_id === values[0]) as unknown as T[]);
+        }
+
+        if (normalizedSql.includes("FROM supporting_documents")) {
+          const targetColumn = normalizedSql.includes("service_request_id = $2")
+            ? "service_request_id"
+            : "service_request_draft_id";
+
+          return result<T>(
+            supportingDocuments.filter((row) => row.customer_id === values[0] && row[targetColumn] === values[1]) as unknown as T[]
+          );
         }
 
         if (normalizedSql.includes("FROM submission_summaries ss")) {
@@ -555,6 +591,56 @@ describe("GraphQL route", () => {
     expect(response.json()).toMatchObject({
       data: {
         serviceRequest: null
+      }
+    });
+
+    await app.close();
+  });
+
+  it("returns supporting documents for a customer-owned service request", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query SupportingDocuments {
+            supportingDocuments(referenceNumber: "SSQ-DEMO-0001") {
+              category
+              fileName
+              mimeType
+              sizeBytes
+              uploadStatus
+              scanStatus
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        supportingDocuments: [
+          {
+            category: "identity",
+            fileName: "identity-evidence.pdf",
+            mimeType: "application/pdf",
+            sizeBytes: 512000,
+            uploadStatus: "UPLOADED",
+            scanStatus: "PASSED"
+          }
+        ]
       }
     });
 

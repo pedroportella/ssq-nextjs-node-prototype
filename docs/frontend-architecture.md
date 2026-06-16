@@ -42,8 +42,8 @@ The current layout layer is server-renderable by default. A future mobile drawer
 
 Next.js app routes that read frontend service data are rendered dynamically so production builds do not bake mock data into browser or server output. Runtime mode is resolved by the server-only service layer:
 
-- mock mode for frontend-only work and the current prototype Compose runtime;
-- backend mode only when `BACKEND_INTERNAL_URL` is configured and the relevant service adapter is implemented.
+- mock mode for frontend-only work and deterministic mock smoke tests;
+- backend mode for the Compose/full-stack runtime when `BACKEND_INTERNAL_URL` is configured.
 
 Backend and GraphQL URLs must stay server-only. Apps should import server data helpers from `@ssq/services/server`; browser components should receive data through props and must not use `NEXT_PUBLIC_BACKEND_URL`.
 

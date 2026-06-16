@@ -58,6 +58,8 @@ export interface ServiceRequestRecord {
   referenceNumber: string;
   status: "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "ACTION_REQUIRED" | "COMPLETED" | "WITHDRAWN";
   payload: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
   transactionKey?: string;
 }
 
@@ -215,6 +217,8 @@ interface ServiceRequestRow {
   reference_number: string;
   status: ServiceRequestRecord["status"];
   payload: Record<string, unknown>;
+  created_at: Date | string;
+  updated_at: Date | string;
   transaction_key?: string;
 }
 
@@ -440,7 +444,7 @@ export class PrototypeRepository {
           payload
         )
         VALUES ($1, $2, $3, $4, $5::jsonb)
-        RETURNING id, customer_id, transaction_definition_id, reference_number, status, payload
+        RETURNING id, customer_id, transaction_definition_id, reference_number, status, payload, created_at, updated_at
       `,
       [
         input.customerId,
@@ -570,6 +574,8 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.created_at,
+          sr.updated_at,
           td.transaction_key
         FROM service_requests sr
         INNER JOIN transaction_definitions td
@@ -593,6 +599,8 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.created_at,
+          sr.updated_at,
           td.transaction_key
         FROM service_requests sr
         INNER JOIN transaction_definitions td
@@ -642,6 +650,8 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.created_at,
+          sr.updated_at,
           td.transaction_key
         FROM service_requests sr
         INNER JOIN transaction_definitions td
@@ -699,6 +709,8 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.created_at,
+          sr.updated_at,
           td.transaction_key
         FROM service_requests sr
         INNER JOIN transaction_definitions td
@@ -724,6 +736,8 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.created_at,
+          sr.updated_at,
           td.transaction_key
         FROM service_requests sr
         INNER JOIN transaction_definitions td
@@ -758,6 +772,8 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.created_at,
+          sr.updated_at,
           td.transaction_key
       `,
       [input.referenceNumber, input.customerId, input.status]
@@ -941,6 +957,52 @@ export class PrototypeRepository {
     );
 
     return mapSupportingDocument(result.rows[0]);
+  }
+
+  async listSupportingDocumentsForCustomer(input: {
+    customerId: string;
+    serviceRequestDraftId?: string;
+    serviceRequestId?: string;
+  }): Promise<SupportingDocumentRecord[]> {
+    const targetColumn = input.serviceRequestId
+      ? "service_request_id"
+      : input.serviceRequestDraftId
+        ? "service_request_draft_id"
+        : undefined;
+    const targetId = input.serviceRequestId ?? input.serviceRequestDraftId;
+
+    if (!targetColumn || !targetId) {
+      return [];
+    }
+
+    const result = await this.database.query<SupportingDocumentRow>(
+      `
+        SELECT
+          id,
+          customer_id,
+          service_request_draft_id,
+          service_request_id,
+          category,
+          file_name,
+          file_extension,
+          mime_type,
+          size_bytes,
+          storage_key,
+          upload_status,
+          scan_status,
+          retention_policy,
+          metadata,
+          created_at,
+          updated_at
+        FROM supporting_documents
+        WHERE customer_id = $1
+          AND ${targetColumn} = $2
+        ORDER BY created_at DESC
+      `,
+      [input.customerId, targetId]
+    );
+
+    return result.rows.map(mapSupportingDocument);
   }
 
   async createSubmissionSummary(input: {
@@ -1145,6 +1207,8 @@ function mapServiceRequest(row: ServiceRequestRow): ServiceRequestRecord {
     referenceNumber: row.reference_number,
     status: row.status,
     payload: row.payload,
+    createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
+    updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at,
     transactionKey: row.transaction_key
   };
 }

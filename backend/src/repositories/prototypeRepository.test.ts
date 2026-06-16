@@ -12,6 +12,7 @@ class SeededTestDatabase implements Queryable {
   private readonly serviceRequests: QueryResultRow[] = [];
   private readonly serviceRequestDrafts: QueryResultRow[] = [];
   private readonly submissionSummaries: QueryResultRow[] = [];
+  private readonly supportingDocuments: QueryResultRow[] = [];
 
   async query<T extends QueryResultRow = QueryResultRow>(sql: string, values: readonly unknown[] = []): Promise<QueryResult<T>> {
     const normalizedSql = sql.replace(/\s+/g, " ").trim();
@@ -95,7 +96,9 @@ class SeededTestDatabase implements Queryable {
         transaction_definition_id: String(values[1]),
         reference_number: String(values[2]),
         status: String(values[3]),
-        payload: JSON.parse(String(values[4]))
+        payload: JSON.parse(String(values[4])),
+        created_at: "2026-06-10T00:00:00.000Z",
+        updated_at: "2026-06-10T00:00:00.000Z"
       };
 
       this.serviceRequests.push(row);
@@ -210,6 +213,7 @@ class SeededTestDatabase implements Queryable {
       }
 
       request.status = String(values[2]);
+      request.updated_at = "2026-06-10T00:30:00.000Z";
 
       return result<T>([
         {
@@ -305,6 +309,40 @@ class SeededTestDatabase implements Queryable {
 
     if (normalizedSql.includes("FROM customer_profile_evidence")) {
       return result<T>(this.customerProfileEvidence.filter((row) => row.service_request_id === values[0]) as T[]);
+    }
+
+    if (normalizedSql.startsWith("INSERT INTO supporting_documents")) {
+      const row = {
+        id: "93000000-0000-4000-8000-000000000001",
+        customer_id: String(values[0]),
+        service_request_draft_id: values[1] === null ? null : String(values[1]),
+        service_request_id: values[2] === null ? null : String(values[2]),
+        category: String(values[3]),
+        file_name: String(values[4]),
+        file_extension: String(values[5]),
+        mime_type: String(values[6]),
+        size_bytes: Number(values[7]),
+        storage_key: String(values[8]),
+        upload_status: String(values[9]),
+        scan_status: String(values[10]),
+        retention_policy: String(values[11]),
+        metadata: JSON.parse(String(values[12])),
+        created_at: "2026-06-10T00:35:00.000Z",
+        updated_at: "2026-06-10T00:35:00.000Z"
+      };
+
+      this.supportingDocuments.push(row);
+      return result<T>([row as unknown as T]);
+    }
+
+    if (normalizedSql.includes("FROM supporting_documents")) {
+      const targetColumn = normalizedSql.includes("service_request_id = $2")
+        ? "service_request_id"
+        : "service_request_draft_id";
+
+      return result<T>(
+        this.supportingDocuments.filter((row) => row.customer_id === values[0] && row[targetColumn] === values[1]) as T[]
+      );
     }
 
     if (normalizedSql.includes("FROM submission_summaries ss")) {
@@ -550,6 +588,42 @@ describe("PrototypeRepository", () => {
     });
     expect(ownedSummary?.id).toBe(summary.id);
     expect(otherCustomerSummary).toBeUndefined();
+  });
+
+  it("creates and reads supporting documents for customer-owned requests", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+
+    const document = await repository.createSupportingDocument({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      serviceRequestId: "30000000-0000-4000-8000-000000000099",
+      category: "identity",
+      fileName: "identity-evidence.pdf",
+      fileExtension: ".pdf",
+      mimeType: "application/pdf",
+      sizeBytes: 512000,
+      storageKey: "supporting-documents/identity-evidence.pdf",
+      uploadStatus: "UPLOADED",
+      scanStatus: "PASSED",
+      retentionPolicy: "prototype"
+    });
+    const ownedDocuments = await repository.listSupportingDocumentsForCustomer({
+      customerId: document.customerId,
+      serviceRequestId: document.serviceRequestId
+    });
+    const otherCustomerDocuments = await repository.listSupportingDocumentsForCustomer({
+      customerId: "10000000-0000-4000-8000-000000000999",
+      serviceRequestId: document.serviceRequestId
+    });
+
+    expect(ownedDocuments).toEqual([
+      expect.objectContaining({
+        fileName: "identity-evidence.pdf",
+        uploadStatus: "UPLOADED",
+        scanStatus: "PASSED"
+      })
+    ]);
+    expect(otherCustomerDocuments).toEqual([]);
   });
 
   it("creates and reads simulated customer profile evidence", async () => {

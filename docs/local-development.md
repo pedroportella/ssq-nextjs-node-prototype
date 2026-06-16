@@ -16,11 +16,13 @@ Copy `.env.example` to `.env` only when you need to override local ports or data
 
 ## Local Runtime
 
-Start PostgreSQL, the backend API and the three frontend apps:
+Start PostgreSQL, the backend API and the three frontend apps in backend mode:
 
 ```bash
-pnpm docker:up
+pnpm docker:up:backend
 ```
+
+Use `pnpm docker:up` when you intentionally want the mode from your local `.env`.
 
 Start only PostgreSQL and the backend API:
 
@@ -54,7 +56,15 @@ curl -i http://localhost:3001/status
 curl -i http://localhost:3002/status
 ```
 
-Frontend app containers receive `BACKEND_INTERNAL_URL` as a server-side environment variable pointing at the Compose backend service. The current prototype Compose runtime also sets `SSQ_FRONTEND_DATA_SOURCE=mock`, because the workflow backend adapters are still deferred. Do not add `NEXT_PUBLIC_BACKEND_URL` or browser-visible backend URL values.
+Frontend app containers receive `BACKEND_INTERNAL_URL` as a server-side environment variable pointing at the Compose backend service. The Compose runtime defaults `SSQ_FRONTEND_DATA_SOURCE=backend` so the dashboard and transaction apps render backend-backed data through the server-only frontend service layer. Do not add `NEXT_PUBLIC_BACKEND_URL` or browser-visible backend URL values.
+
+Run the local full-stack smoke check after `pnpm docker:up:backend`:
+
+```bash
+pnpm test:full-stack-smoke
+```
+
+The smoke check verifies backend readiness, all three frontend `/status` endpoints, direct GraphQL profile/catalogue reads and backend-rendered dashboard/transaction pages.
 
 The database is exposed on host port `54329` by default to avoid clashing with a local PostgreSQL install.
 

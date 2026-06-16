@@ -15,11 +15,11 @@ Each app has an app-local Dockerfile under `frontend/apps/<app>/Dockerfile`. The
 Frontend pages resolve data through the server-only service layer in `@ssq/services/server`.
 
 - `SSQ_FRONTEND_DATA_SOURCE=mock` uses deterministic frontend mock data.
-- `SSQ_FRONTEND_DATA_SOURCE=backend` requires `BACKEND_INTERNAL_URL` and uses backend adapters where implemented.
+- `SSQ_FRONTEND_DATA_SOURCE=backend` requires `BACKEND_INTERNAL_URL` and uses the backend service adapters.
 - Omitting `SSQ_FRONTEND_DATA_SOURCE` uses backend mode when `BACKEND_INTERNAL_URL` is present, otherwise local development falls back to mock mode.
 - Production-like runs fail closed unless `BACKEND_INTERNAL_URL` is set or `SSQ_FRONTEND_DATA_SOURCE=mock` is explicit.
 
-The current prototype Compose runtime sets `SSQ_FRONTEND_DATA_SOURCE=mock` for frontend services because the end-to-end workflow backend adapters are not complete yet. `BACKEND_INTERNAL_URL` remains present as a server-only integration setting for later backend-mode checks.
+The prototype Compose runtime defaults `SSQ_FRONTEND_DATA_SOURCE=backend` for frontend services and passes `BACKEND_INTERNAL_URL` as a server-only integration setting. Use `SSQ_FRONTEND_DATA_SOURCE=mock` for frontend-only work and deterministic mock smoke checks.
 
 ## Public URLs
 
@@ -67,15 +67,13 @@ pnpm test:mock-smoke
 
 Run `pnpm test:mock-smoke:all` when the release check needs all three frontend apps.
 
-For container status checks:
+For local backend-mode container smoke checks:
 
 ```bash
 pnpm docker:build
-pnpm docker:up
-curl -i http://localhost:3000/status
-curl -i http://localhost:3001/status
-curl -i http://localhost:3002/status
+pnpm docker:up:backend
+pnpm test:full-stack-smoke
 pnpm docker:down
 ```
 
-Status endpoints are intentionally lightweight and validate container readiness without requiring workflow backend adapters.
+The full-stack smoke validates backend readiness, all frontend status endpoints, direct GraphQL reads and backend-rendered frontend pages.

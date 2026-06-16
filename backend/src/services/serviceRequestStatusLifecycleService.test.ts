@@ -12,6 +12,8 @@ function createServiceRequest(status: ServiceRequestRecord["status"]): ServiceRe
     referenceNumber: "SSQ-DEMO-0001",
     status,
     payload: {},
+    createdAt: "2026-06-10T00:00:00.000Z",
+    updatedAt: "2026-06-10T00:00:00.000Z",
     transactionKey: "seniors-card"
   };
 }
