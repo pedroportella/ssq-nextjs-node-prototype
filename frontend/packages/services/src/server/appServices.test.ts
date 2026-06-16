@@ -11,6 +11,7 @@ import {
   getRentalSecuritySubsidyWorkflowData,
   getSeniorsCardShellData,
   getSeniorsCardWorkflowData,
+  recordSupportingDocumentUploadMetadata,
   submitTransactionDraft,
   updateTransactionDraftWithValidationError
 } from "./index";
@@ -223,6 +224,15 @@ describe("server app services", () => {
   it("returns mock upload policy, uploaded document states and summary downloads", async () => {
     await expect(getSupportingDocumentUploadPolicy({ dataSource: "mock" })).resolves.toMatchObject({
       acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
+      allowedCategories: expect.arrayContaining([
+        expect.objectContaining({
+          label: "Identity evidence",
+          value: "identity"
+        })
+      ]),
+      defaultPersonKey: "applicant",
+      maxFilesPerPerson: 5,
+      maxTotalSizeBytesPerPerson: 10 * 1024 * 1024,
       rejectedExample: {
         fieldPath: "supportingDocuments[0].file"
       }
@@ -243,6 +253,28 @@ describe("server app services", () => {
       contentType: "text/plain",
       filename: "sc-2026-0001-summary.txt",
       referenceNumber: "SC-2026-0001"
+    });
+    await expect(recordSupportingDocumentUploadMetadata({
+      category: "identity",
+      fileName: "identity-evidence.pdf",
+      mimeType: "application/pdf",
+      personKey: "applicant",
+      sizeBytes: 512_000,
+      target: {
+        draftId: "seniors-card-draft-001",
+        type: "DRAFT"
+      }
+    }, { dataSource: "mock" })).resolves.toMatchObject({
+      document: {
+        category: "Identity evidence",
+        fileName: "identity-evidence.pdf",
+        personKey: "applicant",
+        status: "uploaded"
+      },
+      ok: true,
+      policy: {
+        maxFilesPerPerson: 5
+      }
     });
   });
 
@@ -467,7 +499,14 @@ describe("server app services", () => {
     });
 
     await expect(getSupportingDocumentUploadPolicy(backendConfig)).resolves.toMatchObject({
-      maxFileSizeBytes: 5 * 1024 * 1024
+      allowedCategories: expect.arrayContaining([
+        expect.objectContaining({
+          value: "identity"
+        })
+      ]),
+      maxFileSizeBytes: 5 * 1024 * 1024,
+      maxFilesPerPerson: 5,
+      maxTotalSizeBytesPerPerson: 10 * 1024 * 1024
     });
     await expect(getUploadedDocuments("rental-security-subsidy", backendConfig)).resolves.toEqual([
       expect.objectContaining({
@@ -481,6 +520,81 @@ describe("server app services", () => {
       contentType: "text/plain",
       filename: "SSQ-TEST-0002-summary.txt",
       referenceNumber: "SSQ-TEST-0002"
+    });
+  });
+
+  it("records backend supporting document metadata through the server-only REST adapter", async () => {
+    mockBackendFetch(({ body, url }) => {
+      expect(url).toBe("http://backend:7001/uploads/supporting-documents");
+      expect(body).toMatchObject({
+        category: "identity",
+        fileName: "identity-evidence.pdf",
+        personKey: "applicant",
+        target: {
+          draftId: "70000000-0000-4000-8000-000000000001",
+          type: "DRAFT"
+        }
+      });
+
+      return Response.json({
+        correlationId: "upload-correlation",
+        document: {
+          category: "identity",
+          fileName: "identity-evidence.pdf",
+          metadata: {
+            personKey: "applicant"
+          },
+          mimeType: "application/pdf",
+          scanStatus: "NOT_SCANNED_PROTOTYPE",
+          sizeBytes: 512000,
+          uploadStatus: "METADATA_RECORDED"
+        },
+        ok: true,
+        policy: {
+          allowedCategories: ["identity", "residency", "supporting-evidence"],
+          allowedMimeTypes: ["application/pdf", "image/jpeg", "image/png"],
+          defaultPersonKey: "applicant",
+          maxFilesPerPerson: 5,
+          maxSizeBytes: 5 * 1024 * 1024,
+          maxTotalSizeBytesPerPerson: 10 * 1024 * 1024
+        }
+      });
+    });
+
+    await expect(recordSupportingDocumentUploadMetadata({
+      category: "identity",
+      fileName: "identity-evidence.pdf",
+      mimeType: "application/pdf",
+      personKey: "applicant",
+      sizeBytes: 512_000,
+      target: {
+        draftId: "70000000-0000-4000-8000-000000000001",
+        type: "DRAFT"
+      }
+    }, backendConfig)).resolves.toMatchObject({
+      document: {
+        category: "Identity",
+        fileName: "identity-evidence.pdf",
+        mimeType: "application/pdf",
+        personKey: "applicant",
+        status: "uploaded"
+      },
+      ok: true,
+      policy: {
+        allowedCategories: [
+          expect.objectContaining({
+            value: "identity"
+          }),
+          expect.objectContaining({
+            value: "residency"
+          }),
+          expect.objectContaining({
+            value: "supporting-evidence"
+          })
+        ],
+        maxFilesPerPerson: 5,
+        maxTotalSizeBytesPerPerson: 10 * 1024 * 1024
+      }
     });
   });
 });

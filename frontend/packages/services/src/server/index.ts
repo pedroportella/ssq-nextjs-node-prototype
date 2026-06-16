@@ -16,6 +16,7 @@ export {
   getRentalSecuritySubsidyShellData,
   getSeniorsCardShellData,
   getSeniorsCardWorkflowData,
+  recordSupportingDocumentUploadMetadata,
   submitTransactionDraft,
   updateTransactionDraftWithValidationError
 } from "./appServices";

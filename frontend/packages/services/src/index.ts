@@ -51,9 +51,19 @@ export interface PrototypeValidationError {
   message: string;
 }
 
+export interface PrototypeUploadCategory {
+  hint?: string;
+  label: string;
+  value: string;
+}
+
 export interface PrototypeUploadPolicy {
   acceptedFileTypes: string[];
+  allowedCategories: PrototypeUploadCategory[];
+  defaultPersonKey: string;
   maxFileSizeBytes: number;
+  maxFilesPerPerson: number;
+  maxTotalSizeBytesPerPerson: number;
   rejectedExample: PrototypeValidationError;
 }
 
@@ -61,8 +71,40 @@ export interface PrototypeUploadedDocument {
   category: string;
   fileName: string;
   message?: string;
+  mimeType?: string;
+  personKey?: string;
   sizeBytes: number;
   status: "uploaded" | "rejected";
+}
+
+export type PrototypeSupportingDocumentTarget =
+  | {
+      draftId: string;
+      type: "DRAFT";
+    }
+  | {
+      referenceNumber: string;
+      type: "SERVICE_REQUEST";
+    };
+
+export interface PrototypeSupportingDocumentUploadInput {
+  category: string;
+  fileName: string;
+  mimeType: string;
+  personKey: string;
+  sizeBytes: number;
+  target: PrototypeSupportingDocumentTarget;
+}
+
+export interface PrototypeSupportingDocumentUploadResult {
+  document?: PrototypeUploadedDocument;
+  error?: {
+    code: string;
+    message: string;
+  };
+  fieldErrors: PrototypeValidationError[];
+  ok: boolean;
+  policy: PrototypeUploadPolicy;
 }
 
 export interface PrototypeSubmissionSummaryMetadata {

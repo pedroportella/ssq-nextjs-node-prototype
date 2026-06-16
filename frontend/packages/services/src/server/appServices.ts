@@ -8,6 +8,7 @@ import {
   getBackendSupportingDocumentUploadPolicy,
   getBackendUploadedDocuments,
   getBackendWorkflowData,
+  recordBackendSupportingDocumentUploadMetadata,
   submitBackendTransactionDraft,
   updateBackendDraftWithValidationError
 } from "./backendServices";
@@ -20,6 +21,7 @@ import {
   getMockUploadedDocuments,
   getMockRentalSecuritySubsidyWorkflowData,
   getMockSeniorsCardWorkflowData,
+  recordMockSupportingDocumentUploadMetadata,
   submitMockDraft,
   updateMockDraftWithValidationError
 } from "./mockServices";
@@ -30,6 +32,8 @@ import type {
   PrototypeAppSummary,
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
+  PrototypeSupportingDocumentUploadInput,
+  PrototypeSupportingDocumentUploadResult,
   PrototypeSubmissionSummaryDownload,
   PrototypeSubmitResult,
   PrototypeUploadedDocument,
@@ -160,6 +164,19 @@ export async function getUploadedDocuments(
   }
 
   return getMockUploadedDocuments(appKey);
+}
+
+export async function recordSupportingDocumentUploadMetadata(
+  input: PrototypeSupportingDocumentUploadInput,
+  config?: FrontendRuntimeConfig
+): Promise<PrototypeSupportingDocumentUploadResult> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    return recordBackendSupportingDocumentUploadMetadata(input, runtimeConfig);
+  }
+
+  return recordMockSupportingDocumentUploadMetadata(input);
 }
 
 export async function getSubmissionSummaryDownload(

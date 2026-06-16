@@ -1,11 +1,13 @@
 import {
   createTransactionDraft,
   getSeniorsCardWorkflowData,
+  recordSupportingDocumentUploadMetadata,
   submitTransactionDraft,
   updateTransactionDraftWithValidationError
 } from "@ssq/services/server";
 import {
   QhdsButton,
+  QhdsCategorizedFileUpload,
   QhdsCheckbox,
   QhdsDirectionLink,
   QhdsFooter,
@@ -20,10 +22,17 @@ import {
 
 import styles from "./SeniorsCardHomeContainer.module.scss";
 
-import type { PrototypeDraftMutationResult, PrototypeSubmitResult, PrototypeWorkflowData } from "@ssq/services";
+import type {
+  PrototypeDraftMutationResult,
+  PrototypeSubmitResult,
+  PrototypeSupportingDocumentUploadResult,
+  PrototypeUploadPolicy,
+  PrototypeWorkflowData
+} from "@ssq/services";
 
 const seniorsCardProgressSteps = [
   { id: "eligibility", label: "Eligibility", status: "current" as const },
+  { id: "supporting-evidence", label: "Supporting evidence", status: "upcoming" as const },
   { id: "review-details", label: "Review details", status: "upcoming" as const },
   { id: "declaration", label: "Declaration", status: "upcoming" as const },
   { id: "confirmation", label: "Confirmation", status: "upcoming" as const }
@@ -31,16 +40,23 @@ const seniorsCardProgressSteps = [
 
 export function SeniorsCardApplyContent({
   createdDraft,
+  evidenceUploadResult,
   submitResult,
+  uploadPolicy,
   validationResult,
   workflow
 }: {
   createdDraft: PrototypeDraftMutationResult;
+  evidenceUploadResult: PrototypeSupportingDocumentUploadResult;
   submitResult: PrototypeSubmitResult;
+  uploadPolicy: PrototypeUploadPolicy;
   validationResult: PrototypeDraftMutationResult;
   workflow: PrototypeWorkflowData;
 }) {
   const dateOfBirthError = validationResult.validationErrors.find((error) => error.fieldPath === "eligibility.dateOfBirth");
+  const evidenceUploadStatus = evidenceUploadResult.ok
+    ? evidenceUploadResult.document?.fileName ?? "supporting evidence metadata"
+    : evidenceUploadResult.error?.message ?? "Supporting evidence metadata was not recorded.";
 
   return (
     <QhdsLayout contentWidth="task" focusMode footer={<QhdsFooter />} header={<QhdsHeader />} mainLabel="Seniors Card application">
@@ -115,6 +131,31 @@ export function SeniorsCardApplyContent({
             />
           </fieldset>
 
+          <fieldset className={styles.workflowSection}>
+            <legend className={`qld__fieldset__legend ${styles.workflowLegend}`}>Supporting evidence</legend>
+            <QhdsCategorizedFileUpload
+              categories={uploadPolicy.allowedCategories}
+              hint="Attach identity, residency or concession evidence for assessment."
+              id="supporting-evidence"
+              label="Upload supporting evidence"
+              name="supportingEvidence"
+              people={[
+                {
+                  hint: "Evidence is grouped under the applicant for this Seniors Card request.",
+                  key: uploadPolicy.defaultPersonKey,
+                  label: workflow.profile.displayName
+                }
+              ]}
+              policy={uploadPolicy}
+            />
+            <p className={styles.workflowReference}>
+              Metadata proof <strong>{evidenceUploadStatus}</strong>.
+              <span className={styles.meta}>
+                Server policy allows {uploadPolicy.maxFilesPerPerson} files and {Math.round(uploadPolicy.maxTotalSizeBytesPerPerson / (1024 * 1024))} MB per person.
+              </span>
+            </p>
+          </fieldset>
+
           <p className={styles.workflowReference}>
             Submission <strong>{submitResult.referenceNumber}</strong> returned status{" "}
             <strong>{submitResult.status.toLowerCase().replace("_", " ")}</strong>.
@@ -133,11 +174,24 @@ export async function SeniorsCardApplyContainer() {
     updateTransactionDraftWithValidationError("seniors-card"),
     submitTransactionDraft("seniors-card")
   ]);
+  const evidenceUploadResult = await recordSupportingDocumentUploadMetadata({
+    category: "identity",
+    fileName: "identity-evidence.pdf",
+    mimeType: "application/pdf",
+    personKey: workflow.uploadPolicy.defaultPersonKey,
+    sizeBytes: 512_000,
+    target: {
+      draftId: createdDraft.draft.draftId,
+      type: "DRAFT"
+    }
+  });
 
   return (
     <SeniorsCardApplyContent
       createdDraft={createdDraft}
+      evidenceUploadResult={evidenceUploadResult}
       submitResult={submitResult}
+      uploadPolicy={evidenceUploadResult.policy}
       validationResult={validationResult}
       workflow={workflow}
     />

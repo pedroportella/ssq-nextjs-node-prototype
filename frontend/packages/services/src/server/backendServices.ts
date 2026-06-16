@@ -13,11 +13,14 @@ import type {
   PrototypeDraftSummary,
   PrototypeProfileSummary,
   PrototypeServiceCatalogueEntry,
+  PrototypeSupportingDocumentUploadInput,
+  PrototypeSupportingDocumentUploadResult,
   PrototypeSubmissionSummaryDownload,
   PrototypeSubmissionSummaryMetadata,
   PrototypeSubmitResult,
   PrototypeSubmittedRequestSummary,
   PrototypeUploadedDocument,
+  PrototypeUploadCategory,
   PrototypeUploadPolicy,
   PrototypeValidationError,
   PrototypeWorkflowData,
@@ -80,10 +83,33 @@ interface BackendServiceRequest {
 interface BackendSupportingDocument {
   category: string;
   fileName: string;
+  metadata?: {
+    personKey?: unknown;
+  };
   mimeType: string;
   scanStatus: string;
   sizeBytes: number;
   uploadStatus: string;
+}
+
+interface BackendUploadPolicy {
+  allowedCategories?: string[];
+  allowedMimeTypes?: string[];
+  defaultPersonKey?: string;
+  maxFilesPerPerson?: number;
+  maxSizeBytes?: number;
+  maxTotalSizeBytesPerPerson?: number;
+}
+
+interface BackendSupportingDocumentUploadResponse {
+  document?: BackendSupportingDocument;
+  error?: {
+    code: string;
+    message: string;
+  };
+  fieldErrors?: BackendFieldValidationError[];
+  ok: boolean;
+  policy?: BackendUploadPolicy;
 }
 
 interface BackendSubmissionSummary {
@@ -101,9 +127,32 @@ interface BackendFieldValidationError {
   message: string;
 }
 
+const backendUploadCategoryValues = [
+  "concession",
+  "identity",
+  "income",
+  "other",
+  "residency",
+  "supporting-evidence",
+  "supporting-document"
+];
+
+const backendUploadCategoryHints: Record<string, string> = {
+  concession: "Pension, concession or card evidence.",
+  identity: "Documents that prove the applicant's name or age.",
+  income: "Payslips, statements or other income evidence.",
+  residency: "Documents that show the applicant lives in Queensland.",
+  "supporting-evidence": "Service-specific documents requested during assessment.",
+  "supporting-document": "Other documents that support this request."
+};
+
 const backendUploadPolicy: PrototypeUploadPolicy = {
   acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
+  allowedCategories: createUploadCategories(backendUploadCategoryValues),
+  defaultPersonKey: "applicant",
   maxFileSizeBytes: 5 * 1024 * 1024,
+  maxFilesPerPerson: 5,
+  maxTotalSizeBytesPerPerson: 10 * 1024 * 1024,
   rejectedExample: {
     fieldPath: "supportingDocuments[0].file",
     message: "Upload a PDF, JPG or PNG file under 5 MB."
@@ -365,6 +414,41 @@ export async function getBackendSupportingDocumentUploadPolicy(): Promise<Protot
   return backendUploadPolicy;
 }
 
+export async function recordBackendSupportingDocumentUploadMetadata(
+  input: PrototypeSupportingDocumentUploadInput,
+  config: FrontendRuntimeConfig
+): Promise<PrototypeSupportingDocumentUploadResult> {
+  const backendConfig = toBackendClientConfig(config);
+  const correlationId = createCorrelationId();
+  const response = await fetch(`${backendConfig.backendUrl}/uploads/supporting-documents`, {
+    body: JSON.stringify(input),
+    cache: "no-store",
+    headers: createBackendHeaders(correlationId),
+    method: "POST"
+  });
+  const payload = await response.json() as BackendSupportingDocumentUploadResponse;
+  const policy = mapUploadPolicy(payload.policy);
+
+  if (!response.ok || !payload.ok) {
+    return {
+      error: payload.error ?? {
+        code: response.status === 404 ? "TARGET_NOT_FOUND" : "UPLOAD_FAILED",
+        message: "Supporting document metadata could not be recorded."
+      },
+      fieldErrors: mapValidationErrorsFromBackendFields(payload.fieldErrors ?? []),
+      ok: false,
+      policy
+    };
+  }
+
+  return {
+    document: payload.document ? mapUploadedDocument(payload.document) : undefined,
+    fieldErrors: [],
+    ok: true,
+    policy
+  };
+}
+
 export async function getBackendUploadedDocuments(
   appKey: TransactionAppKey,
   config: FrontendRuntimeConfig
@@ -534,8 +618,27 @@ function mapUploadedDocument(document: BackendSupportingDocument): PrototypeUplo
     category: formatDocumentCategory(document.category),
     fileName: document.fileName,
     message: document.uploadStatus === "REJECTED" ? backendUploadPolicy.rejectedExample.message : undefined,
+    mimeType: document.mimeType,
+    personKey: typeof document.metadata?.personKey === "string" ? document.metadata.personKey : undefined,
     sizeBytes: document.sizeBytes,
     status: document.uploadStatus === "REJECTED" || document.scanStatus === "REJECTED" ? "rejected" : "uploaded"
+  };
+}
+
+function mapUploadPolicy(policy: BackendUploadPolicy | undefined): PrototypeUploadPolicy {
+  const maxFileSizeBytes = policy?.maxSizeBytes ?? backendUploadPolicy.maxFileSizeBytes;
+
+  return {
+    acceptedFileTypes: policy?.allowedMimeTypes ?? backendUploadPolicy.acceptedFileTypes,
+    allowedCategories: policy?.allowedCategories ? createUploadCategories(policy.allowedCategories) : backendUploadPolicy.allowedCategories,
+    defaultPersonKey: policy?.defaultPersonKey ?? backendUploadPolicy.defaultPersonKey,
+    maxFileSizeBytes,
+    maxFilesPerPerson: policy?.maxFilesPerPerson ?? backendUploadPolicy.maxFilesPerPerson,
+    maxTotalSizeBytesPerPerson: policy?.maxTotalSizeBytesPerPerson ?? backendUploadPolicy.maxTotalSizeBytesPerPerson,
+    rejectedExample: {
+      fieldPath: backendUploadPolicy.rejectedExample.fieldPath,
+      message: `Upload a PDF, JPG or PNG file under ${Math.round(maxFileSizeBytes / (1024 * 1024))} MB.`
+    }
   };
 }
 
@@ -739,6 +842,21 @@ function mapValidationErrors(
   return fieldErrors.map((error) => ({
     fieldPath: mapValidationField(appKey, error.field),
     message: error.message
+  }));
+}
+
+function mapValidationErrorsFromBackendFields(fieldErrors: BackendFieldValidationError[]): PrototypeValidationError[] {
+  return fieldErrors.map((error) => ({
+    fieldPath: error.field,
+    message: error.message
+  }));
+}
+
+function createUploadCategories(categories: string[]): PrototypeUploadCategory[] {
+  return categories.map((category) => ({
+    hint: backendUploadCategoryHints[category],
+    label: formatDocumentCategory(category),
+    value: category
   }));
 }
 

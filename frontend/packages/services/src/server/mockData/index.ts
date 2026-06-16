@@ -7,10 +7,13 @@ import type {
   PrototypeDraftSummary,
   PrototypeProfileSummary,
   PrototypeServiceCatalogueEntry,
+  PrototypeSupportingDocumentUploadInput,
+  PrototypeSupportingDocumentUploadResult,
   PrototypeSubmissionSummaryMetadata,
   PrototypeSubmissionSummaryDownload,
   PrototypeSubmittedRequestSummary,
   PrototypeUploadedDocument,
+  PrototypeUploadCategory,
   PrototypeUploadPolicy,
   PrototypeValidationError,
   PrototypeWorkflowData
@@ -60,12 +63,52 @@ export function createMockValidationErrors(appKey: Exclude<PrototypeAppKey, "das
   ];
 }
 
+export const mockUploadCategories: PrototypeUploadCategory[] = [
+  {
+    hint: "Documents that prove the applicant's name or age.",
+    label: "Identity evidence",
+    value: "identity"
+  },
+  {
+    hint: "Documents that show the applicant lives in Queensland.",
+    label: "Residency evidence",
+    value: "residency"
+  },
+  {
+    hint: "Pension, concession or card evidence.",
+    label: "Concession evidence",
+    value: "concession"
+  },
+  {
+    hint: "Payslips, statements or other income evidence.",
+    label: "Income evidence",
+    value: "income"
+  },
+  {
+    hint: "Service-specific documents requested during assessment.",
+    label: "Supporting evidence",
+    value: "supporting-evidence"
+  },
+  {
+    label: "Other supporting document",
+    value: "supporting-document"
+  },
+  {
+    label: "Other",
+    value: "other"
+  }
+];
+
 export const mockUploadPolicy: PrototypeUploadPolicy = {
   acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
-  maxFileSizeBytes: 10 * 1024 * 1024,
+  allowedCategories: mockUploadCategories,
+  defaultPersonKey: "applicant",
+  maxFileSizeBytes: 5 * 1024 * 1024,
+  maxFilesPerPerson: 5,
+  maxTotalSizeBytesPerPerson: 10 * 1024 * 1024,
   rejectedExample: {
     fieldPath: "supportingDocuments[0].file",
-    message: "Upload a PDF, JPG or PNG file under 10 MB."
+    message: "Upload a PDF, JPG or PNG file under 5 MB."
   }
 };
 
@@ -76,6 +119,8 @@ export function createMockUploadedDocuments(appKey: Exclude<PrototypeAppKey, "da
     {
       category: appKey === "seniors-card" ? "Identity evidence" : "Rental evidence",
       fileName: `${prefix}-evidence.pdf`,
+      mimeType: "application/pdf",
+      personKey: "applicant",
       sizeBytes: 512_000,
       status: "uploaded"
     },
@@ -83,10 +128,32 @@ export function createMockUploadedDocuments(appKey: Exclude<PrototypeAppKey, "da
       category: "Rejected example",
       fileName: `${prefix}-archive.zip`,
       message: mockUploadPolicy.rejectedExample.message,
+      mimeType: "application/zip",
+      personKey: "applicant",
       sizeBytes: 14_000_000,
       status: "rejected"
     }
   ];
+}
+
+export function createMockSupportingDocumentUploadResult(
+  input: PrototypeSupportingDocumentUploadInput
+): PrototypeSupportingDocumentUploadResult {
+  const category = mockUploadCategories.find((candidate) => candidate.value === input.category);
+
+  return {
+    document: {
+      category: category?.label ?? input.category,
+      fileName: input.fileName,
+      mimeType: input.mimeType,
+      personKey: input.personKey,
+      sizeBytes: input.sizeBytes,
+      status: "uploaded"
+    },
+    fieldErrors: [],
+    ok: true,
+    policy: mockUploadPolicy
+  };
 }
 
 export function createMockDraftSummary(appKey: Exclude<PrototypeAppKey, "dashboard">): PrototypeDraftSummary {

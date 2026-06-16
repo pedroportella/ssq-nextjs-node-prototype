@@ -7,6 +7,7 @@ import {
   createMockDraftSummary,
   createMockSubmissionSummaryMetadata,
   createMockSubmissionSummaryDownload,
+  createMockSupportingDocumentUploadResult,
   createMockValidationErrors,
   createMockWorkflowData,
   mockUploadPolicy,
@@ -18,6 +19,8 @@ import type {
   PrototypeAppKey,
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
+  PrototypeSupportingDocumentUploadInput,
+  PrototypeSupportingDocumentUploadResult,
   PrototypeSubmissionSummaryDownload,
   PrototypeSubmitResult,
   PrototypeUploadedDocument,
@@ -79,6 +82,12 @@ export async function getMockSupportingDocumentUploadPolicy(): Promise<Prototype
 
 export async function getMockUploadedDocuments(appKey: Exclude<PrototypeAppKey, "dashboard">): Promise<PrototypeUploadedDocument[]> {
   return createMockUploadedDocuments(appKey);
+}
+
+export async function recordMockSupportingDocumentUploadMetadata(
+  input: PrototypeSupportingDocumentUploadInput
+): Promise<PrototypeSupportingDocumentUploadResult> {
+  return createMockSupportingDocumentUploadResult(input);
 }
 
 export async function getMockSubmissionSummaryDownload(

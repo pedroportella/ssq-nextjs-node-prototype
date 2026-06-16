@@ -8,6 +8,7 @@ import { SeniorsCardStatusContent } from "../containers/SeniorsCardStatusContain
 
 import type {
   PrototypeDraftMutationResult,
+  PrototypeSupportingDocumentUploadResult,
   PrototypeSubmitResult,
   PrototypeWorkflowData
 } from "@ssq/services";
@@ -69,10 +70,19 @@ const workflow: PrototypeWorkflowData = {
   ],
   uploadPolicy: {
     acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
-    maxFileSizeBytes: 10 * 1024 * 1024,
+    allowedCategories: [
+      { hint: "Documents that prove the applicant's name or age.", label: "Identity evidence", value: "identity" },
+      { hint: "Documents that show the applicant lives in Queensland.", label: "Residency evidence", value: "residency" },
+      { hint: "Pension, concession or card evidence.", label: "Concession evidence", value: "concession" },
+      { hint: "Service-specific documents requested during assessment.", label: "Supporting evidence", value: "supporting-evidence" }
+    ],
+    defaultPersonKey: "applicant",
+    maxFileSizeBytes: 5 * 1024 * 1024,
+    maxFilesPerPerson: 5,
+    maxTotalSizeBytesPerPerson: 10 * 1024 * 1024,
     rejectedExample: {
       fieldPath: "supportingDocuments[0].file",
-      message: "Upload a PDF, JPG or PNG file under 10 MB."
+      message: "Upload a PDF, JPG or PNG file under 5 MB."
     }
   },
   validationErrors: [
@@ -102,6 +112,20 @@ const submitResult: PrototypeSubmitResult = {
     href: "/service-requests/SC-2026-0001/summary/download",
     referenceNumber: "SC-2026-0001"
   }
+};
+
+const evidenceUploadResult: PrototypeSupportingDocumentUploadResult = {
+  document: {
+    category: "Identity evidence",
+    fileName: "identity-evidence.pdf",
+    mimeType: "application/pdf",
+    personKey: "applicant",
+    sizeBytes: 512_000,
+    status: "uploaded"
+  },
+  fieldErrors: [],
+  ok: true,
+  policy: workflow.uploadPolicy
 };
 
 describe("Seniors Card workflow containers", () => {
@@ -146,7 +170,9 @@ describe("Seniors Card workflow containers", () => {
     const html = renderToStaticMarkup(
       <SeniorsCardApplyContent
         createdDraft={createdDraft}
+        evidenceUploadResult={evidenceUploadResult}
         submitResult={submitResult}
+        uploadPolicy={workflow.uploadPolicy}
         validationResult={validationResult}
         workflow={workflow}
       />
@@ -170,6 +196,15 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("Back to landing page");
     expect(html).toContain("qld__progress-indicator");
     expect(html).toContain("qld__progress-indicator__item--current");
+    expect(html).toContain("Supporting evidence");
+    expect(html).toContain("ssq-categorized-upload");
+    expect(html).toContain('id="supporting-evidence-applicant-upload"');
+    expect(html).toContain('name="supportingEvidence[applicant][]"');
+    expect(html).toContain('accept="application/pdf,image/jpeg,image/png"');
+    expect(html).toContain("Maximum 5 files and 10.0 MB total per person.");
+    expect(html).toContain("Metadata proof");
+    expect(html).toContain("identity-evidence.pdf");
+    expect(html).toContain("Server policy allows 5 files and 10 MB per person.");
     expect(html).toContain("qld__form-group");
     expect(html).toContain("qld__select");
     expect(html).toContain("qld__select-control");
