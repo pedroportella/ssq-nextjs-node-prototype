@@ -18,10 +18,9 @@ ingress:
 
 services:
   - name: seniors-card
-    github:
-      repo: pedroportella/ssq-nextjs-node-prototype
+    git:
+      repo_clone_url: https://github.com/pedroportella/ssq-nextjs-node-prototype.git
       branch: main
-      deploy_on_push: false
     source_dir: /
     dockerfile_path: frontend/apps/seniors-card/Dockerfile
     http_port: 3001

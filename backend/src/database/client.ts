@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, type PoolConfig } from "pg";
 
 import type { AppConfig } from "../config.js";
 import type { DatabaseHealthCheck, Queryable } from "./types.js";
@@ -29,11 +29,7 @@ export class PostgresDatabaseClient implements DatabaseClient {
   readonly queryable: Queryable;
 
   constructor(connectionString: string) {
-    this.pool = new Pool({
-      connectionString,
-      max: 10,
-      ssl: false
-    });
+    this.pool = new Pool(createPostgresPoolConfig(connectionString));
     this.queryable = this.pool;
   }
 
@@ -49,6 +45,36 @@ export class PostgresDatabaseClient implements DatabaseClient {
   async close() {
     await this.pool.end();
   }
+}
+
+export function createPostgresPoolConfig(connectionString: string): PoolConfig {
+  return {
+    connectionString,
+    max: 10,
+    ssl: resolvePostgresSsl(connectionString)
+  };
+}
+
+function resolvePostgresSsl(connectionString: string): PoolConfig["ssl"] {
+  let sslMode: string | null = null;
+
+  try {
+    sslMode = new URL(connectionString).searchParams.get("sslmode")?.toLowerCase() ?? null;
+  } catch {
+    return false;
+  }
+
+  if (sslMode === "require" || sslMode === "prefer" || sslMode === "no-verify") {
+    return {
+      rejectUnauthorized: false
+    };
+  }
+
+  if (sslMode === "verify-ca" || sslMode === "verify-full") {
+    return true;
+  }
+
+  return false;
 }
 
 export function createDatabaseClient(config: AppConfig): DatabaseClient {

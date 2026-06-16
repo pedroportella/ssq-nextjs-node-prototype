@@ -18,10 +18,9 @@ ingress:
 
 services:
   - name: api
-    github:
-      repo: pedroportella/ssq-nextjs-node-prototype
+    git:
+      repo_clone_url: https://github.com/pedroportella/ssq-nextjs-node-prototype.git
       branch: main
-      deploy_on_push: false
     source_dir: /
     dockerfile_path: backend/Dockerfile
     run_command: sh -c "cd backend && pnpm db:migrate && pnpm db:seed && pnpm start"
