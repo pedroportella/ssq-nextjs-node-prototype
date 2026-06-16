@@ -14,7 +14,8 @@ Start here:
 
 1. Open the [live review apps](docs/live-review-links.md), especially the dashboard and Seniors Card apply flow.
 2. Scan the [selection criteria map](docs/selection-criteria-map.md) for role criteria, concrete evidence, verification commands and honest production-next gaps.
-3. Use the [release handover runbook](docs/release-runbook.md) to run the same stack locally or review the quality gates.
+3. Review the [accessibility and design-system evidence](docs/accessibility-and-design-system-evidence.md) for QHDS, responsive and Playwright coverage.
+4. Use the [release handover runbook](docs/release-runbook.md) to run the same stack locally or review the quality gates.
 
 The short version: the prototype demonstrates the role's core frontend, backend, testing and delivery expectations now. AWS, production identity, high-availability operations, auditable authorization and full security/privacy assurance are mapped as production-next work rather than claimed as implemented.
 
@@ -120,6 +121,7 @@ The guard scripts fail when generated artifacts, local env files, local database
 ## Key Docs
 
 - [Selection criteria map](docs/selection-criteria-map.md)
+- [Accessibility and design-system evidence](docs/accessibility-and-design-system-evidence.md)
 - [Release handover runbook](docs/release-runbook.md)
 - [Live review links](docs/live-review-links.md)
 - [Local development](docs/local-development.md)
