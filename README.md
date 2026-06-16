@@ -6,6 +6,18 @@ The prototype shows three separately deployable Next.js frontend apps over a sha
 
 It is still a prototype boundary, not an official Queensland Government, Smart Service Queensland, myQLD or production Digital Transaction Platform system.
 
+## Role Fit In Five Minutes
+
+This prototype is shaped around the Digital Customer (SSQ) Principal Full-stack Developer role: React, Next.js, TypeScript, SPA/SSR workflows, GraphQL/REST integration, Node.js services, test automation, GitHub Actions, design-system delivery and product-focused government service patterns.
+
+Start here:
+
+1. Open the [live review apps](docs/live-review-links.md), especially the dashboard and Seniors Card apply flow.
+2. Scan the [selection criteria map](docs/selection-criteria-map.md) for role criteria, concrete evidence, verification commands and honest production-next gaps.
+3. Use the [release handover runbook](docs/release-runbook.md) to run the same stack locally or review the quality gates.
+
+The short version: the prototype demonstrates the role's core frontend, backend, testing and delivery expectations now. AWS, production identity, high-availability operations, auditable authorization and full security/privacy assurance are mapped as production-next work rather than claimed as implemented.
+
 ## Live Review
 
 Current DigitalOcean review environment:
@@ -107,6 +119,7 @@ The guard scripts fail when generated artifacts, local env files, local database
 
 ## Key Docs
 
+- [Selection criteria map](docs/selection-criteria-map.md)
 - [Release handover runbook](docs/release-runbook.md)
 - [Live review links](docs/live-review-links.md)
 - [Local development](docs/local-development.md)

@@ -1,0 +1,57 @@
+# Selection Criteria Map
+
+This map links the SSQ Next.js/Node prototype to the Digital Customer (SSQ) Principal Full-stack Developer role criteria. It is intended as a five-minute reviewer path, not a production readiness claim.
+
+The prototype is not an official Queensland Government, Smart Service Queensland, myQLD or Digital Transaction Platform system. DigitalOcean is used as review infrastructure only.
+
+## Five-Minute Review Path
+
+1. Open the public frontend apps:
+   - [Dashboard](https://ssq-dashboard-swgsm.ondigitalocean.app)
+   - [Seniors Card](https://ssq-seniors-card-lfzpt.ondigitalocean.app)
+   - [Rental Security Subsidy](https://ssq-rental-security-subsidy-kgbzf.ondigitalocean.app)
+2. Scan the screenshots in the [README](../README.md#screenshots) for the dashboard, transaction overview and apply flow.
+3. Review the criteria matrix below for direct links to code, docs and checks.
+4. Use the [release handover runbook](release-runbook.md) to run the stack locally or review the quality gates.
+
+## Criteria Matrix
+
+| Role criterion | Prototype evidence | Verification and caveats |
+| --- | --- | --- |
+| Whole-of-government digital customer services and transaction platforms | Three separately deployable Next.js apps for dashboard, Seniors Card and Rental Security Subsidy; shared backend service request lifecycle; citizen and reviewer views. See [README](../README.md#what-is-real), [live links](live-review-links.md), [dashboard page](../frontend/apps/dashboard/src/app/page.tsx), [Seniors Card page](../frontend/apps/seniors-card/src/app/page.tsx) and [Rental Security Subsidy page](../frontend/apps/rental-security-subsidy/src/app/page.tsx). | Review the live apps or run the local review path in [release-runbook.md](release-runbook.md). The domain is prototype data only. |
+| React, Next.js and TypeScript | App Router apps under [frontend/apps](../frontend/apps), shared TypeScript packages under [frontend/packages](../frontend/packages), and production standalone Dockerfiles for each app. | `pnpm check` and `pnpm build`. |
+| SPA/SSR architecture, routing, state, feature flags, forms and validation | App routes stay thin, server-rendered pages read through [@ssq/services/server](../frontend/packages/services/src/server), transaction containers own workflow composition, and backend validation owns submit rules. See [frontend architecture](frontend-architecture.md), [Seniors Card apply container](../frontend/apps/seniors-card/src/containers/SeniorsCardApplyContainer.tsx), [Rental Security Subsidy apply container](../frontend/apps/rental-security-subsidy/src/containers/RentalSecuritySubsidyApplyContainer.tsx), [submission validation](../backend/src/services/submissionValidation.ts), and feature flag seed data in [002_transaction_catalogue_seed.sql](../backend/database/seeds/002_transaction_catalogue_seed.sql). | Frontend workflow tests live beside each app. Backend validation is covered through backend service tests. |
+| UI libraries, design systems, HTML5, CSS and responsive design | QHDS-style React adapter packages cover layout, header/footer, side navigation, form controls, cards, alerts, tables, tabs, progress, file upload, icons and tokens. See [design-system adapter](design-system-adapter.md), [frontend architecture](frontend-architecture.md), [ui-library components](../frontend/packages/ui-library/src/components), and [QHDS visual baselines](qhds-visual-baselines.md). | `pnpm test:visual` for desktop/mobile screenshot baselines. A follow-up evidence pack can make accessibility and responsive evidence more explicit. |
+| REST or GraphQL API integration using TypeScript | Server-only frontend services integrate with the backend through [backendServices.ts](../frontend/packages/services/src/server/backendServices.ts) and [backendClient.ts](../frontend/packages/services/src/server/backendClient.ts). The backend exposes GraphQL contracts in [schema.ts](../backend/src/graphql/schema.ts) and REST routes for health, uploads, operations and summary downloads under [backend/src/routes](../backend/src/routes). | `pnpm --filter @ssq/services test`, `pnpm --dir backend test`, and `pnpm test:full-stack-smoke`. |
+| Apollo GraphQL client patterns | The prototype intentionally uses a server-only GraphQL/BFF boundary instead of browser Apollo Client. This keeps backend origins and demo identity headers out of browser bundles while preserving GraphQL contract thinking and SSR-friendly workflows. | If SSQ required browser Apollo, the adoption path would be to introduce Apollo Client only behind authenticated public graph surfaces, keep internal backend URLs server-side, and preserve the existing service contracts. `pnpm guard:frontend-source` and `pnpm guard:browser-bundles` enforce the current boundary. |
+| Backend API development in Node.js | Node.js 22, Fastify 5, GraphQL Yoga, PostgreSQL, Zod and Pino power the backend. See [backend architecture](backend-architecture.md), [app.ts](../backend/src/app.ts), [GraphQL route](../backend/src/routes/graphql.ts), [supporting document route](../backend/src/routes/supportingDocuments.ts), [submission summary route](../backend/src/routes/submissionSummaries.ts), and services under [backend/src/services](../backend/src/services). | `pnpm --dir backend typecheck`, `pnpm --dir backend test`, and backend build in the CI workflow. |
+| Test automation: unit, integration and end-to-end | Vitest covers backend, shared packages and app containers; Playwright covers mock smoke, accessibility QA and visual baselines; the full-stack smoke checks backend readiness, GraphQL reads and backend-rendered pages. See [package scripts](../package.json), [mock smoke tests](../tests/mock-smoke), [visual tests](../tests/visual), and [full-stack smoke](../scripts/full-stack-smoke.mjs). | Main commands: `pnpm test`, `pnpm test:mock-smoke:all`, `pnpm test:visual`, `pnpm test:full-stack-smoke`. |
+| Jira, Confluence and GitHub delivery habits | Public docs are shaped as reviewer-facing delivery artefacts: [release runbook](release-runbook.md), [backend architecture](backend-architecture.md), [frontend architecture](frontend-architecture.md), [deployment readiness](frontend-deployment-readiness.md), [production readiness](backend-production-readiness.md), and [GitHub Actions CI](../.github/workflows/ci.yml). | Real Jira/Confluence spaces are not included in the public repo; these docs provide equivalent handover, architecture, risk and quality-gate evidence. |
+| CI/CD automation through GitHub Actions | The [CI workflow](../.github/workflows/ci.yml) installs pinned Node/pnpm versions, lints, typechecks, tests, runs guards, builds packages/apps, checks browser bundles, validates Compose and builds Docker images. | This is a quality gate, not a production AWS deployment pipeline. A follow-up platform mapping can document AWS deployment and promotion controls. |
+| AWS, Kubernetes and serverless familiarity | The prototype has containerized apps, Docker Compose, app-local Dockerfiles and review deployment templates. These prove container boundaries and release thinking. | AWS, EKS/Kubernetes and serverless components are not implemented in this review environment. The production-next path would map frontend/backend containers to ECS/Fargate or EKS, PostgreSQL to RDS, secrets to Secrets Manager/SSM, logs to CloudWatch/OpenTelemetry and outbox events to SQS/EventBridge/Lambda. |
+| Agile, DevSecOps and continuous improvement | The repository keeps implementation, docs, quality guards and production-next gaps together. Artifact guards block generated files and local env leakage; frontend-source and browser-bundle guards protect backend/internal URL boundaries. See [quality guards](../scripts/quality-guards.mjs), [release runbook](release-runbook.md), and [production readiness](backend-production-readiness.md). | The prototype shows the delivery discipline; formal team ceremonies, Jira boards and agency governance would sit outside this repo. |
+| High availability, reliability and high-security-assurance environments | Implemented review controls include health/live/ready endpoints, frontend `/status` routes, PostgreSQL readiness, correlation IDs, safe errors, redacted logs, CORS allow-listing, simple rate limiting, security headers and secret/artifact guards. See [backend production readiness](backend-production-readiness.md) and [release runbook](release-runbook.md). | Production HA/security assurance remains explicit production-next work: real IAM/SSO, auditable authorization, backups/PITR, alerting/tracing, threat modelling, privacy review, penetration testing, malware scanning and retention controls. |
+| Product-focused team collaboration | The prototype expresses citizen workflows, reviewer visibility, service request status/activity history and production-next trade-offs. It is documented for product managers, customer experience, service design, backend, infrastructure and stakeholder review rather than only code inspection. | The live apps and docs provide a concrete discussion artefact for iteration; real product priorities would come from SSQ service owners. |
+| Support and after-hours readiness | The release runbook documents live review links, status checks, local runtime, full-stack smoke and handover caveats. Backend readiness and frontend status endpoints support quick review checks. | This is reviewer support evidence, not a production on-call model. Production support would need incident runbooks, alert routing, escalation paths, SLOs and operational ownership. |
+
+## GraphQL And Apollo Decision
+
+The role description names Apollo GraphQL client patterns. This prototype proves GraphQL integration, but intentionally keeps GraphQL calls inside the server-only frontend service layer instead of adding browser Apollo Client.
+
+That choice is deliberate for this public review prototype:
+
+- backend/internal origins stay out of browser JavaScript;
+- demo identity headers are not pushed into client components;
+- Next.js SSR can render customer workflows from the same service contracts used by local and review runtimes;
+- browser bundles can be scanned for backend URL leaks.
+
+If a future SSQ surface needs Apollo Client, the recommended path is to add Apollo behind authenticated public GraphQL boundaries while keeping internal service URLs, privileged headers and operational endpoints server-side.
+
+## Delivery Artefacts
+
+- Executive review: [README](../README.md) and [live review links](live-review-links.md).
+- Handover/runbook: [release-runbook.md](release-runbook.md).
+- Architecture notes: [frontend-architecture.md](frontend-architecture.md), [backend-architecture.md](backend-architecture.md), [design-system-adapter.md](design-system-adapter.md).
+- Deployment and platform evidence: [frontend-deployment-readiness.md](frontend-deployment-readiness.md), [digitalocean-deployment.md](digitalocean-deployment.md), [CI workflow](../.github/workflows/ci.yml).
+- Production-next backlog/risk register: [backend-production-readiness.md](backend-production-readiness.md) and [README production next steps](../README.md#production-next-steps).
+- Verification commands: [package.json scripts](../package.json) and [release quality checks](release-runbook.md#release-quality-checks).
