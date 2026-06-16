@@ -36,6 +36,12 @@ The guard scripts fail when generated artifacts, local env files, local database
 
 Private deployment notes and generated DigitalOcean specs stay out of Git. Commit only safe templates and reviewer-facing documentation.
 
+## Review Deployment
+
+Safe DigitalOcean App Platform templates live under `.do/*.template.yml` for the shared backend and three frontend apps. Copy them to local specs before replacing live URLs or account-specific values.
+
+See `docs/digitalocean-deployment.md` for the review deployment order, template replacement values and smoke checks.
+
 ## Local Infrastructure
 
 ```bash

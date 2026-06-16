@@ -1,0 +1,73 @@
+# DigitalOcean App Platform template for the SSQ Seniors Card app.
+# Copy to .do/ssq-seniors-card.local.yml before replacing environment-specific values.
+
+name: ssq-seniors-card
+region: syd
+
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+
+ingress:
+  rules:
+    - component:
+        name: seniors-card
+      match:
+        path:
+          prefix: /
+
+services:
+  - name: seniors-card
+    github:
+      repo: pedroportella/ssq-nextjs-node-prototype
+      branch: main
+      deploy_on_push: false
+    source_dir: /
+    dockerfile_path: frontend/apps/seniors-card/Dockerfile
+    http_port: 3001
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    health_check:
+      http_path: /status
+      initial_delay_seconds: 20
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 6
+    envs:
+      - key: NODE_ENV
+        value: production
+        scope: RUN_TIME
+        type: GENERAL
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+        scope: RUN_AND_BUILD_TIME
+        type: GENERAL
+      - key: HOSTNAME
+        value: 0.0.0.0
+        scope: RUN_TIME
+        type: GENERAL
+      - key: PORT
+        value: "3001"
+        scope: RUN_TIME
+        type: GENERAL
+      - key: SSQ_FRONTEND_DATA_SOURCE
+        value: backend
+        scope: RUN_TIME
+        type: GENERAL
+      - key: BACKEND_INTERNAL_URL
+        value: https://ssq-node-api.example.invalid
+        scope: RUN_TIME
+        type: GENERAL
+      - key: DASHBOARD_PUBLIC_URL
+        value: https://ssq-dashboard.example.invalid
+        scope: RUN_TIME
+        type: GENERAL
+      - key: SENIORS_CARD_PUBLIC_URL
+        value: https://ssq-seniors-card.example.invalid
+        scope: RUN_TIME
+        type: GENERAL
+      - key: RENTAL_SECURITY_SUBSIDY_PUBLIC_URL
+        value: https://ssq-rental-security-subsidy.example.invalid
+        scope: RUN_TIME
+        type: GENERAL

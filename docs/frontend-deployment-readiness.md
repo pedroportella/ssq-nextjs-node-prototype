@@ -77,3 +77,13 @@ pnpm docker:down
 ```
 
 The full-stack smoke validates backend readiness, all frontend status endpoints, direct GraphQL reads and backend-rendered frontend pages.
+
+## DigitalOcean Review Templates
+
+DigitalOcean App Platform templates for the three frontend apps live in `.do/`:
+
+- `.do/ssq-dashboard.template.yml`
+- `.do/ssq-seniors-card.template.yml`
+- `.do/ssq-rental-security-subsidy.template.yml`
+
+Use `docs/digitalocean-deployment.md` when preparing local deployment specs. Keep generated specs, live app IDs and backend URLs out of committed browser assets.
