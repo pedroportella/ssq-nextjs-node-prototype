@@ -95,4 +95,14 @@ describe("QhdsSideNav", () => {
     expect(styles).toContain("position: absolute");
     expect(styles).toContain("transform: rotate(-180deg)");
   });
+
+  it("keeps visited navigation links on the accessible side-nav palette", () => {
+    expect(styles).toContain("a.qld__left-nav__item-link:visited");
+    expect(styles).toContain("color: var(--ssq-left-nav-text)");
+    expect(styles).toContain("a.qld__left-nav__item-link:visited:hover");
+    expect(styles).toContain("color: var(--ssq-left-nav-link)");
+    expect(styles).toContain("a.qld__left-nav__item-link--open:visited");
+    expect(styles).toContain(".qld__accordion__body a.qld__left-nav__item-link:visited");
+    expect(styles).not.toContain("var(--ssq-color-link-visited)");
+  });
 });

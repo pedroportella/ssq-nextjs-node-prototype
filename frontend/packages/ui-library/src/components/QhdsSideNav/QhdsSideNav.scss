@@ -91,6 +91,14 @@ a.qld__left-nav__item-link:hover {
   text-decoration-thickness: var(--ssq-link-decoration-thickness-hover);
 }
 
+a.qld__left-nav__item-link:visited {
+  color: var(--ssq-left-nav-text);
+}
+
+a.qld__left-nav__item-link:visited:hover {
+  color: var(--ssq-left-nav-link);
+}
+
 a.qld__left-nav__item-link:hover::after {
   background-color: var(--ssq-left-nav-link-hover);
 }
@@ -103,6 +111,10 @@ a.qld__left-nav__item-link:focus-visible {
 .qld__left-nav__item-link--open {
   background-color: var(--ssq-left-nav-surface);
   border-top-right-radius: var(--ssq-radius-qhds-sm);
+  color: var(--ssq-left-nav-link);
+}
+
+a.qld__left-nav__item-link--open:visited {
   color: var(--ssq-left-nav-link);
 }
 
@@ -188,6 +200,10 @@ a.qld__left-nav__item-link:focus-visible {
   color: var(--ssq-left-nav-link);
   min-height: 3.25rem;
   padding-left: var(--ssq-space-10);
+}
+
+.qld__accordion__body a.qld__left-nav__item-link:visited {
+  color: var(--ssq-left-nav-link);
 }
 
 .qld__accordion__body .qld__left-nav__item-link::after {
