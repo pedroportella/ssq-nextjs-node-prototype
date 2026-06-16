@@ -37,7 +37,9 @@ if (isMockSmokeAppSelected("seniors-card")) {
     await page.goto("http://localhost:3001/apply");
     await expect(page.getByRole("heading", { level: 1, name: "Check your eligibility" })).toBeVisible();
     await expect(page.getByText("Enter a date of birth that confirms eligibility.")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Submit result" }).locator("xpath=ancestor::article")).toContainText("SC-2026-0001");
+    const seniorsApplyForm = page.locator("form.qld__form");
+    await expect(seniorsApplyForm).toContainText("SC-2026-0001");
+    await expect(seniorsApplyForm.locator(".qld__card, .ssq-card")).toHaveCount(0);
 
     await page.goto("http://localhost:3001/application-status");
     await expect(page.getByRole("heading", { level: 1, name: "Seniors Card application status" })).toBeVisible();
@@ -65,7 +67,9 @@ if (isMockSmokeAppSelected("rental-security-subsidy")) {
     await page.goto("http://localhost:3002/apply");
     await expect(page.getByRole("heading", { level: 1, name: "Prepare your rental support application" })).toBeVisible();
     await expect(page.getByText("Enter the weekly rent amount for the property.")).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Submit result" }).locator("xpath=ancestor::article")).toContainText("RSS-2026-0001");
+    const rentalApplyForm = page.locator("form.qld__form");
+    await expect(rentalApplyForm).toContainText("RSS-2026-0001");
+    await expect(rentalApplyForm.locator(".qld__card, .ssq-card")).toHaveCount(0);
 
     await page.goto("http://localhost:3002/application-status");
     await expect(page.getByRole("heading", { level: 1, name: "Rental Security Subsidy application status" })).toBeVisible();

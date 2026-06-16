@@ -6,16 +6,13 @@ import {
 } from "@ssq/services/server";
 import {
   QhdsButton,
-  QhdsCard,
   QhdsCheckbox,
-  QhdsCol,
   QhdsDirectionLink,
   QhdsFooter,
   QhdsHeader,
   QhdsLayout,
   QhdsProgressIndicator,
   QhdsRadioGroup,
-  QhdsRow,
   QhdsSelect,
   QhdsTextInput,
   QhdsTextarea,
@@ -84,130 +81,117 @@ export function RentalSecuritySubsidyApplyContent({
         requiredText="All fields are required unless marked optional."
       >
         <form aria-label="Rental Security Subsidy application details" className={`qld__form ${styles.workflowForm}`} noValidate>
-          <QhdsRow className={styles.workflowGrid}>
-            <QhdsCol lg={4} xl={4}>
-              <QhdsCard heading="Draft state">
-                <p>
-                  Created draft <strong>{createdDraft.draft.draftId}</strong> for {createdDraft.draft.title}.
-                </p>
-                <p className={styles.meta}>No validation errors were returned on draft creation.</p>
-              </QhdsCard>
-            </QhdsCol>
+          <p className={styles.workflowReference}>
+            Created draft <strong>{createdDraft.draft.draftId}</strong> for {createdDraft.draft.title}.
+            <span className={styles.meta}>No validation errors were returned on draft creation.</span>
+          </p>
 
-            <QhdsCol lg={8} xl={8}>
-              <QhdsCard heading="About you">
-                <QhdsTextInput
-                  id="full-name"
-                  label="Full name"
-                  name="fullName"
-                  readOnly
-                  required
-                  value={workflow.profile.displayName}
-                />
-                <QhdsTextInput
-                  id="email"
-                  label="Email address"
-                  name="email"
-                  readOnly
-                  required
-                  type="email"
-                  value={workflow.profile.email}
-                />
-                <QhdsSelect
-                  defaultValue="bond"
-                  id="support-type"
-                  label="Support type"
-                  name="supportType"
-                  options={[
-                    { label: "Bond assistance", value: "bond" },
-                    { label: "Rental security subsidy", value: "subsidy" }
-                  ]}
-                  required
-                />
-              </QhdsCard>
-            </QhdsCol>
+          <fieldset className={styles.workflowSection}>
+            <legend className={`qld__fieldset__legend ${styles.workflowLegend}`}>About you</legend>
+            <QhdsTextInput
+              id="full-name"
+              label="Full name"
+              name="fullName"
+              readOnly
+              required
+              value={workflow.profile.displayName}
+            />
+            <QhdsTextInput
+              id="email"
+              label="Email address"
+              name="email"
+              readOnly
+              required
+              type="email"
+              value={workflow.profile.email}
+            />
+            <QhdsSelect
+              defaultValue="bond"
+              id="support-type"
+              label="Support type"
+              name="supportType"
+              options={[
+                { label: "Bond assistance", value: "bond" },
+                { label: "Rental security subsidy", value: "subsidy" }
+              ]}
+              required
+            />
+          </fieldset>
 
-            <QhdsCol lg={6} xl={6}>
-              <QhdsCard heading="Household and income">
-                <QhdsRadioGroup
-                  defaultValue="private-rental"
-                  id="housing-situation"
-                  legend="Housing situation"
-                  name="housingSituation"
-                  options={[
-                    { hint: "You rent from a private owner or real estate agent.", label: "Private rental", value: "private-rental" },
-                    { hint: "You are moving from crisis or supported accommodation.", label: "Supported accommodation", value: "supported-accommodation" }
-                  ]}
-                  required
-                />
-                <QhdsTextInput
-                  id="household-members"
-                  label="Household members"
-                  name="householdMembers"
-                  readOnly
-                  required
-                  type="number"
-                  value="2"
-                />
-                <QhdsTextInput
-                  id="income"
-                  label="Fortnightly household income"
-                  name="income"
-                  readOnly
-                  required
-                  value="$1,240"
-                />
-              </QhdsCard>
-            </QhdsCol>
+          <fieldset className={styles.workflowSection}>
+            <legend className={`qld__fieldset__legend ${styles.workflowLegend}`}>Household and income</legend>
+            <QhdsRadioGroup
+              defaultValue="private-rental"
+              id="housing-situation"
+              legend="Housing situation"
+              name="housingSituation"
+              options={[
+                { hint: "You rent from a private owner or real estate agent.", label: "Private rental", value: "private-rental" },
+                { hint: "You are moving from crisis or supported accommodation.", label: "Supported accommodation", value: "supported-accommodation" }
+              ]}
+              required
+            />
+            <QhdsTextInput
+              id="household-members"
+              label="Household members"
+              name="householdMembers"
+              readOnly
+              required
+              type="number"
+              value="2"
+            />
+            <QhdsTextInput
+              id="income"
+              label="Fortnightly household income"
+              name="income"
+              readOnly
+              required
+              value="$1,240"
+            />
+          </fieldset>
 
-            <QhdsCol lg={6} xl={6}>
-              <QhdsCard heading="Rental property">
-                <QhdsTextInput
-                  hint="Enter the suburb for the property related to this request."
-                  id="rental-suburb"
-                  label="Rental suburb"
-                  name="rentalSuburb"
-                  readOnly
-                  required
-                  value="Mackay"
-                />
-                <QhdsTextInput
-                  error={weeklyRentError?.message}
-                  hint="For this mock state, the backend-compatible error path is rentalProperty.weeklyRent."
-                  id="weekly-rent"
-                  label="Weekly rent"
-                  name="weeklyRent"
-                  required
-                  type="number"
-                />
-                <QhdsTextarea
-                  hint="Keep this brief. Evidence upload comes later."
-                  id="additional-details"
-                  label="Anything else we should know?"
-                  name="additionalDetails"
-                  optional
-                  readOnly
-                  value="Applicant is preparing documents for review."
-                />
-                <QhdsCheckbox
-                  id="declaration"
-                  label="I declare the rental support information is ready for review."
-                  name="declaration"
-                  required
-                />
-              </QhdsCard>
-            </QhdsCol>
+          <fieldset className={styles.workflowSection}>
+            <legend className={`qld__fieldset__legend ${styles.workflowLegend}`}>Rental property</legend>
+            <QhdsTextInput
+              hint="Enter the suburb for the property related to this request."
+              id="rental-suburb"
+              label="Rental suburb"
+              name="rentalSuburb"
+              readOnly
+              required
+              value="Mackay"
+            />
+            <QhdsTextInput
+              error={weeklyRentError?.message}
+              hint="For this mock state, the backend-compatible error path is rentalProperty.weeklyRent."
+              id="weekly-rent"
+              label="Weekly rent"
+              name="weeklyRent"
+              required
+              type="number"
+            />
+            <QhdsTextarea
+              hint="Keep this brief. Evidence upload comes later."
+              id="additional-details"
+              label="Anything else we should know?"
+              name="additionalDetails"
+              optional
+              readOnly
+              value="Applicant is preparing documents for review."
+            />
+            <QhdsCheckbox
+              id="declaration"
+              label="I declare the rental support information is ready for review."
+              name="declaration"
+              required
+            />
+          </fieldset>
 
-            <QhdsCol lg={4} xl={4}>
-              <QhdsCard heading="Submit result">
-                <p>
-                  Mock submission <strong>{submitResult.referenceNumber}</strong> returned status{" "}
-                  <strong>{submitResult.status.toLowerCase().replace("_", " ")}</strong>.
-                </p>
-                <p className={styles.meta}>Summary placeholder: {submitResult.summary.filename}</p>
-              </QhdsCard>
-            </QhdsCol>
-          </QhdsRow>
+          <p className={styles.workflowReference}>
+            Mock submission <strong>{submitResult.referenceNumber}</strong> returned status{" "}
+            <strong>{submitResult.status.toLowerCase().replace("_", " ")}</strong>.
+            <span className={styles.meta}>Summary placeholder: {submitResult.summary.filename}</span>
+          </p>
         </form>
       </QhdsWorkflowLayout>
     </QhdsLayout>

@@ -8,8 +8,7 @@
   margin: var(--ssq-space-1) 0 0;
 }
 
-.sectionGrid,
-.workflowGrid {
+.sectionGrid {
   row-gap: var(--ssq-space-6);
 }
 
@@ -23,8 +22,27 @@
 
 .workflowForm {
   margin: 0;
+  max-width: 42rem;
 }
 
-.workflowGrid {
-  align-items: start;
+.workflowReference {
+  margin: 0 0 var(--ssq-space-6);
+  max-width: 42rem;
+}
+
+.workflowSection {
+  border: 0;
+  margin: 0 0 var(--ssq-space-7);
+  max-width: 42rem;
+  padding: 0;
+}
+
+.workflowLegend {
+  color: var(--ssq-color-heading);
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 var(--ssq-space-4);
+  padding: 0;
 }

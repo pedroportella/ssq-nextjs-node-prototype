@@ -160,9 +160,11 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("container-fluid");
     expect(html).toContain("ssq-layout__content--task");
     expect(html).toContain("row");
-    expect(html).toContain("col-xs-12 col-lg-4 col-xl-4");
-    expect(html).toContain("col-xs-12 col-lg-8 col-xl-8");
+    expect(html).not.toContain("qld__card");
+    expect(html).not.toContain("ssq-card");
     expect(html).toContain("qld__form");
+    expect(html).toContain("<fieldset");
+    expect(html).toContain("Eligibility details");
     expect(html).toContain("qld__direction-link");
     expect(html).toContain("Back to Seniors Card landing page");
     expect(html).toContain("Back to landing page");

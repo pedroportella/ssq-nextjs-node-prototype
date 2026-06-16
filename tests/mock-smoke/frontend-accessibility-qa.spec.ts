@@ -474,20 +474,24 @@ async function expectQhdsComponentHooks(page: Page, path: string) {
     cardCount: document.querySelectorAll(".qld__card").length,
     contentSectionCount: document.querySelectorAll(".ssq-content-section").length,
     directionLinkCount: document.querySelectorAll(".qld__direction-link").length,
+    formCount: document.querySelectorAll("form.qld__form").length,
     landingSectionCount: document.querySelectorAll("#about-service, #eligibility, #before-you-start, #start-application").length,
     pageHeaderCount: document.querySelectorAll(".ssq-page-header").length,
     port: location.port,
     progressCount: document.querySelectorAll(".qld__progress-indicator").length,
     summaryListCount: document.querySelectorAll(".qld__summary-list").length,
-    tableCount: document.querySelectorAll(".qld__table").length
+    tableCount: document.querySelectorAll(".qld__table").length,
+    workflowFieldsetCount: document.querySelectorAll("form.qld__form > fieldset").length
   }));
 
   expect(componentState.buttonCount).toBeGreaterThan(0);
 
   if (path === "/apply") {
-    expect(componentState.cardCount).toBeGreaterThan(0);
+    expect(componentState.cardCount).toBe(0);
     expect(componentState.directionLinkCount).toBeGreaterThan(0);
+    expect(componentState.formCount).toBe(1);
     expect(componentState.progressCount).toBeGreaterThan(0);
+    expect(componentState.workflowFieldsetCount).toBeGreaterThan(0);
   } else {
     expect(componentState.contentSectionCount).toBeGreaterThan(0);
     expect(componentState.pageHeaderCount).toBeGreaterThan(0);
