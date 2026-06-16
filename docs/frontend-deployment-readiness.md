@@ -1,6 +1,6 @@
 # Frontend Deployment Readiness
 
-F20 makes the three Next.js frontend apps buildable as production standalone apps while preserving the frontend-only mock runtime used by the prototype.
+The three Next.js frontend apps are buildable as production standalone apps while preserving the frontend-only mock runtime used by the prototype.
 
 ## Apps
 

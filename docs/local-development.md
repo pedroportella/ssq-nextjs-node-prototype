@@ -10,9 +10,7 @@ This repository uses Docker Compose for local infrastructure.
 
 ## Environment
 
-Safe local defaults are defined in `docker-compose.yml`.
-
-Copy `.env.example` to `.env` only when you need to override local ports or database credentials. Do not commit `.env`.
+Safe local defaults are defined in `docker-compose.yml`. Optional local override values are documented in `.env.example`; keep any machine-specific override file untracked.
 
 ## Local Runtime
 
@@ -22,7 +20,7 @@ Start PostgreSQL, the backend API and the three frontend apps in backend mode:
 pnpm docker:up:backend
 ```
 
-Use `pnpm docker:up` when you intentionally want the mode from your local `.env`.
+Use `pnpm docker:up` when you intentionally want the mode from your local shell environment.
 
 Start only PostgreSQL and the backend API:
 
@@ -83,15 +81,7 @@ The `ssq-postgres-data` Docker volume persists database state across container r
 
 Frontend app work can run without Docker, PostgreSQL or the backend API. The server-side frontend service layer defaults to mock data in local development and tests when `BACKEND_INTERNAL_URL` is not configured.
 
-The root `.env` file can be used for frontend-only work. Load it in each terminal session before starting an app:
-
-```bash
-set -a
-source .env
-set +a
-```
-
-Then run the apps locally in three separate terminal tabs:
+Run the apps locally in three separate terminal tabs:
 
 ```bash
 pnpm --filter @ssq/dashboard dev
@@ -99,7 +89,7 @@ pnpm --filter @ssq/seniors-card dev
 pnpm --filter @ssq/rental-security-subsidy dev
 ```
 
-Or run them without loading `.env` by keeping the mock runtime inline:
+Or keep the mock runtime explicit inline:
 
 ```bash
 SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/dashboard dev

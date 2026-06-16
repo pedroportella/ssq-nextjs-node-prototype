@@ -69,6 +69,7 @@ For frontend-only review without Docker or the backend, use the frontend-only sm
 Run these before treating a branch as review-ready:
 
 ```bash
+pnpm test:reviewer-evidence
 pnpm guard:artifacts
 pnpm build
 pnpm guard:browser-bundles
@@ -76,7 +77,22 @@ pnpm guard:frontend-source
 pnpm check
 ```
 
+`pnpm test:reviewer-evidence` checks that the public five-minute path still has the required docs, screenshots, live frontend links, `/status` links, local Markdown targets and public-doc leakage safeguards.
+
 `pnpm guard:browser-bundles` must run after production frontend builds because it scans generated `.next/static` assets for leaked backend-only configuration.
+
+## Reviewer Evidence Checklist
+
+Before sharing the prototype with a selection panel:
+
+- Open the public frontend links in `docs/live-review-links.md`.
+- Check the three public `/status` URLs.
+- Read the README's "Role Fit In Five Minutes" path from top to bottom.
+- Confirm the selection criteria map links each role criterion to evidence and caveats.
+- Run `pnpm test:reviewer-evidence` to check required docs, screenshots, local Markdown links and public-doc leakage patterns.
+- Run the release quality checks above when a branch needs a fresh local quality gate.
+
+Latest local evidence gate recorded on 2026-06-16: `pnpm test:reviewer-evidence`, `pnpm guard:artifacts`, `pnpm build`, `pnpm guard:browser-bundles`, `pnpm guard:frontend-source` and `pnpm check` passed. `pnpm check` emitted the existing Dart Sass legacy JS API deprecation warnings during UI/app tests. If any command is skipped in a later pass, record why in the private handover note.
 
 ## What Is Real
 

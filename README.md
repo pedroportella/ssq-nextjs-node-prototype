@@ -112,6 +112,7 @@ See [docs/local-development.md](docs/local-development.md) for frontend-only smo
 ## Main Checks
 
 ```bash
+pnpm test:reviewer-evidence
 pnpm guard:artifacts
 pnpm build
 pnpm guard:browser-bundles
@@ -119,7 +120,7 @@ pnpm guard:frontend-source
 pnpm check
 ```
 
-The guard scripts fail when generated artifacts, local env files, local databases, reports, generated DigitalOcean specs, browser-visible backend origins or backend-only environment variable names are tracked or leaked.
+The reviewer evidence smoke checks the public handover path, required docs, screenshots, local Markdown links, live frontend/status URLs and obvious private-info leakage patterns. The guard scripts fail when generated artifacts, local env files, local databases, reports, generated DigitalOcean specs, browser-visible backend origins or backend-only environment variable names are tracked or leaked.
 
 ## Key Docs
 

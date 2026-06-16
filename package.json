@@ -19,6 +19,7 @@
     "test:mock-smoke:rental-security-subsidy": "SSQ_MOCK_SMOKE_APP=rental-security-subsidy playwright test -c playwright.mock-smoke.config.ts",
     "test:mock-smoke:all": "SSQ_MOCK_SMOKE_APP=all playwright test -c playwright.mock-smoke.config.ts",
     "test:full-stack-smoke": "node scripts/full-stack-smoke.mjs",
+    "test:reviewer-evidence": "node scripts/reviewer-evidence-smoke.mjs",
     "test:visual": "playwright test -c playwright.visual.config.ts",
     "test:visual:update": "playwright test -c playwright.visual.config.ts --update-snapshots",
     "guard:artifacts": "node scripts/quality-guards.mjs artifacts",
