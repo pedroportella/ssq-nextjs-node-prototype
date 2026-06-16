@@ -18,7 +18,7 @@ The DigitalOcean deployment is a prototype review environment, not Queensland Go
 
 ## Screenshots
 
-Captured from the live review apps on 2026-06-16.
+Captured from local review builds on 2026-06-16.
 
 | Service dashboard | Seniors Card application |
 | --- | --- |
@@ -79,23 +79,19 @@ Local URLs:
 - Seniors Card: `http://localhost:3001`
 - Rental Security Subsidy: `http://localhost:3002`
 
-The full-stack smoke verifies backend readiness, all three frontend `/status` endpoints, GraphQL profile/catalogue reads and backend-rendered frontend pages. See [docs/local-development.md](docs/local-development.md) for alternate ports, frontend-only mock mode and Docker details.
+The full-stack smoke verifies backend readiness, all three frontend `/status` endpoints, GraphQL profile/catalogue reads and backend-rendered frontend pages. See [docs/local-development.md](docs/local-development.md) for alternate ports, frontend-only runtime and Docker details.
 
 ## Frontend-Only Development
 
-Use mock mode for fast UI work without Docker, PostgreSQL or the backend.
+Use local frontend data for fast UI work without Docker, PostgreSQL or the backend.
 
 ```bash
-SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/dashboard dev
-SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/seniors-card dev
-SSQ_FRONTEND_DATA_SOURCE=mock pnpm --filter @ssq/rental-security-subsidy dev
+pnpm --filter @ssq/dashboard dev
+pnpm --filter @ssq/seniors-card dev
+pnpm --filter @ssq/rental-security-subsidy dev
 ```
 
-Run the browser smoke suite for all three frontend apps in mock mode:
-
-```bash
-pnpm test:mock-smoke:all
-```
+See [docs/local-development.md](docs/local-development.md) for frontend-only smoke commands and runtime options.
 
 ## Main Checks
 

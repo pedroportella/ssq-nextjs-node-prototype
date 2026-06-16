@@ -46,10 +46,9 @@ export function RentalSecuritySubsidyOverviewContent({
         lead="Check what you need before starting the focused Rental Security Subsidy application form."
       />
 
-      <QhdsPageAlert heading="Frontend-only rental workflow" tone="success">
+      <QhdsPageAlert heading="Prototype rental workflow" tone="success">
         <p>
-          This rental support journey is using {shell.dataSource} data from the frontend service layer, including mock draft,
-          validation and submission responses.
+          This rental support journey uses the frontend service layer to show draft, validation and submission responses.
         </p>
       </QhdsPageAlert>
 

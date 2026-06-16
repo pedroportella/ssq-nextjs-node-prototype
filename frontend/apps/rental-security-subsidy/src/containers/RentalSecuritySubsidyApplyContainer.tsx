@@ -69,14 +69,14 @@ export function RentalSecuritySubsidyApplyContent({
       <QhdsWorkflowLayout
         actions={
           <>
-            <QhdsButton href="/application-status">Review mock submission</QhdsButton>
+            <QhdsButton href="/application-status">Review submission</QhdsButton>
             <QhdsButton href="/" variant="secondary">Back to landing page</QhdsButton>
           </>
         }
         backLink={<QhdsDirectionLink href="/">Back to Rental Security Subsidy landing page</QhdsDirectionLink>}
         contextLabel="Rental Security Subsidy"
         heading="Prepare your rental support application"
-        lead="This frontend-only slice shows the deeper rental workflow using F13 mock draft, validation and submit services."
+        lead="This prototype form shows draft, validation and submit states for the rental support workflow."
         progress={<QhdsProgressIndicator label="Rental Security Subsidy application progress" steps={rentalSecuritySubsidyProgressSteps} />}
         requiredText="All fields are required unless marked optional."
       >
@@ -163,7 +163,7 @@ export function RentalSecuritySubsidyApplyContent({
             />
             <QhdsTextInput
               error={weeklyRentError?.message}
-              hint="For this mock state, the backend-compatible error path is rentalProperty.weeklyRent."
+              hint="The backend-compatible error path is rentalProperty.weeklyRent."
               id="weekly-rent"
               label="Weekly rent"
               name="weeklyRent"
@@ -188,7 +188,7 @@ export function RentalSecuritySubsidyApplyContent({
           </fieldset>
 
           <p className={styles.workflowReference}>
-            Mock submission <strong>{submitResult.referenceNumber}</strong> returned status{" "}
+            Submission <strong>{submitResult.referenceNumber}</strong> returned status{" "}
             <strong>{submitResult.status.toLowerCase().replace("_", " ")}</strong>.
             <span className={styles.meta}>Summary placeholder: {submitResult.summary.filename}</span>
           </p>

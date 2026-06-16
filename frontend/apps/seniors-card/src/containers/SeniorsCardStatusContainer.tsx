@@ -60,7 +60,7 @@ export function SeniorsCardStatusContent({
         }
         heading="Seniors Card application status"
         headingId="page-title"
-        lead="Track the mock submission produced by the frontend-only workflow."
+        lead="Track the submitted Seniors Card application through the prototype workflow."
       />
 
       <QhdsPageAlert heading="Application submitted" tone="success">
@@ -86,7 +86,7 @@ export function SeniorsCardStatusContent({
 
       <QhdsContentSection heading="Supporting documents" id="supporting-documents">
         <QhdsFileUpload
-          hint="The mock upload policy shows accepted and rejected file states without storing real files."
+          hint="The prototype upload policy shows accepted and rejected file states without storing real files."
           id="supporting-documents-upload"
           label="Upload supporting documents"
           name="supportingDocuments"

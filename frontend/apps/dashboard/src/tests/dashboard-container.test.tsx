@@ -86,7 +86,7 @@ describe("DashboardContent", () => {
     expect(html).toContain("Dashboard summary");
     expect(html).toContain("Current records");
     expect(html).toContain("Avery Taylor");
-    expect(html).toContain("Frontend mock runtime");
+    expect(html).toContain("Prototype review data");
     expect(html).toContain("Seniors Card");
     expect(html).toContain('href="https://example.test/seniors-card"');
     expect(html).toContain("Saved drafts");

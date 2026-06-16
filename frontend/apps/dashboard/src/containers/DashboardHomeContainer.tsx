@@ -206,10 +206,9 @@ export function DashboardContent({ shell, summary }: { shell: AppShellData; summ
         lead="Review digital transaction activity across the prototype services."
       />
 
-      <QhdsPageAlert heading="Frontend mock runtime" tone={shell.dataSource === "mock" ? "success" : "info"}>
+      <QhdsPageAlert heading="Prototype review data" tone={shell.dataSource === "mock" ? "success" : "info"}>
         <p>
-          Dashboard data is currently served from the {shell.dataSource} frontend service layer, so this page can be developed
-          without Docker or a live backend.
+          Dashboard data is currently served through the frontend service layer so reviewers can inspect the workflow safely.
         </p>
       </QhdsPageAlert>
 

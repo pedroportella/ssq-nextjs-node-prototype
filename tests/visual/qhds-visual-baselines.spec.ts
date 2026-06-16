@@ -10,13 +10,13 @@ const viewports = [
 const pages = [
   {
     heading: "SSQ Service Dashboard",
-    keyText: "Frontend mock runtime",
+    keyText: "Prototype review data",
     name: "dashboard-home",
     url: "http://localhost:3000"
   },
   {
     heading: "Seniors Card",
-    keyText: "Frontend-only workflow",
+    keyText: "Prototype workflow",
     name: "seniors-card-overview",
     url: "http://localhost:3001"
   },
@@ -34,7 +34,7 @@ const pages = [
   },
   {
     heading: "Rental Security Subsidy",
-    keyText: "Frontend-only rental workflow",
+    keyText: "Prototype rental workflow",
     name: "rental-security-subsidy-overview",
     url: "http://localhost:3002"
   },

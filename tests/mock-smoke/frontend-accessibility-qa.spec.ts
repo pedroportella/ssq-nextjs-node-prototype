@@ -19,14 +19,14 @@ const pages = [
   {
     app: "dashboard",
     heading: "SSQ Service Dashboard",
-    keyText: "Frontend mock runtime",
+    keyText: "Prototype review data",
     path: "/",
     url: "http://localhost:3000"
   },
   {
     app: "seniors-card",
     heading: "Seniors Card",
-    keyText: "Frontend-only workflow",
+    keyText: "Prototype workflow",
     path: "/",
     url: "http://localhost:3001"
   },
@@ -47,7 +47,7 @@ const pages = [
   {
     app: "rental-security-subsidy",
     heading: "Rental Security Subsidy",
-    keyText: "Frontend-only rental workflow",
+    keyText: "Prototype rental workflow",
     path: "/",
     url: "http://localhost:3002"
   },
@@ -721,7 +721,7 @@ for (const viewport of viewports) {
 }
 
 if (isMockSmokeAppSelected("seniors-card")) {
-  test("seniors-card transaction form validation states are accessible in mock mode", async ({ page }) => {
+  test("seniors-card transaction form validation states are accessible in frontend-only mode", async ({ page }) => {
     const forbiddenRequests = trackForbiddenRequests(page);
 
     await page.setViewportSize({ height: 844, width: 390 });
@@ -753,7 +753,7 @@ if (isMockSmokeAppSelected("seniors-card")) {
 }
 
 if (isMockSmokeAppSelected("rental-security-subsidy")) {
-  test("rental-security-subsidy transaction form validation states are accessible in mock mode", async ({ page }) => {
+  test("rental-security-subsidy transaction form validation states are accessible in frontend-only mode", async ({ page }) => {
     const forbiddenRequests = trackForbiddenRequests(page);
 
     await page.setViewportSize({ height: 844, width: 390 });

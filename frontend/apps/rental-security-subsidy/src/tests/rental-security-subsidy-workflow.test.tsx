@@ -135,7 +135,7 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("ssq-page-header");
     expect(html).toContain("ssq-content-section");
     expect(html).toContain("qld__summary-list");
-    expect(html).toContain("Frontend-only rental workflow");
+    expect(html).toContain("Prototype rental workflow");
     expect(html).toContain("About this service");
     expect(html).toContain("Before you start");
     expect(html).toContain("The next step opens the multistep form without the landing page side navigation.");
@@ -198,6 +198,8 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("Enter the weekly rent amount for the property.");
     expect(html).toContain("RSS-2026-0001");
     expect(html).toContain("rss-2026-0001-summary.txt");
+    expect(html).not.toContain("F13");
+    expect(html).not.toContain("mock draft");
   });
 
   it("renders the status view with submitted request reference and activity", () => {

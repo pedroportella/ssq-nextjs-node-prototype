@@ -47,14 +47,14 @@ export function SeniorsCardApplyContent({
       <QhdsWorkflowLayout
         actions={
           <>
-            <QhdsButton href="/application-status">Review mock submission</QhdsButton>
+            <QhdsButton href="/application-status">Review submission</QhdsButton>
             <QhdsButton href="/" variant="secondary">Back to landing page</QhdsButton>
           </>
         }
         backLink={<QhdsDirectionLink href="/">Back to Seniors Card landing page</QhdsDirectionLink>}
         contextLabel="Seniors Card"
         heading="Check your eligibility"
-        lead="This frontend-only slice shows the draft, validation and submit states using F13 mock services."
+        lead="This prototype form shows draft, validation and submit states for a Seniors Card application."
         progress={<QhdsProgressIndicator label="Seniors Card application progress" steps={seniorsCardProgressSteps} />}
         requiredText="All fields are required unless marked optional."
       >
@@ -77,7 +77,7 @@ export function SeniorsCardApplyContent({
             />
             <QhdsTextInput
               error={dateOfBirthError?.message}
-              hint="For this mock state, the backend-compatible error path is eligibility.dateOfBirth."
+              hint="The backend-compatible error path is eligibility.dateOfBirth."
               id="date-of-birth"
               label="Date of birth"
               name="dateOfBirth"
@@ -116,7 +116,7 @@ export function SeniorsCardApplyContent({
           </fieldset>
 
           <p className={styles.workflowReference}>
-            Mock submission <strong>{submitResult.referenceNumber}</strong> returned status{" "}
+            Submission <strong>{submitResult.referenceNumber}</strong> returned status{" "}
             <strong>{submitResult.status.toLowerCase().replace("_", " ")}</strong>.
             <span className={styles.meta}>Summary placeholder: {submitResult.summary.filename}</span>
           </p>

@@ -62,11 +62,7 @@ SSQ_FRONTEND_DATA_SOURCE=backend \
 docker compose up -d postgres backend dashboard seniors-card rental-security-subsidy
 ```
 
-For frontend-only review without Docker or the backend:
-
-```bash
-pnpm test:mock-smoke:all
-```
+For frontend-only review without Docker or the backend, use the frontend-only smoke path documented in `docs/local-development.md`.
 
 ## Release Quality Checks
 

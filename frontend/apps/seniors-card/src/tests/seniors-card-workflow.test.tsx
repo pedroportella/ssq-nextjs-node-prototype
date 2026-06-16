@@ -135,14 +135,14 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("ssq-page-header");
     expect(html).toContain("ssq-content-section");
     expect(html).toContain("qld__summary-list");
-    expect(html).toContain("Frontend-only workflow");
+    expect(html).toContain("Prototype workflow");
     expect(html).toContain("About this service");
     expect(html).toContain("Before you start");
     expect(html).toContain("The next step opens the multistep form without the landing page side navigation.");
     expect(html).toContain("seniors-card-draft-001");
   });
 
-  it("renders the apply workflow with mock validation errors and submit result", () => {
+  it("renders the apply workflow with validation errors and submit result", () => {
     const html = renderToStaticMarkup(
       <SeniorsCardApplyContent
         createdDraft={createdDraft}
@@ -196,6 +196,8 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("Enter a date of birth that confirms eligibility.");
     expect(html).toContain("SC-2026-0001");
     expect(html).toContain("sc-2026-0001-summary.txt");
+    expect(html).not.toContain("F13");
+    expect(html).not.toContain("mock services");
   });
 
   it("renders the status view with submitted request reference and activity", () => {

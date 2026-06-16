@@ -40,10 +40,9 @@ export function SeniorsCardOverviewContent({ shell, workflow }: { shell: AppShel
         lead="Check what you need before starting the focused Seniors Card application form."
       />
 
-      <QhdsPageAlert heading="Frontend-only workflow" tone="success">
+      <QhdsPageAlert heading="Prototype workflow" tone="success">
         <p>
-          This Seniors Card journey is using {shell.dataSource} data from the frontend service layer, including mock draft,
-          validation and submission responses.
+          This Seniors Card journey uses the frontend service layer to show draft, validation and submission responses.
         </p>
       </QhdsPageAlert>
 
@@ -70,7 +69,7 @@ export function SeniorsCardOverviewContent({ shell, workflow }: { shell: AppShel
         <ul>
           <li>You live in Queensland.</li>
           <li>You meet the Seniors Card age or concession requirements for this prototype.</li>
-          <li>You can review the profile details already available from the mock service layer.</li>
+          <li>You can review the profile details already available for this prototype journey.</li>
         </ul>
       </QhdsContentSection>
 
