@@ -86,7 +86,19 @@
   }
 
   .ssq-layout__left-nav {
+    background-color: rgb(245 245 245);
+    border-right: var(--QLD-border-width-default) solid rgb(235 235 235);
+    box-sizing: border-box;
     flex: 0 0 17.5rem;
+    max-width: 17.5rem;
+    min-width: 17.5rem;
+  }
+
+  .ssq-layout__left-nav > .qld__left-nav.ssq-side-nav {
+    background-color: transparent;
+    border-right: 0;
+    max-width: 100%;
+    min-width: 100%;
   }
 
   .ssq-layout__left-nav-content {

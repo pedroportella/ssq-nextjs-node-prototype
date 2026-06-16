@@ -1,7 +1,7 @@
 .ssq-side-nav.qld__left-nav {
   --ssq-left-nav-action: var(--QLD-color-light__action--secondary);
-  --ssq-left-nav-background: var(--QLD-color-status__info--lightest);
-  --ssq-left-nav-border: var(--QLD-color-light__border);
+  --ssq-left-nav-background: rgb(245 245 245);
+  --ssq-left-nav-border: rgb(235 235 235);
   --ssq-left-nav-focus: var(--QLD-color-light__focus);
   --ssq-left-nav-heading: var(--QLD-color-light__heading);
   --ssq-left-nav-link: var(--QLD-color-light__link);
@@ -10,8 +10,9 @@
   --ssq-left-nav-surface: var(--ssq-primitive-color-white);
   --ssq-left-nav-text: var(--QLD-color-light__text);
 
-  background-color: var(--QLD-color-status__info--lightest);
+  background-color: var(--ssq-left-nav-background);
   border-right: var(--QLD-border-width-default) solid var(--ssq-left-nav-border);
+  box-sizing: border-box;
   color: var(--ssq-left-nav-text);
   display: none;
   flex: 0 0 17.5rem;
@@ -125,23 +126,28 @@ a.qld__left-nav__item-link:focus-visible {
 }
 
 .qld__left-nav__item-toggle {
-  align-items: center;
   background-color: var(--ssq-left-nav-surface);
   border: 0;
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
+  box-shadow:
+    rgb(0 0 0 / 20%) 0 1px 2px,
+    rgb(0 0 0 / 10%) 0 1px 3px 1px;
   color: var(--ssq-left-nav-action);
   cursor: pointer;
-  display: inline-flex;
+  display: block;
   height: 2rem;
-  justify-content: center;
   margin: 0 var(--ssq-space-4);
+  min-height: 2rem;
+  min-width: 2rem;
   padding: 0;
+  position: relative;
   width: 2rem;
 }
 
 .qld__left-nav__item-toggle:hover {
-  box-shadow: 0 3px 8px rgb(0 0 0 / 24%);
+  box-shadow:
+    rgb(0 0 0 / 10%) 0 4px 8px 3px,
+    rgb(0 0 0 / 20%) 0 1px 3px;
 }
 
 .qld__left-nav__item-toggle:focus-visible {
@@ -150,9 +156,15 @@ a.qld__left-nav__item-link:focus-visible {
 }
 
 .qld__left-nav__item-toggle .qld__icon {
+  border-radius: 50%;
   color: var(--ssq-left-nav-action);
   fill: var(--ssq-left-nav-action);
+  height: 1.25rem;
+  inset: 0;
+  margin: auto;
+  position: absolute;
   transition: transform 0.25s ease-in;
+  width: 1.25rem;
 }
 
 .qld__left-nav__item-toggle.qld__accordion--closed .qld__icon {

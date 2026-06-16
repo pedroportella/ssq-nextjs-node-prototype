@@ -47,8 +47,8 @@ export function QhdsHeader({
   logoutLabel = "Logout",
   navItems = [],
   onNavigate,
-  serviceDescription = "Digital services prototype",
-  serviceName = "Services Queensland",
+  serviceDescription = "Digital Services Prototype",
+  serviceName = "Smart Services Queensland",
   showAccountControls = true,
   width = "app"
 }: QhdsHeaderProps) {

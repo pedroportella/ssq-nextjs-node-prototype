@@ -80,6 +80,12 @@ describe("QhdsLayout", () => {
     expect(styles).toContain(".ssq-layout__content--task");
     expect(styles).toContain("max-width: 76rem");
     expect(styles).toContain(".ssq-layout--has-left-nav .ssq-layout__main");
+    expect(styles).toContain(".ssq-layout__left-nav");
+    expect(styles).toContain("background-color: rgb(245 245 245)");
+    expect(styles).toContain("border-right: var(--QLD-border-width-default) solid rgb(235 235 235)");
+    expect(styles).toContain(".ssq-layout__left-nav > .qld__left-nav.ssq-side-nav");
+    expect(styles).toContain("background-color: transparent");
+    expect(styles).toContain("border-right: 0");
     expect(styles).toContain(".qld__body--left-nav .ssq-layout__container");
   });
 
