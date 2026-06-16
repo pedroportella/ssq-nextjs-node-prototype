@@ -1,6 +1,7 @@
 export * from "./components/QhdsAccordion";
 export * from "./components/QhdsButton";
 export * from "./components/QhdsCard";
+export * from "./components/QhdsCategorizedFileUpload";
 export * from "./components/QhdsContentSection";
 export * from "./components/QhdsDirectionLink";
 export * from "./components/QhdsFooter";

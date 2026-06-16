@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   QhdsButton,
   QhdsCard,
+  QhdsCategorizedFileUpload,
   QhdsCheckbox,
   QhdsCheckboxGroup,
   QhdsContentSection,
@@ -29,6 +30,7 @@ describe("ui-library public exports", () => {
   it("exports app-facing layout and core components", () => {
     expect(QhdsButton).toBeTypeOf("function");
     expect(QhdsCard).toBeTypeOf("function");
+    expect(QhdsCategorizedFileUpload).toBeTypeOf("function");
     expect(QhdsContentSection).toBeTypeOf("function");
     expect(QhdsDirectionLink).toBeTypeOf("function");
     expect(QhdsFooter).toBeTypeOf("function");
