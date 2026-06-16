@@ -120,6 +120,20 @@ pnpm test:mock-smoke:rental-security-subsidy
 pnpm test:mock-smoke:all
 ```
 
+Run a headed Playwright E2E flow when you want to watch Chromium drive the app. This command opens Rental Security Subsidy, clicks the Start application entry point, stages the mock evidence files, submits the record, opens Dashboard and verifies the RSS record and file links:
+
+```bash
+SSQ_MOCK_SMOKE_APP=dashboard,rental-security-subsidy pnpm exec playwright test -c playwright.mock-smoke.config.ts tests/mock-smoke/frontend-rss-dashboard-record-flow.spec.ts --headed
+```
+
+For a headed run of the complete mock smoke suite across all frontend apps:
+
+```bash
+SSQ_MOCK_SMOKE_APP=all pnpm exec playwright test -c playwright.mock-smoke.config.ts --headed
+```
+
+The mock smoke Playwright config starts the selected Next.js apps automatically. In managed sandboxes, headed runs may need permission to bind the selected local app ports: `3000`, `3001` or `3002`.
+
 Run visual baseline checks when reviewing QHDS-facing layout changes:
 
 ```bash
@@ -128,8 +142,6 @@ pnpm test:visual:update
 ```
 
 See `docs/qhds-visual-baselines.md` for the captured page list and screenshot update workflow.
-
-In managed sandboxes, the command may need permission to bind the selected local app port: `3000`, `3001` or `3002`.
 
 Use backend mode only for explicit integration checks:
 

@@ -67,6 +67,8 @@ pnpm test:mock-smoke
 
 Run `pnpm test:mock-smoke:all` when the release check needs all three frontend apps.
 
+For a visible browser pass, run the headed Playwright E2E command documented in [local development](local-development.md). The focused RSS flow verifies file upload, submitted status and Dashboard file links in Chromium.
+
 For local backend-mode container smoke checks:
 
 ```bash
