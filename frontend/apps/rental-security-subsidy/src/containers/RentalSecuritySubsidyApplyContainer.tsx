@@ -6,6 +6,7 @@ import {
 } from "@ssq/services/server";
 import {
   QhdsButton,
+  QhdsCategorizedFileUpload,
   QhdsCheckbox,
   QhdsDirectionLink,
   QhdsFooter,
@@ -21,7 +22,11 @@ import {
 
 import styles from "./RentalSecuritySubsidyHomeContainer.module.scss";
 
-import type { PrototypeDraftMutationResult, PrototypeSubmitResult, PrototypeWorkflowData } from "@ssq/services";
+import type {
+  PrototypeDraftMutationResult,
+  PrototypeSubmitResult,
+  PrototypeWorkflowData
+} from "@ssq/services";
 import type { QhdsProgressStepStatus } from "@ssq/ui-library";
 
 const workflowSteps = [
@@ -31,12 +36,13 @@ const workflowSteps = [
   "Household",
   "Income",
   "Rental property",
+  "Evidence",
   "Review",
   "Declaration",
   "Confirmation"
 ];
 
-const currentWorkflowStep = "Rental property";
+const currentWorkflowStep = "Evidence";
 
 const rentalSecuritySubsidyProgressSteps = workflowSteps.map((step) => {
   const currentStepIndex = workflowSteps.indexOf(currentWorkflowStep);
@@ -63,6 +69,7 @@ export function RentalSecuritySubsidyApplyContent({
   workflow: PrototypeWorkflowData;
 }) {
   const weeklyRentError = validationResult.validationErrors.find((error) => error.fieldPath === "rentalProperty.weeklyRent");
+  const uploadPolicy = workflow.uploadPolicy;
 
   return (
     <QhdsLayout contentWidth="task" focusMode footer={<QhdsFooter />} header={<QhdsHeader />} mainLabel="Rental Security Subsidy application">
@@ -171,7 +178,7 @@ export function RentalSecuritySubsidyApplyContent({
               type="number"
             />
             <QhdsTextarea
-              hint="Keep this brief. Evidence upload comes later."
+              hint="Keep this brief. Evidence can be grouped by person in the next section."
               id="additional-details"
               label="Anything else we should know?"
               name="additionalDetails"
@@ -184,6 +191,30 @@ export function RentalSecuritySubsidyApplyContent({
               label="I declare the rental support information is ready for review."
               name="declaration"
               required
+            />
+          </fieldset>
+
+          <fieldset className={styles.workflowSection}>
+            <legend className={`qld__fieldset__legend ${styles.workflowLegend}`}>Evidence</legend>
+            <QhdsCategorizedFileUpload
+              categories={uploadPolicy.allowedCategories}
+              hint="Attach rental, income or identity evidence and assign each file to the right person."
+              id="rental-evidence"
+              label="Upload evidence by person"
+              name="rentalEvidence"
+              people={[
+                {
+                  hint: "Rental property and identity evidence for the applicant.",
+                  key: uploadPolicy.defaultPersonKey,
+                  label: workflow.profile.displayName
+                },
+                {
+                  hint: "Income or household evidence for the other household member.",
+                  key: "household-member",
+                  label: "Household member"
+                }
+              ]}
+              policy={uploadPolicy}
             />
           </fieldset>
 

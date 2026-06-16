@@ -1,7 +1,6 @@
 import {
   createTransactionDraft,
   getSeniorsCardWorkflowData,
-  recordSupportingDocumentUploadMetadata,
   submitTransactionDraft,
   updateTransactionDraftWithValidationError
 } from "@ssq/services/server";
@@ -25,8 +24,6 @@ import styles from "./SeniorsCardHomeContainer.module.scss";
 import type {
   PrototypeDraftMutationResult,
   PrototypeSubmitResult,
-  PrototypeSupportingDocumentUploadResult,
-  PrototypeUploadPolicy,
   PrototypeWorkflowData
 } from "@ssq/services";
 
@@ -40,23 +37,17 @@ const seniorsCardProgressSteps = [
 
 export function SeniorsCardApplyContent({
   createdDraft,
-  evidenceUploadResult,
   submitResult,
-  uploadPolicy,
   validationResult,
   workflow
 }: {
   createdDraft: PrototypeDraftMutationResult;
-  evidenceUploadResult: PrototypeSupportingDocumentUploadResult;
   submitResult: PrototypeSubmitResult;
-  uploadPolicy: PrototypeUploadPolicy;
   validationResult: PrototypeDraftMutationResult;
   workflow: PrototypeWorkflowData;
 }) {
   const dateOfBirthError = validationResult.validationErrors.find((error) => error.fieldPath === "eligibility.dateOfBirth");
-  const evidenceUploadStatus = evidenceUploadResult.ok
-    ? evidenceUploadResult.document?.fileName ?? "supporting evidence metadata"
-    : evidenceUploadResult.error?.message ?? "Supporting evidence metadata was not recorded.";
+  const uploadPolicy = workflow.uploadPolicy;
 
   return (
     <QhdsLayout contentWidth="task" focusMode footer={<QhdsFooter />} header={<QhdsHeader />} mainLabel="Seniors Card application">
@@ -148,12 +139,6 @@ export function SeniorsCardApplyContent({
               ]}
               policy={uploadPolicy}
             />
-            <p className={styles.workflowReference}>
-              Metadata proof <strong>{evidenceUploadStatus}</strong>.
-              <span className={styles.meta}>
-                Server policy allows {uploadPolicy.maxFilesPerPerson} files and {Math.round(uploadPolicy.maxTotalSizeBytesPerPerson / (1024 * 1024))} MB per person.
-              </span>
-            </p>
           </fieldset>
 
           <p className={styles.workflowReference}>
@@ -174,24 +159,11 @@ export async function SeniorsCardApplyContainer() {
     updateTransactionDraftWithValidationError("seniors-card"),
     submitTransactionDraft("seniors-card")
   ]);
-  const evidenceUploadResult = await recordSupportingDocumentUploadMetadata({
-    category: "identity",
-    fileName: "identity-evidence.pdf",
-    mimeType: "application/pdf",
-    personKey: workflow.uploadPolicy.defaultPersonKey,
-    sizeBytes: 512_000,
-    target: {
-      draftId: createdDraft.draft.draftId,
-      type: "DRAFT"
-    }
-  });
 
   return (
     <SeniorsCardApplyContent
       createdDraft={createdDraft}
-      evidenceUploadResult={evidenceUploadResult}
       submitResult={submitResult}
-      uploadPolicy={evidenceUploadResult.policy}
       validationResult={validationResult}
       workflow={workflow}
     />

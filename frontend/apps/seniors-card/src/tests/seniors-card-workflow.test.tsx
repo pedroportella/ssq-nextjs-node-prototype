@@ -8,7 +8,6 @@ import { SeniorsCardStatusContent } from "../containers/SeniorsCardStatusContain
 
 import type {
   PrototypeDraftMutationResult,
-  PrototypeSupportingDocumentUploadResult,
   PrototypeSubmitResult,
   PrototypeWorkflowData
 } from "@ssq/services";
@@ -114,20 +113,6 @@ const submitResult: PrototypeSubmitResult = {
   }
 };
 
-const evidenceUploadResult: PrototypeSupportingDocumentUploadResult = {
-  document: {
-    category: "Identity evidence",
-    fileName: "identity-evidence.pdf",
-    mimeType: "application/pdf",
-    personKey: "applicant",
-    sizeBytes: 512_000,
-    status: "uploaded"
-  },
-  fieldErrors: [],
-  ok: true,
-  policy: workflow.uploadPolicy
-};
-
 describe("Seniors Card workflow containers", () => {
   it("renders the landing page with side navigation and application entry points", () => {
     const html = renderToStaticMarkup(<SeniorsCardOverviewContent shell={shell} workflow={workflow} />);
@@ -170,9 +155,7 @@ describe("Seniors Card workflow containers", () => {
     const html = renderToStaticMarkup(
       <SeniorsCardApplyContent
         createdDraft={createdDraft}
-        evidenceUploadResult={evidenceUploadResult}
         submitResult={submitResult}
-        uploadPolicy={workflow.uploadPolicy}
         validationResult={validationResult}
         workflow={workflow}
       />
@@ -202,9 +185,6 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain('name="supportingEvidence[applicant][]"');
     expect(html).toContain('accept="application/pdf,image/jpeg,image/png"');
     expect(html).toContain("Maximum 5 files and 10.0 MB total per person.");
-    expect(html).toContain("Metadata proof");
-    expect(html).toContain("identity-evidence.pdf");
-    expect(html).toContain("Server policy allows 5 files and 10 MB per person.");
     expect(html).toContain("qld__form-group");
     expect(html).toContain("qld__select");
     expect(html).toContain("qld__select-control");

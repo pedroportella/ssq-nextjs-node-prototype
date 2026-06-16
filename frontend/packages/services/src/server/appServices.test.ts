@@ -170,6 +170,19 @@ describe("server app services", () => {
       submittedRequests: expect.arrayContaining([
         expect.objectContaining({
           referenceNumber: "SC-2026-0001"
+        }),
+        expect.objectContaining({
+          referenceNumber: "RSS-2026-0001",
+          supportingDocuments: expect.arrayContaining([
+            expect.objectContaining({
+              fileName: "rental-property-evidence.pdf",
+              status: "uploaded"
+            }),
+            expect.objectContaining({
+              fileName: "household-income-evidence.pdf",
+              status: "uploaded"
+            })
+          ])
         })
       ])
     });
@@ -241,6 +254,11 @@ describe("server app services", () => {
       expect.arrayContaining([
         expect.objectContaining({
           fileName: "rental-property-evidence.pdf",
+          status: "uploaded"
+        }),
+        expect.objectContaining({
+          fileName: "household-income-evidence.pdf",
+          personKey: "household-member",
           status: "uploaded"
         }),
         expect.objectContaining({

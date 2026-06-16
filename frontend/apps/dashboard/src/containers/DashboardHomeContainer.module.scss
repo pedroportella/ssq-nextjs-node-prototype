@@ -21,3 +21,15 @@
 .empty {
   margin: 0;
 }
+
+.fileList {
+  display: grid;
+  gap: var(--ssq-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fileListItem {
+  margin: 0;
+}

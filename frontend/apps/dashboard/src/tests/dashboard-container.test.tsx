@@ -28,6 +28,13 @@ const summary: PrototypeDashboardSummaryData = {
       href: "https://example.test/seniors-card",
       label: "Seniors Card",
       status: "available"
+    },
+    {
+      appKey: "rental-security-subsidy",
+      description: "Apply for rental support.",
+      href: "https://example.test/rental-security-subsidy",
+      label: "Rental Security Subsidy",
+      status: "available"
     }
   ],
   drafts: [
@@ -50,7 +57,42 @@ const summary: PrototypeDashboardSummaryData = {
       referenceNumber: "SC-2026-0001",
       status: "APPROVED",
       submittedAt: "2026-06-12T02:15:00.000Z",
+      supportingDocuments: [
+        {
+          category: "Identity evidence",
+          fileName: "identity-evidence.pdf",
+          mimeType: "application/pdf",
+          personKey: "applicant",
+          sizeBytes: 512_000,
+          status: "uploaded"
+        }
+      ],
       title: "Seniors Card"
+    },
+    {
+      appKey: "rental-security-subsidy",
+      referenceNumber: "RSS-2026-0001",
+      status: "IN_REVIEW",
+      submittedAt: "2026-06-12T02:15:00.000Z",
+      supportingDocuments: [
+        {
+          category: "Rental evidence",
+          fileName: "rental-property-evidence.pdf",
+          mimeType: "application/pdf",
+          personKey: "applicant",
+          sizeBytes: 512_000,
+          status: "uploaded"
+        },
+        {
+          category: "Income evidence",
+          fileName: "household-income-evidence.pdf",
+          mimeType: "application/pdf",
+          personKey: "household-member",
+          sizeBytes: 384_000,
+          status: "uploaded"
+        }
+      ],
+      title: "Rental Security Subsidy"
     }
   ]
 };
@@ -89,9 +131,17 @@ describe("DashboardContent", () => {
     expect(html).toContain("Prototype review data");
     expect(html).toContain("Seniors Card");
     expect(html).toContain('href="https://example.test/seniors-card"');
+    expect(html).toContain("Rental Security Subsidy");
+    expect(html).toContain('href="https://example.test/rental-security-subsidy"');
     expect(html).toContain("Saved drafts");
     expect(html).toContain("Submitted requests");
     expect(html).toContain("SC-2026-0001");
+    expect(html).toContain("RSS-2026-0001");
+    expect(html).toContain("Files");
+    expect(html).toContain("identity-evidence.pdf");
+    expect(html).toContain("rental-property-evidence.pdf");
+    expect(html).toContain("household-income-evidence.pdf");
+    expect(html).toContain('href="https://example.test/rental-security-subsidy/application-status#supporting-documents"');
   });
 
   it("renders safe empty states when dashboard data is missing", () => {

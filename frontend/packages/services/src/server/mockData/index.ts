@@ -113,12 +113,40 @@ export const mockUploadPolicy: PrototypeUploadPolicy = {
 };
 
 export function createMockUploadedDocuments(appKey: Exclude<PrototypeAppKey, "dashboard">): PrototypeUploadedDocument[] {
-  const prefix = appKey === "seniors-card" ? "identity" : "rental-property";
+  if (appKey === "rental-security-subsidy") {
+    return [
+      {
+        category: "Rental evidence",
+        fileName: "rental-property-evidence.pdf",
+        mimeType: "application/pdf",
+        personKey: "applicant",
+        sizeBytes: 512_000,
+        status: "uploaded"
+      },
+      {
+        category: "Income evidence",
+        fileName: "household-income-evidence.pdf",
+        mimeType: "application/pdf",
+        personKey: "household-member",
+        sizeBytes: 384_000,
+        status: "uploaded"
+      },
+      {
+        category: "Rejected example",
+        fileName: "rental-property-archive.zip",
+        message: mockUploadPolicy.rejectedExample.message,
+        mimeType: "application/zip",
+        personKey: "applicant",
+        sizeBytes: 14_000_000,
+        status: "rejected"
+      }
+    ];
+  }
 
   return [
     {
-      category: appKey === "seniors-card" ? "Identity evidence" : "Rental evidence",
-      fileName: `${prefix}-evidence.pdf`,
+      category: "Identity evidence",
+      fileName: "identity-evidence.pdf",
       mimeType: "application/pdf",
       personKey: "applicant",
       sizeBytes: 512_000,
@@ -126,7 +154,7 @@ export function createMockUploadedDocuments(appKey: Exclude<PrototypeAppKey, "da
     },
     {
       category: "Rejected example",
-      fileName: `${prefix}-archive.zip`,
+      fileName: "identity-archive.zip",
       message: mockUploadPolicy.rejectedExample.message,
       mimeType: "application/zip",
       personKey: "applicant",
@@ -174,6 +202,7 @@ export function createMockSubmittedRequestSummary(
     referenceNumber: appKey === "seniors-card" ? "SC-2026-0001" : "RSS-2026-0001",
     status: appKey === "seniors-card" ? "APPROVED" : "IN_REVIEW",
     submittedAt: "2026-06-12T02:15:00.000Z",
+    supportingDocuments: createMockUploadedDocuments(appKey).filter((document) => document.status === "uploaded"),
     title: createPrototypeAppSummary(appKey).label
   };
 }

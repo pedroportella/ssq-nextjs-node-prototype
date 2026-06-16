@@ -60,19 +60,35 @@ const workflow: PrototypeWorkflowData = {
       status: "uploaded"
     },
     {
+      category: "Income evidence",
+      fileName: "household-income-evidence.pdf",
+      personKey: "household-member",
+      sizeBytes: 384_000,
+      status: "uploaded"
+    },
+    {
       category: "Rejected example",
       fileName: "rental-property-archive.zip",
-      message: "Upload a PDF, JPG or PNG file under 10 MB.",
+      message: "Upload a PDF, JPG or PNG file under 5 MB.",
       sizeBytes: 14_000_000,
       status: "rejected"
     }
   ],
   uploadPolicy: {
     acceptedFileTypes: ["application/pdf", "image/jpeg", "image/png"],
-    maxFileSizeBytes: 10 * 1024 * 1024,
+    allowedCategories: [
+      { hint: "Documents that prove the applicant's name or age.", label: "Identity evidence", value: "identity" },
+      { hint: "Documents that show the applicant lives in Queensland.", label: "Residency evidence", value: "residency" },
+      { hint: "Payslips, statements or other income evidence.", label: "Income evidence", value: "income" },
+      { hint: "Service-specific documents requested during assessment.", label: "Supporting evidence", value: "supporting-evidence" }
+    ],
+    defaultPersonKey: "applicant",
+    maxFileSizeBytes: 5 * 1024 * 1024,
+    maxFilesPerPerson: 5,
+    maxTotalSizeBytesPerPerson: 10 * 1024 * 1024,
     rejectedExample: {
       fieldPath: "supportingDocuments[0].file",
-      message: "Upload a PDF, JPG or PNG file under 10 MB."
+      message: "Upload a PDF, JPG or PNG file under 5 MB."
     }
   },
   validationErrors: [
@@ -166,11 +182,20 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("<fieldset");
     expect(html).toContain("About you");
     expect(html).toContain("Household and income");
+    expect(html).toContain("Evidence");
     expect(html).toContain("qld__direction-link");
     expect(html).toContain("Back to Rental Security Subsidy landing page");
     expect(html).toContain("Back to landing page");
     expect(html).toContain("qld__progress-indicator");
     expect(html).toContain("qld__progress-indicator__item--current");
+    expect(html).toContain("ssq-categorized-upload");
+    expect(html).toContain('id="rental-evidence-applicant-upload"');
+    expect(html).toContain('id="rental-evidence-household-member-upload"');
+    expect(html).toContain('name="rentalEvidence[applicant][]"');
+    expect(html).toContain('name="rentalEvidence[household-member][]"');
+    expect(html).toContain('accept="application/pdf,image/jpeg,image/png"');
+    expect(html).toContain("Attach rental, income or identity evidence and assign each file to the right person.");
+    expect(html).toContain("Maximum 5 files and 10.0 MB total per person.");
     expect(html).toContain("qld__form-group");
     expect(html).toContain("qld__select");
     expect(html).toContain("qld__select-control");
@@ -249,6 +274,7 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("RSS-2026-0001");
     expect(html).toContain("Download submission summary");
     expect(html).toContain("rental-property-evidence.pdf");
+    expect(html).toContain("household-income-evidence.pdf");
     expect(html).toContain("rental-property-archive.zip");
     expect(html).toContain("Draft saved");
     expect(html).toContain("RSS-2026-0001 submitted");

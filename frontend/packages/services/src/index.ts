@@ -37,6 +37,7 @@ export interface PrototypeSubmittedRequestSummary {
   referenceNumber: string;
   status: Exclude<ServiceRequestStatus, "DRAFT">;
   submittedAt: string;
+  supportingDocuments?: PrototypeUploadedDocument[];
   title: string;
 }
 

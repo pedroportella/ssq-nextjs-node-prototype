@@ -19,7 +19,13 @@ import {
 import styles from "./DashboardHomeContainer.module.scss";
 
 import type { AppShellData } from "@ssq/services/server";
-import type { PrototypeActivityEntry, PrototypeDashboardSummaryData, PrototypeServiceCatalogueEntry } from "@ssq/services";
+import type {
+  PrototypeActivityEntry,
+  PrototypeDashboardSummaryData,
+  PrototypeServiceCatalogueEntry,
+  PrototypeSubmittedRequestSummary,
+  PrototypeUploadedDocument
+} from "@ssq/services";
 
 function formatDateTime(value: string): string {
   return new Intl.DateTimeFormat("en-AU", {
@@ -39,6 +45,47 @@ function formatStatus(status: string): string {
 
 function renderEmptyState(message: string) {
   return <p className={styles.empty}>{message}</p>;
+}
+
+function getSubmittedRequestHref(summary: PrototypeDashboardSummaryData, request: PrototypeSubmittedRequestSummary) {
+  const service = summary.availableServices.find((candidate) => candidate.appKey === request.appKey);
+
+  if (!service) {
+    return undefined;
+  }
+
+  return `${service.href.replace(/\/$/, "")}/application-status`;
+}
+
+function RecordTitleLink({ href, request }: { href?: string; request: PrototypeSubmittedRequestSummary }) {
+  if (!href) {
+    return <strong>{request.title}</strong>;
+  }
+
+  return (
+    <a href={href}>
+      <strong>{request.title}</strong>
+    </a>
+  );
+}
+
+function FileLinks({ documents, href }: { documents?: PrototypeUploadedDocument[]; href?: string }) {
+  const uploadedDocuments = documents?.filter((document) => document.status === "uploaded") ?? [];
+
+  if (uploadedDocuments.length === 0) {
+    return <span className={styles.meta}>No files</span>;
+  }
+
+  return (
+    <ul className={styles.fileList}>
+      {uploadedDocuments.map((document) => (
+        <li className={styles.fileListItem} key={`${document.personKey}-${document.fileName}`}>
+          {href ? <a href={`${href}#supporting-documents`}>{document.fileName}</a> : <span>{document.fileName}</span>}
+          <span className={styles.meta}>{document.category}</span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 function DashboardSideNav({ services }: { services: PrototypeServiceCatalogueEntry[] }) {
@@ -138,19 +185,25 @@ function SubmittedRequestsTable({ summary }: { summary: PrototypeDashboardSummar
       columns={[
         { header: "Request", key: "request" },
         { header: "Status", key: "status" },
-        { header: "Submitted", key: "submitted" }
+        { header: "Submitted", key: "submitted" },
+        { header: "Files", key: "files" }
       ]}
-      rows={summary.submittedRequests.map((request) => ({
-        id: request.referenceNumber,
-        request: (
-          <>
-            <strong>{request.title}</strong>
-            <span className={styles.meta}>{request.referenceNumber}</span>
-          </>
-        ),
-        status: formatStatus(request.status),
-        submitted: formatDateTime(request.submittedAt)
-      }))}
+      rows={summary.submittedRequests.map((request) => {
+        const submittedRequestHref = getSubmittedRequestHref(summary, request);
+
+        return {
+          files: <FileLinks documents={request.supportingDocuments} href={submittedRequestHref} />,
+          id: request.referenceNumber,
+          request: (
+            <>
+              <RecordTitleLink href={submittedRequestHref} request={request} />
+              <span className={styles.meta}>{request.referenceNumber}</span>
+            </>
+          ),
+          status: formatStatus(request.status),
+          submitted: formatDateTime(request.submittedAt)
+        };
+      })}
       striped
     />
   );
