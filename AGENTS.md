@@ -52,6 +52,7 @@ You are working in the SSQ Next.js + Node.js prototype.
 - Do not commit `node_modules`, `.next`, `dist`, coverage, Playwright reports, local databases, logs, local env files or generated DigitalOcean specs.
 - Keep changes small, reviewable and easy to commit.
 - Check `git status` before editing and never overwrite user changes.
+- Do not run `git push` or otherwise write commits/tags to a remote unless the user explicitly asks for that push in the current turn.
 
 ## Runtime Config
 
@@ -160,6 +161,7 @@ You are working in the SSQ Next.js + Node.js prototype.
 ## Commit Message Handoff
 
 - Every implementation wrap-up should include a suggested git commit message.
+- Local commits may be created only when requested by the user or when the active task explicitly includes committing; pushes are never implicit.
 - Use `type(scope): past-tense summary`.
 - Keep the message concise, conventional and scoped to the actual changes made.
 - Start the summary with a past-tense verb such as `added`, `documented`, `implemented`, `improved` or `resolved`.
