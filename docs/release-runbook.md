@@ -117,4 +117,4 @@ pnpm check
 - Commit only `.do/*.template.yml` specs and reviewer-facing docs.
 - Keep backend/admin/ops URLs and DigitalOcean app IDs in private operational notes.
 - Use `docs/digitalocean-deployment.md` for deployment mechanics and `docs/live-review-links.md` for public frontend links.
-- Use `docs/backend-production-readiness.md`, `docs/frontend-deployment-readiness.md` and `docs/operational-reliability-support-evidence.md` for deeper readiness, support and production-next notes.
+- Use `docs/backend-production-readiness.md`, `docs/frontend-deployment-readiness.md`, `docs/operational-reliability-support-evidence.md` and `docs/aws-platform-mapping.md` for deeper readiness, support, platform and production-next notes.
