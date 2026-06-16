@@ -2,7 +2,7 @@
 
 Queensland Government-style service portal prototype for SSQ/myQLD digital transaction workflows.
 
-This repository will contain:
+This repository contains:
 
 - `backend`: Node.js/TypeScript API for transaction definitions, drafts, submissions, status tracking and operational seams.
 - `frontend`: three separately deployable Next.js apps for dashboard, Seniors Card and Rental Security Subsidy workflows.
@@ -11,7 +11,7 @@ This repository will contain:
 
 ## Current State
 
-This repository currently contains the initial project structure. Application implementation will be added incrementally.
+This repository currently contains the working review prototype: a shared backend, three Next.js frontend apps, Docker-based local runtime, smoke checks and DigitalOcean App Platform review deployment notes.
 
 ## Runtime
 
@@ -39,6 +39,10 @@ Private deployment notes and generated DigitalOcean specs stay out of Git. Commi
 ## Review Deployment
 
 Safe DigitalOcean App Platform templates live under `.do/*.template.yml` for the shared backend and three frontend apps. Copy them to local specs before replacing live URLs or account-specific values.
+
+See `docs/release-runbook.md` for the reviewer handover, live review path, local review path and production-next caveats.
+
+See `docs/live-review-links.md` for current public frontend review links.
 
 See `docs/digitalocean-deployment.md` for the review deployment order, template replacement values and smoke checks.
 

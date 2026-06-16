@@ -9,3 +9,5 @@ Public frontend apps:
 - Rental Security Subsidy: https://ssq-rental-security-subsidy-kgbzf.ondigitalocean.app
 
 The shared backend is configured server-side for the frontend apps. Backend/admin/operations details are intentionally not listed here.
+
+For reviewer handover, local run commands and production-next caveats, see `docs/release-runbook.md`.
