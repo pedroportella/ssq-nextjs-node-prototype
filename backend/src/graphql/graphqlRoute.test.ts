@@ -488,7 +488,12 @@ describe("GraphQL route", () => {
       payload: {
         query: `
           query PlatformData {
-            platform { correlationId }
+            platform {
+              correlationId
+              identityAssuranceLevel
+              identityDisplayName
+              identitySource
+            }
             viewer { email givenName externalRef }
             customerProfile {
               attributes { key value }
@@ -515,7 +520,10 @@ describe("GraphQL route", () => {
     expect(response.json()).toMatchObject({
       data: {
         platform: {
-          correlationId: "test-correlation-id"
+          correlationId: "test-correlation-id",
+          identityAssuranceLevel: "DEMO_LOW_ASSURANCE",
+          identityDisplayName: "demo.customer",
+          identitySource: "DEMO_HEADER"
         },
         viewer: {
           email: "demo.customer@example.test",

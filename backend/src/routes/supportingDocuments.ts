@@ -1,12 +1,11 @@
 import { randomUUID } from "node:crypto";
 
+import { AuthorizationPolicyService } from "../auth/authorizationPolicy.js";
 import {
-  canReadSubmittedRecords,
   DEMO_CUSTOMER_EMAIL_HEADER,
   DEMO_ROLE_HEADER,
   DEMO_SUBJECT_HEADER,
   headerValue,
-  isCitizen,
   resolveDemoIdentity
 } from "../auth/demoIdentity.js";
 import { supportingDocumentUploadPolicy } from "../policies/supportingDocumentPolicy.js";
@@ -27,15 +26,16 @@ export async function registerSupportingDocumentRoutes(app: FastifyInstance, que
       subjectHeader: headerValue(request.headers[DEMO_SUBJECT_HEADER]),
       legacyCustomerEmailHeader: headerValue(request.headers[DEMO_CUSTOMER_EMAIL_HEADER])
     });
+    const decision = new AuthorizationPolicyService().decide(identity, "supportingDocument.upload");
 
-    if (!isCitizen(identity)) {
+    if (!decision.ok) {
       reply.code(403);
 
       return {
         ok: false,
         error: {
           code: "FORBIDDEN",
-          message: "Role cannot upload citizen documents."
+          message: decision.message ?? "Role cannot upload citizen documents."
         },
         fieldErrors: [],
         policy: supportingDocumentUploadPolicy
@@ -98,23 +98,27 @@ export async function registerSupportingDocumentRoutes(app: FastifyInstance, que
       legacyCustomerEmailHeader: headerValue(request.headers[DEMO_CUSTOMER_EMAIL_HEADER])
     });
     const params = request.params as { documentId: string; referenceNumber: string };
-    const document = isCitizen(identity)
+    const authorization = new AuthorizationPolicyService();
+    const downloadDecision = authorization.decide(identity, "supportingDocument.download");
+    const canReadCitizenDocuments = authorization.can(identity, "citizen.supportingDocuments.read");
+    const canReadSubmittedRecords = authorization.can(identity, "serviceRequest.detail.read");
+    const document = canReadCitizenDocuments
       ? await resolveCitizenDocument(repository, identity.subject, params)
-      : canReadSubmittedRecords(identity)
+      : canReadSubmittedRecords
         ? await repository.getSupportingDocumentForServiceRequest({
             documentId: params.documentId,
             referenceNumber: params.referenceNumber
           })
         : undefined;
 
-    if (!isCitizen(identity) && !canReadSubmittedRecords(identity)) {
+    if (!downloadDecision.ok || (!canReadCitizenDocuments && !canReadSubmittedRecords)) {
       reply.code(403);
 
       return {
         ok: false,
         error: {
           code: "FORBIDDEN",
-          message: "Role cannot download supporting documents."
+          message: downloadDecision.message ?? "Role cannot download supporting documents."
         },
         correlationId
       };

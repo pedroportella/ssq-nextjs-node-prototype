@@ -1,7 +1,7 @@
-import { canReadSubmittedRecords } from "../auth/demoIdentity.js";
+import { authorizationPolicy } from "../auth/authorizationPolicy.js";
 import { evaluateServiceRequestTransitionPolicy, normalizeTransitionReason } from "../policies/serviceRequestReviewPolicy.js";
 
-import type { DemoRole } from "../auth/demoIdentity.js";
+import type { ResolvedIdentity } from "../auth/demoIdentity.js";
 import type { PrototypeRepository, ServiceRequestRecord } from "../repositories/prototypeRepository.js";
 
 export type ServiceRequestLifecycleStatus = ServiceRequestRecord["status"];
@@ -45,8 +45,7 @@ export class ServiceRequestStatusLifecycleService {
   constructor(private readonly repository: PrototypeRepository) {}
 
   async transitionStatus(input: {
-    actorRole: DemoRole;
-    actorSubject: string;
+    actorIdentity: ResolvedIdentity;
     batch?: boolean;
     customerId: string;
     referenceNumber: string;
@@ -68,7 +67,7 @@ export class ServiceRequestStatusLifecycleService {
     }
 
     const policy = evaluateServiceRequestTransitionPolicy({
-      actorRole: input.actorRole,
+      actorRole: input.actorIdentity.role,
       batch: input.batch,
       fromStatus: serviceRequest.status,
       reason: input.reason,
@@ -85,7 +84,7 @@ export class ServiceRequestStatusLifecycleService {
 
     const updated = await this.repository.updateServiceRequestStatusForCustomer({
       customerId: input.customerId,
-      lastTouchedBy: input.actorSubject,
+      lastTouchedBy: input.actorIdentity.subject,
       referenceNumber: input.referenceNumber,
       status: input.nextStatus
     });
@@ -103,8 +102,10 @@ export class ServiceRequestStatusLifecycleService {
       eventType: "SERVICE_REQUEST_STATUS_CHANGED",
       eventPayload: {
         correlationId: input.correlationId,
-        actorRole: input.actorRole,
-        actorSubject: input.actorSubject,
+        actorRole: input.actorIdentity.role,
+        actorSubject: input.actorIdentity.subject,
+        actorUserId: input.actorIdentity.userId,
+        identitySource: input.actorIdentity.source,
         batch: input.batch === true,
         fromStatus: serviceRequest.status,
         reason: policy.normalizedReason ?? null,
@@ -124,8 +125,7 @@ export class ServiceRequestStatusLifecycleService {
   }
 
   async batchTransitionStatus(input: {
-    actorRole: DemoRole;
-    actorSubject: string;
+    actorIdentity: ResolvedIdentity;
     correlationId: string;
     nextStatus: ServiceRequestLifecycleStatus;
     reason?: string | null;
@@ -149,8 +149,7 @@ export class ServiceRequestStatusLifecycleService {
       }
 
       const result = await this.transitionStatus({
-        actorRole: input.actorRole,
-        actorSubject: input.actorSubject,
+        actorIdentity: input.actorIdentity,
         batch: true,
         customerId: serviceRequest.customerId,
         referenceNumber,
@@ -182,22 +181,20 @@ export class ServiceRequestStatusLifecycleService {
   }
 
   async assignRequest(input: {
-    actorRole: DemoRole;
-    actorSubject: string;
+    actorIdentity: ResolvedIdentity;
     assignedOfficerSubject?: string | null;
     assignedTeam?: string | null;
     correlationId: string;
     reason?: string | null;
     referenceNumber: string;
   }): Promise<ServiceRequestAssignmentLifecycleResult> {
-    if (!canReadSubmittedRecords({
-      role: input.actorRole,
-      subject: input.actorSubject
-    })) {
+    const decision = authorizationPolicy.decide(input.actorIdentity, "serviceRequest.assign");
+
+    if (!decision.ok) {
       return {
         ok: false,
         code: "FORBIDDEN",
-        message: "Role cannot assign service requests."
+        message: decision.message ?? "Role cannot assign service requests."
       };
     }
 
@@ -233,7 +230,7 @@ export class ServiceRequestStatusLifecycleService {
     const updated = await this.repository.updateServiceRequestAssignment({
       assignedOfficerSubject: assignedOfficerSubject ?? null,
       assignedTeam: assignedTeam ?? null,
-      lastTouchedBy: input.actorSubject,
+      lastTouchedBy: input.actorIdentity.subject,
       referenceNumber: input.referenceNumber
     });
 
@@ -250,8 +247,10 @@ export class ServiceRequestStatusLifecycleService {
       eventType: "SERVICE_REQUEST_ASSIGNMENT_CHANGED",
       eventPayload: {
         correlationId: input.correlationId,
-        actorRole: input.actorRole,
-        actorSubject: input.actorSubject,
+        actorRole: input.actorIdentity.role,
+        actorSubject: input.actorIdentity.subject,
+        actorUserId: input.actorIdentity.userId,
+        identitySource: input.actorIdentity.source,
         assignedOfficerSubject: updated.assignedOfficerSubject ?? null,
         assignedTeam: updated.assignedTeam ?? null,
         previousAssignedOfficerSubject: serviceRequest.assignedOfficerSubject ?? null,

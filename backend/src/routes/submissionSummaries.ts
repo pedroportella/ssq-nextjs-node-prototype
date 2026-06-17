@@ -1,4 +1,5 @@
-import { DEMO_CUSTOMER_EMAIL_HEADER, DEMO_ROLE_HEADER, DEMO_SUBJECT_HEADER, headerValue, isCitizen, resolveDemoIdentity } from "../auth/demoIdentity.js";
+import { AuthorizationPolicyService } from "../auth/authorizationPolicy.js";
+import { DEMO_CUSTOMER_EMAIL_HEADER, DEMO_ROLE_HEADER, DEMO_SUBJECT_HEADER, headerValue, resolveDemoIdentity } from "../auth/demoIdentity.js";
 import { PrototypeRepository } from "../repositories/prototypeRepository.js";
 
 import type { FastifyInstance } from "fastify";
@@ -12,15 +13,16 @@ export async function registerSubmissionSummaryRoutes(app: FastifyInstance, quer
       subjectHeader: headerValue(request.headers[DEMO_SUBJECT_HEADER]),
       legacyCustomerEmailHeader: headerValue(request.headers[DEMO_CUSTOMER_EMAIL_HEADER])
     });
+    const decision = new AuthorizationPolicyService().decide(identity, "citizen.submissionSummary.download");
 
-    if (!isCitizen(identity)) {
+    if (!decision.ok) {
       reply.code(403);
 
       return {
         ok: false,
         error: {
           code: "FORBIDDEN",
-          message: "Role cannot download citizen summaries."
+          message: decision.message ?? "Role cannot download citizen summaries."
         }
       };
     }

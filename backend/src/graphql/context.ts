@@ -7,6 +7,7 @@ import {
   DEMO_SUBJECT_HEADER,
   resolveDemoIdentity
 } from "../auth/demoIdentity.js";
+import { AuthorizationPolicyService } from "../auth/authorizationPolicy.js";
 import { PrototypeRepository } from "../repositories/prototypeRepository.js";
 import { DraftLifecycleService } from "../services/draftLifecycleService.js";
 import { ServiceRequestStatusLifecycleService } from "../services/serviceRequestStatusLifecycleService.js";
@@ -17,6 +18,7 @@ import type { Queryable } from "../database/types.js";
 import type { DemoIdentity } from "../auth/demoIdentity.js";
 
 export interface GraphqlContext {
+  authorization: AuthorizationPolicyService;
   correlationId: string;
   demoIdentity: DemoIdentity;
   repository: PrototypeRepository;
@@ -40,6 +42,7 @@ export function createGraphqlContext(input: {
   });
 
   return {
+    authorization: new AuthorizationPolicyService(),
     correlationId,
     demoIdentity,
     draftLifecycle: new DraftLifecycleService(repository, transactionCatalogue),

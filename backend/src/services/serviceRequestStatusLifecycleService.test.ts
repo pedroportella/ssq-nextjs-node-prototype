@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
 
+import { resolveDemoIdentity } from "../auth/demoIdentity.js";
 import { ServiceRequestStatusLifecycleService } from "./serviceRequestStatusLifecycleService.js";
 
+import type { DemoRole, ResolvedIdentity } from "../auth/demoIdentity.js";
 import type { PrototypeRepository, ServiceRequestEventRecord, ServiceRequestRecord } from "../repositories/prototypeRepository.js";
+
+function createIdentity(role: DemoRole = "ServiceOfficer", subject = "officer@example.test"): ResolvedIdentity {
+  return resolveDemoIdentity({
+    roleHeader: role,
+    subjectHeader: subject
+  });
+}
 
 function createServiceRequest(status: ServiceRequestRecord["status"]): ServiceRequestRecord {
   return {
@@ -97,8 +106,7 @@ describe("ServiceRequestStatusLifecycleService", () => {
     const service = new ServiceRequestStatusLifecycleService(createRepository(createServiceRequest("SUBMITTED")));
 
     await expect(service.transitionStatus({
-      actorRole: "ServiceOfficer",
-      actorSubject: "officer@example.test",
+      actorIdentity: createIdentity(),
       customerId: "10000000-0000-4000-8000-000000000001",
       referenceNumber: "SSQ-DEMO-0001",
       nextStatus: "UNDER_REVIEW",
@@ -115,8 +123,7 @@ describe("ServiceRequestStatusLifecycleService", () => {
     const actionRequiredService = new ServiceRequestStatusLifecycleService(createRepository(createServiceRequest("UNDER_REVIEW")));
 
     await expect(actionRequiredService.transitionStatus({
-      actorRole: "ServiceOfficer",
-      actorSubject: "officer@example.test",
+      actorIdentity: createIdentity(),
       customerId: "10000000-0000-4000-8000-000000000001",
       referenceNumber: "SSQ-DEMO-0001",
       nextStatus: "ACTION_REQUIRED",
@@ -132,8 +139,7 @@ describe("ServiceRequestStatusLifecycleService", () => {
     const completedService = new ServiceRequestStatusLifecycleService(createRepository(createServiceRequest("UNDER_REVIEW")));
 
     await expect(completedService.transitionStatus({
-      actorRole: "ServiceOfficer",
-      actorSubject: "officer@example.test",
+      actorIdentity: createIdentity(),
       customerId: "10000000-0000-4000-8000-000000000001",
       referenceNumber: "SSQ-DEMO-0001",
       nextStatus: "COMPLETED",
@@ -151,8 +157,7 @@ describe("ServiceRequestStatusLifecycleService", () => {
     const service = new ServiceRequestStatusLifecycleService(createRepository(createServiceRequest("SUBMITTED")));
 
     await expect(service.transitionStatus({
-      actorRole: "ServiceOfficer",
-      actorSubject: "officer@example.test",
+      actorIdentity: createIdentity(),
       customerId: "10000000-0000-4000-8000-000000000001",
       referenceNumber: "SSQ-DEMO-0001",
       nextStatus: "COMPLETED",
@@ -168,8 +173,7 @@ describe("ServiceRequestStatusLifecycleService", () => {
     const service = new ServiceRequestStatusLifecycleService(createRepository(createServiceRequest("UNDER_REVIEW")));
 
     await expect(service.transitionStatus({
-      actorRole: "ServiceOfficer",
-      actorSubject: "officer@example.test",
+      actorIdentity: createIdentity(),
       customerId: "10000000-0000-4000-8000-000000000001",
       referenceNumber: "SSQ-DEMO-0001",
       nextStatus: "COMPLETED",
@@ -186,8 +190,7 @@ describe("ServiceRequestStatusLifecycleService", () => {
     const service = new ServiceRequestStatusLifecycleService(createRepository(createServiceRequest("SUBMITTED"), events));
 
     await expect(service.assignRequest({
-      actorRole: "ServiceOfficer",
-      actorSubject: "officer@example.test",
+      actorIdentity: createIdentity(),
       assignedOfficerSubject: "officer@example.test",
       assignedTeam: "Seniors Card",
       correlationId: "assignment-correlation",
@@ -226,8 +229,7 @@ describe("ServiceRequestStatusLifecycleService", () => {
     const service = new ServiceRequestStatusLifecycleService(createRepository([first, second]));
 
     await expect(service.batchTransitionStatus({
-      actorRole: "ServiceOfficer",
-      actorSubject: "officer@example.test",
+      actorIdentity: createIdentity(),
       correlationId: "batch-correlation",
       nextStatus: "UNDER_REVIEW",
       referenceNumbers: ["SSQ-DEMO-0001", "SSQ-DEMO-0002", "SSQ-MISSING"]
@@ -263,8 +265,7 @@ describe("ServiceRequestStatusLifecycleService", () => {
     const service = new ServiceRequestStatusLifecycleService(createRepository(undefined));
 
     await expect(service.transitionStatus({
-      actorRole: "ServiceOfficer",
-      actorSubject: "officer@example.test",
+      actorIdentity: createIdentity(),
       customerId: "10000000-0000-4000-8000-000000000999",
       referenceNumber: "SSQ-DEMO-0001",
       nextStatus: "UNDER_REVIEW",

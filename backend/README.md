@@ -135,7 +135,9 @@ Prototype role headers are also supported:
 - `X-SSQ-DEMO-ROLE`: `Citizen`, `ServiceOfficer`, `TeamLead` or `Admin`.
 - `X-SSQ-DEMO-SUBJECT`: demo subject identifier. For citizens this is the customer email.
 
-Citizen role access is scoped to owned drafts, requests, uploads and summary downloads. Service officer, team lead and admin roles can read submitted service requests and update request status. Admin role is required for operations endpoints. These headers are local review controls only, not production authentication.
+Demo headers resolve into a backend identity contract with subject, user id, display name, email, roles, source and assurance level. This resolver is deliberately marked `DEMO_HEADER` / `DEMO_LOW_ASSURANCE`; a real IAM/OIDC provider should replace the resolver behind the same contract rather than changing resolver/service authorization logic.
+
+Citizen role access is scoped to owned drafts, requests, uploads and summary downloads. Service officer, team lead and admin roles can read submitted service requests, update request status and manage assignments. Admin role is required for operations endpoints. Authorization decisions are centralized in the backend policy service. These headers are local review controls only, not production authentication.
 
 All backend responses preserve a supplied `x-correlation-id` or generate one when absent. Safe not-found and unhandled-error responses include the correlation ID and avoid stack traces or raw infrastructure details. Runtime logs redact common secret-bearing headers and payload/body fields.
 

@@ -1,8 +1,6 @@
 import { GraphQLScalarType, Kind } from "graphql";
 import { createSchema } from "graphql-yoga";
 
-import { canReadSubmittedRecords, isCitizen } from "../auth/demoIdentity.js";
-
 import type { GraphqlContext } from "./context.js";
 import type { CustomerRecord, ServiceRequestListInput } from "../repositories/prototypeRepository.js";
 import type { ServiceRequestBatchStatusLifecycleResult } from "../services/serviceRequestStatusLifecycleService.js";
@@ -289,6 +287,9 @@ export const schema = createSchema<GraphqlContext>({
       correlationId: String!
       demoRole: String!
       demoSubject: String!
+      identityAssuranceLevel: String!
+      identityDisplayName: String!
+      identitySource: String!
     }
 
     type Query {
@@ -357,16 +358,19 @@ export const schema = createSchema<GraphqlContext>({
         return {
           correlationId: context.correlationId,
           demoRole: context.demoIdentity.role,
-          demoSubject: context.demoIdentity.subject
+          demoSubject: context.demoIdentity.subject,
+          identityAssuranceLevel: context.demoIdentity.assuranceLevel,
+          identityDisplayName: context.demoIdentity.displayName,
+          identitySource: context.demoIdentity.source
         };
       },
       viewer(_parent: unknown, _args: unknown, context: GraphqlContext) {
-        return isCitizen(context.demoIdentity)
+        return context.authorization.can(context.demoIdentity, "citizen.profile.read")
           ? context.repository.getCustomerByEmail(context.demoIdentity.subject)
           : null;
       },
       async customerProfile(_parent: unknown, _args: unknown, context: GraphqlContext) {
-        if (!isCitizen(context.demoIdentity)) {
+        if (!context.authorization.can(context.demoIdentity, "citizen.profile.read")) {
           return null;
         }
 
@@ -401,7 +405,7 @@ export const schema = createSchema<GraphqlContext>({
         };
       },
       async serviceRequests(_parent: unknown, _args: unknown, context: GraphqlContext) {
-        if (!isCitizen(context.demoIdentity)) {
+        if (!context.authorization.can(context.demoIdentity, "citizen.serviceRequests.read")) {
           return [];
         }
 
@@ -410,7 +414,7 @@ export const schema = createSchema<GraphqlContext>({
         return customer ? context.repository.listServiceRequestsForCustomer(customer.id) : [];
       },
       submittedServiceRequests(_parent: unknown, _args: unknown, context: GraphqlContext) {
-        return canReadSubmittedRecords(context.demoIdentity)
+        return context.authorization.can(context.demoIdentity, "serviceRequest.detail.read")
           ? context.repository.listSubmittedServiceRequests()
           : [];
       },
@@ -425,7 +429,7 @@ export const schema = createSchema<GraphqlContext>({
           return serviceRequestConnectionError(parsed.code, parsed.message);
         }
 
-        if (!isCitizen(context.demoIdentity)) {
+        if (!context.authorization.can(context.demoIdentity, "citizen.serviceRequests.read")) {
           return serviceRequestConnectionSuccess(emptyServiceRequestConnection(parsed.input));
         }
 
@@ -449,7 +453,7 @@ export const schema = createSchema<GraphqlContext>({
           return serviceRequestConnectionError(parsed.code, parsed.message);
         }
 
-        if (!canReadSubmittedRecords(context.demoIdentity)) {
+        if (!context.authorization.can(context.demoIdentity, "serviceRequest.detail.read")) {
           return serviceRequestConnectionSuccess(emptyServiceRequestConnection(parsed.input));
         }
 
@@ -459,7 +463,7 @@ export const schema = createSchema<GraphqlContext>({
         }));
       },
       async serviceRequestDrafts(_parent: unknown, _args: unknown, context: GraphqlContext) {
-        if (!isCitizen(context.demoIdentity)) {
+        if (!context.authorization.can(context.demoIdentity, "citizen.draft.manage")) {
           return [];
         }
 
@@ -468,7 +472,7 @@ export const schema = createSchema<GraphqlContext>({
         return customer ? context.repository.listServiceRequestDraftsForCustomer(customer.id) : [];
       },
       async serviceRequestDraft(_parent: unknown, args: { id: string }, context: GraphqlContext) {
-        if (!isCitizen(context.demoIdentity)) {
+        if (!context.authorization.can(context.demoIdentity, "citizen.draft.manage")) {
           return null;
         }
 
@@ -482,7 +486,7 @@ export const schema = createSchema<GraphqlContext>({
           : null;
       },
       async serviceRequest(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
-        if (canReadSubmittedRecords(context.demoIdentity)) {
+        if (context.authorization.can(context.demoIdentity, "serviceRequest.detail.read")) {
           const serviceRequest = await context.repository.getServiceRequestByReference(args.referenceNumber);
 
           if (serviceRequest && serviceRequest.status !== "DRAFT") {
@@ -511,7 +515,7 @@ export const schema = createSchema<GraphqlContext>({
           : null;
       },
       async submissionSummary(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
-        if (!isCitizen(context.demoIdentity)) {
+        if (!context.authorization.can(context.demoIdentity, "citizen.submissionSummary.download")) {
           return null;
         }
 
@@ -529,7 +533,7 @@ export const schema = createSchema<GraphqlContext>({
         args: { referenceNumber?: string | null; draftId?: string | null },
         context: GraphqlContext
       ) {
-        if (!isCitizen(context.demoIdentity)) {
+        if (!context.authorization.can(context.demoIdentity, "citizen.supportingDocuments.read")) {
           return [];
         }
 
@@ -582,8 +586,10 @@ export const schema = createSchema<GraphqlContext>({
         args: { input: { transactionKey: string; currentStep: string; payload?: Record<string, unknown> | null } },
         context: GraphqlContext
       ) {
-        if (!isCitizen(context.demoIdentity)) {
-          return draftMutationError("FORBIDDEN", "Role cannot manage citizen drafts.");
+        const decision = context.authorization.decide(context.demoIdentity, "citizen.draft.manage");
+
+        if (!decision.ok) {
+          return draftMutationError("FORBIDDEN", decision.message ?? "Role cannot manage citizen drafts.");
         }
 
         const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
@@ -606,8 +612,10 @@ export const schema = createSchema<GraphqlContext>({
         args: { input: { draftId: string; currentStep: string; payload: Record<string, unknown> } },
         context: GraphqlContext
       ) {
-        if (!isCitizen(context.demoIdentity)) {
-          return draftMutationError("FORBIDDEN", "Role cannot manage citizen drafts.");
+        const decision = context.authorization.decide(context.demoIdentity, "citizen.draft.manage");
+
+        if (!decision.ok) {
+          return draftMutationError("FORBIDDEN", decision.message ?? "Role cannot manage citizen drafts.");
         }
 
         const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
@@ -630,8 +638,10 @@ export const schema = createSchema<GraphqlContext>({
         args: { input: { draftId: string } },
         context: GraphqlContext
       ) {
-        if (!isCitizen(context.demoIdentity)) {
-          return submitMutationError("FORBIDDEN", "Role cannot submit citizen drafts.", []);
+        const decision = context.authorization.decide(context.demoIdentity, "citizen.draft.submit");
+
+        if (!decision.ok) {
+          return submitMutationError("FORBIDDEN", decision.message ?? "Role cannot submit citizen drafts.", []);
         }
 
         const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
@@ -655,8 +665,10 @@ export const schema = createSchema<GraphqlContext>({
         args: { input: { referenceNumber: string; status: string; reason?: string | null } },
         context: GraphqlContext
       ) {
-        if (!canReadSubmittedRecords(context.demoIdentity)) {
-          return statusMutationError("FORBIDDEN", "Role cannot update service request status.");
+        const decision = context.authorization.decide(context.demoIdentity, "serviceRequest.status.update");
+
+        if (!decision.ok) {
+          return statusMutationError("FORBIDDEN", decision.message ?? "Role cannot update service request status.");
         }
 
         const serviceRequest = await context.repository.getServiceRequestByReference(args.input.referenceNumber);
@@ -670,8 +682,7 @@ export const schema = createSchema<GraphqlContext>({
         }
 
         const result = await context.serviceRequestStatusLifecycle.transitionStatus({
-          actorRole: context.demoIdentity.role,
-          actorSubject: context.demoIdentity.subject,
+          actorIdentity: context.demoIdentity,
           customerId: serviceRequest.customerId,
           referenceNumber: args.input.referenceNumber,
           nextStatus: args.input.status,
@@ -688,8 +699,10 @@ export const schema = createSchema<GraphqlContext>({
         args: { input: { referenceNumbers: string[]; status: string; reason?: string | null } },
         context: GraphqlContext
       ) {
-        if (!canReadSubmittedRecords(context.demoIdentity)) {
-          return batchStatusMutationError("FORBIDDEN", "Role cannot update service request status.");
+        const decision = context.authorization.decide(context.demoIdentity, "serviceRequest.batchStatus.update");
+
+        if (!decision.ok) {
+          return batchStatusMutationError("FORBIDDEN", decision.message ?? "Role cannot update service request status.");
         }
 
         if (!isServiceRequestStatus(args.input.status)) {
@@ -703,8 +716,7 @@ export const schema = createSchema<GraphqlContext>({
         }
 
         const result = await context.serviceRequestStatusLifecycle.batchTransitionStatus({
-          actorRole: context.demoIdentity.role,
-          actorSubject: context.demoIdentity.subject,
+          actorIdentity: context.demoIdentity,
           correlationId: context.correlationId,
           nextStatus: args.input.status,
           reason: args.input.reason ?? undefined,
@@ -726,8 +738,7 @@ export const schema = createSchema<GraphqlContext>({
         context: GraphqlContext
       ) {
         const result = await context.serviceRequestStatusLifecycle.assignRequest({
-          actorRole: context.demoIdentity.role,
-          actorSubject: context.demoIdentity.subject,
+          actorIdentity: context.demoIdentity,
           assignedOfficerSubject: args.input.assignedOfficerSubject,
           assignedTeam: args.input.assignedTeam,
           correlationId: context.correlationId,
