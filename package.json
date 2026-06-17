@@ -35,6 +35,7 @@
     "test:visual:showcase:update": "SSQ_VISUAL_APP=dashboard playwright test -c tests/playwright/visual.config.ts tests/visual/ui-library-showcase-baselines.spec.ts --update-snapshots",
     "test:visual:update": "playwright test -c tests/playwright/visual.config.ts --update-snapshots",
     "guard:artifacts": "node scripts/quality-guards.mjs artifacts",
+    "guard:terminology": "node scripts/quality-guards.mjs terminology",
     "guard:frontend-source": "node scripts/quality-guards.mjs frontend-source",
     "guard:browser-bundles": "node scripts/quality-guards.mjs browser-bundles",
     "guard": "node scripts/quality-guards.mjs all",

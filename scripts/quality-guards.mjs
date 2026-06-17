@@ -72,6 +72,124 @@ const browserLeakMarkers = [
   }
 ];
 
+const australianEnglishRules = [
+  {
+    label: "artifact",
+    pattern: /\bartifacts?\b/i,
+    preferred: "artefact/artefacts",
+    allowedLinePatterns: [/\bguard:artifacts\b/, /\bartifacts:\s*checkTrackedArtifacts\b/, /quality-guards\.mjs artifacts/]
+  },
+  {
+    label: "authorization",
+    pattern: /\b(authori(?:zation|ze|zes|zed|zing)|unauthorized)\b/i,
+    preferred: "authorisation/authorise/authorised/unauthorised",
+    allowedLinePatterns: [
+      /\bAuthorizationPolicyService\b/,
+      /\bcontext\.authorization\b/,
+      /\bauthorization\s*[=:.()]/,
+      /\bheaders\.authorization\b/,
+      /\brequest\.headers\.authorization\b/,
+      /\breq\.headers\.authorization\b/,
+      /\bheaders\[['"]authorization['"]\]/,
+      /['"]authorization['"]/
+    ]
+  },
+  {
+    label: "behavior",
+    pattern: /\bbehaviors?\b/i,
+    preferred: "behaviour/behaviours",
+    allowedLinePatterns: []
+  },
+  {
+    label: "color",
+    pattern: /\bcolors?\b/i,
+    preferred: "colour/colours",
+    allowedLinePatterns: [/--[A-Za-z0-9_-]*color/i, /\bcolor\s*:/i]
+  },
+  {
+    label: "center",
+    pattern: /\bcenters?|centered|centering\b/i,
+    preferred: "centre/centres/centred/centring",
+    allowedLinePatterns: []
+  },
+  {
+    label: "centralized",
+    pattern: /\bcentraliz(?:e|es|ed|ing|ation)\b/i,
+    preferred: "centralise/centralises/centralised/centralising/centralisation",
+    allowedLinePatterns: []
+  },
+  {
+    label: "organized",
+    pattern: /\borganiz(?:e|es|ed|ing|ation|ations)\b/i,
+    preferred: "organise/organises/organised/organising/organisation/organisations",
+    allowedLinePatterns: []
+  },
+  {
+    label: "labeled",
+    pattern: /\blabel(?:ed|ing)\b/i,
+    preferred: "labelled/labelling",
+    allowedLinePatterns: []
+  },
+  {
+    label: "modeling",
+    pattern: /\bmodeling\b/i,
+    preferred: "modelling",
+    allowedLinePatterns: []
+  },
+  {
+    label: "analyze",
+    pattern: /\banalyz(?:e|es|ed|ing)\b/i,
+    preferred: "analyse/analyses/analysed/analysing",
+    allowedLinePatterns: []
+  },
+  {
+    label: "license",
+    pattern: /\blicens(?:e|es|ed|ing)\b/i,
+    preferred: "licence/licences/licensed/licensing, unless referring to a code licence identifier",
+    allowedLinePatterns: [/\bMIT\b/, /\bSPDX\b/, /\bLICENSE\b/]
+  },
+  {
+    label: "fulfillment",
+    pattern: /\bfulfill(?:s|ed|ing|ment)?\b/i,
+    preferred: "fulfil/fulfils/fulfilled/fulfilling/fulfilment",
+    allowedLinePatterns: []
+  },
+  {
+    label: "enrollment",
+    pattern: /\benroll(?:s|ed|ing|ment|ments)?\b/i,
+    preferred: "enrol/enrols/enrolled/enrolling/enrolment/enrolments",
+    allowedLinePatterns: []
+  }
+];
+
+function isTerminologyScanFile(filePath) {
+  if (filePath === "README.md" || filePath === "AGENTS.md" || filePath === "backend/README.md") {
+    return true;
+  }
+
+  if (filePath.startsWith("docs/") && filePath.endsWith(".md")) {
+    return true;
+  }
+
+  if (filePath === "scripts/quality-guards.mjs") {
+    return true;
+  }
+
+  if (
+    filePath === "backend/src/services/evidenceStorageService.ts" ||
+    filePath === "backend/src/services/submissionSummaryService.ts" ||
+    filePath === "frontend/packages/services/src/server/mockData/index.ts"
+  ) {
+    return true;
+  }
+
+  return (
+    filePath.startsWith("frontend/apps/") &&
+    (filePath.endsWith(".ts") || filePath.endsWith(".tsx")) &&
+    !filePath.endsWith("next-env.d.ts")
+  );
+}
+
 function getTrackedFiles() {
   const output = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" });
   return output.split("\0").filter(Boolean);
@@ -150,6 +268,44 @@ function checkFrontendSourceConfig() {
   console.log("Frontend source endpoint guard passed.");
 }
 
+function checkAustralianEnglishTerminology() {
+  const trackedFiles = getTrackedFiles().filter(isTerminologyScanFile);
+  const failures = [];
+
+  for (const filePath of trackedFiles) {
+    const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
+
+    lines.forEach((line, index) => {
+      if (filePath === "scripts/quality-guards.mjs" && index + 1 >= 75 && index + 1 <= 163) {
+        return;
+      }
+
+      for (const rule of australianEnglishRules) {
+        if (!rule.pattern.test(line)) {
+          continue;
+        }
+
+        if (rule.allowedLinePatterns.some((pattern) => pattern.test(line))) {
+          continue;
+        }
+
+        failures.push(`${filePath}:${index + 1} uses ${rule.label}; prefer ${rule.preferred}`);
+      }
+    });
+  }
+
+  if (failures.length > 0) {
+    console.error("Australian English terminology guard found US spelling in public prose or user-facing strings:");
+    for (const failure of failures) {
+      console.error(`- ${failure}`);
+    }
+    process.exitCode = 1;
+    return;
+  }
+
+  console.log("Australian English terminology guard passed.");
+}
+
 function checkBrowserBundles() {
   const staticRoots = [
     "frontend/apps/dashboard/.next/static",
@@ -192,10 +348,13 @@ function checkBrowserBundles() {
 
 const checks = {
   artifacts: checkTrackedArtifacts,
+  terminology: checkAustralianEnglishTerminology,
   "frontend-source": checkFrontendSourceConfig,
   "browser-bundles": checkBrowserBundles,
   all: () => {
     checkTrackedArtifacts();
+    if (process.exitCode) return;
+    checkAustralianEnglishTerminology();
     if (process.exitCode) return;
     checkFrontendSourceConfig();
     if (process.exitCode) return;

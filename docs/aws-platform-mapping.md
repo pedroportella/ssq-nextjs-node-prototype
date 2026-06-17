@@ -13,7 +13,7 @@ It is a platform-readiness and selection-criteria evidence pack, not a claim tha
 | Local full-stack runtime | PostgreSQL, backend and frontend apps can run together with health/readiness checks. | [local development](local-development.md), [release runbook](release-runbook.md). |
 | DigitalOcean review templates | Review deployment specs exist as safe templates, while generated specs and app IDs stay out of Git. | [DigitalOcean deployment](digitalocean-deployment.md), `.do/*.template.yml`. |
 | Server-only backend integration | Frontend apps call the backend through server-side service adapters, not browser-visible backend origins. | [frontend deployment readiness](frontend-deployment-readiness.md), [API and security evidence](api-and-security-evidence.md). |
-| Operational guardrails | Artefact, frontend-source and browser-bundle guards reduce accidental leakage of local specs, internal URLs and backend-only settings. | [quality guards](../scripts/quality-guards.mjs), [release quality checks](release-runbook.md#release-quality-checks). |
+| Operational guardrails | Artefact, terminology, frontend-source and browser-bundle guards reduce accidental leakage of local specs, public wording drift, internal URLs and backend-only settings. | [quality guards](../scripts/quality-guards.mjs), [release quality checks](release-runbook.md#release-quality-checks). |
 
 ## AWS Production Architecture Mapping
 
@@ -101,7 +101,7 @@ Recommended shape:
 1. Pull request gate:
    - install pinned Node.js and pnpm;
    - run lint, typecheck and unit/integration tests;
-   - run artefact and frontend-source guards;
+   - run artefact, terminology and frontend-source guards;
    - build backend, shared packages and all frontend apps;
    - build Docker images and scan them.
 2. Main branch build:

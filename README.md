@@ -124,13 +124,14 @@ Use `pnpm test:e2e:mock:*` for focused frontend-only checks and `pnpm test:e2e:r
 ```bash
 pnpm test:reviewer-evidence
 pnpm guard:artifacts
+pnpm guard:terminology
 pnpm build
 pnpm guard:browser-bundles
 pnpm guard:frontend-source
 pnpm check
 ```
 
-The reviewer evidence smoke checks the public handover path, required docs, screenshots, local Markdown links, live frontend/status URLs and obvious private-info leakage patterns. The guard scripts fail when generated artefacts, local env files, local databases, reports, generated DigitalOcean specs, browser-visible backend origins or backend-only environment variable names are tracked or leaked.
+The reviewer evidence smoke checks the public handover path, required docs, screenshots, local Markdown links, live frontend/status URLs and obvious private-info leakage patterns. The guard scripts fail when generated artefacts, local env files, local databases, reports, generated DigitalOcean specs, US spellings in public prose/user-facing strings, browser-visible backend origins or backend-only environment variable names are tracked or leaked.
 
 ## Key Docs
 

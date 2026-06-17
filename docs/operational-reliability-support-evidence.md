@@ -63,6 +63,7 @@ pnpm docker:logs
 pnpm test:full-stack-smoke
 pnpm --dir backend test
 pnpm guard:artifacts
+pnpm guard:terminology
 pnpm guard:frontend-source
 ```
 
@@ -75,7 +76,7 @@ pnpm guard:frontend-source
 | Redaction | Logger redacts common secret-bearing headers and payload fields. | [logger.ts](../backend/src/logger.ts). |
 | Status lifecycle | Status changes write activity events with correlation ID, previous status, next status and reason. | [serviceRequestStatusLifecycleService.ts](../backend/src/services/serviceRequestStatusLifecycleService.ts), [GraphQL tests](../backend/src/graphql/graphqlRoute.test.ts). |
 | Outbox | Submission and status work can persist outbox events; admin route summarises event counts by status/type. | [outboxEventService.ts](../backend/src/services/outboxEventService.ts), [operations route](../backend/src/routes/operations.ts), [operations tests](../backend/src/routes/operations.test.ts). |
-| Guardrails | Artefact, frontend-source and browser-bundle guards reduce accidental local/spec/secret leakage. | [quality guards](../scripts/quality-guards.mjs), [CI workflow](../.github/workflows/ci.yml). |
+| Guardrails | Artefact, terminology, frontend-source and browser-bundle guards reduce accidental local/spec/secret leakage and public-prose drift. | [quality guards](../scripts/quality-guards.mjs), [CI workflow](../.github/workflows/ci.yml). |
 
 ## Release And Quality Gates
 
@@ -84,7 +85,7 @@ The review release path uses:
 - pinned Node.js and pnpm versions;
 - lint, typecheck and test gates;
 - production builds for backend, shared packages and three apps;
-- artefact and frontend-source guards;
+- artefact, terminology and frontend-source guards;
 - browser bundle guard after frontend production builds;
 - Docker Compose validation and Docker image builds;
 - local and deployed full-stack smoke paths.

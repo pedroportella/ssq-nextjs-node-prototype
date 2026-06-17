@@ -71,6 +71,7 @@ Run these before treating a branch as review-ready:
 ```bash
 pnpm test:reviewer-evidence
 pnpm guard:artifacts
+pnpm guard:terminology
 pnpm build
 pnpm guard:browser-bundles
 pnpm guard:frontend-source
@@ -78,6 +79,8 @@ pnpm check
 ```
 
 `pnpm test:reviewer-evidence` checks that the public five-minute path still has the required docs, screenshots, live frontend links, `/status` links, local Markdown targets and public-doc leakage safeguards.
+
+`pnpm guard:terminology` keeps public prose and known user-facing strings aligned with Australian English while allowing stable command names, code identifiers, CSS properties, protocol/header names and third-party API vocabulary.
 
 `pnpm guard:browser-bundles` must run after production frontend builds because it scans generated `.next/static` assets for leaked backend-only configuration.
 
