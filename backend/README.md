@@ -81,7 +81,9 @@ Submitted requests capture simulated profile evidence for transaction-declared p
 
 Supporting document uploads use a metadata-backed local prototype evidence storage adapter for review. The backend validates target ownership, transaction-specific category/person-bucket policy, file extension, MIME type, per-file size and per-person count/total-size limits, then records a replaceable storage key, deterministic prototype scan state, retention class and production-next storage/scanning notes. Download routes return a generated text artifact through the backend boundary rather than exposing browser-visible assets or claiming production binary storage.
 
-Service request status changes are backend-owned. The current lifecycle supports `SUBMITTED -> UNDER_REVIEW`, `SUBMITTED -> WITHDRAWN`, `UNDER_REVIEW -> ACTION_REQUIRED`, `UNDER_REVIEW -> COMPLETED`, and `ACTION_REQUIRED -> UNDER_REVIEW` or `WITHDRAWN`, with each accepted transition recorded as an activity event.
+Service request status changes are backend-owned and policy-driven. The current lifecycle supports `SUBMITTED -> UNDER_REVIEW`, `SUBMITTED -> WITHDRAWN`, `UNDER_REVIEW -> ACTION_REQUIRED`, `UNDER_REVIEW -> COMPLETED`, and `ACTION_REQUIRED -> UNDER_REVIEW` or `WITHDRAWN`. Outcome-style transitions require reviewer reasons, role policy is enforced in the lifecycle service, and each accepted transition is recorded as an activity event with actor and correlation metadata.
+
+Submitted service requests also carry prototype reviewer queue fields: assigned officer subject, assigned team, last touched by and last touched at. Assignment changes are backend mutations with audit events; staff detail reads of submitted records are audit-visible.
 
 Draft submission also generates a text submission summary for the submitted request. The summary is a prototype review artifact with metadata and payload context, not an official receipt or production document store.
 
@@ -122,7 +124,9 @@ Current mutation surface:
 - create service request draft;
 - update service request draft;
 - submit service request draft;
-- update service request status.
+- update service request status;
+- batch update service request status;
+- assign service request.
 
 GraphQL requests can provide `x-correlation-id` for trace continuity. Local prototype identity defaults to `demo.customer@example.test` and can be overridden with `x-demo-customer-email`.
 

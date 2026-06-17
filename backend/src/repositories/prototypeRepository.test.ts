@@ -97,6 +97,10 @@ class SeededTestDatabase implements Queryable {
         reference_number: String(values[2]),
         status: String(values[3]),
         payload: JSON.parse(String(values[4])),
+        assigned_officer_subject: null,
+        assigned_team: null,
+        last_touched_by: null,
+        last_touched_at: null,
         created_at: "2026-06-10T00:00:00.000Z",
         updated_at: "2026-06-10T00:00:00.000Z"
       };
@@ -206,6 +210,27 @@ class SeededTestDatabase implements Queryable {
     }
 
     if (normalizedSql.startsWith("UPDATE service_requests sr")) {
+      if (normalizedSql.includes("assigned_officer_subject = $2")) {
+        const request = this.serviceRequests.find((row) => row.reference_number === values[0] && row.status !== "DRAFT");
+
+        if (!request) {
+          return result<T>([]);
+        }
+
+        request.assigned_officer_subject = values[1] === null ? null : String(values[1]);
+        request.assigned_team = values[2] === null ? null : String(values[2]);
+        request.last_touched_by = String(values[3]);
+        request.last_touched_at = "2026-06-10T00:35:00.000Z";
+        request.updated_at = "2026-06-10T00:35:00.000Z";
+
+        return result<T>([
+          {
+            ...request,
+            transaction_key: "seniors-card"
+          } as unknown as T
+        ]);
+      }
+
       const request = this.serviceRequests.find((row) => row.reference_number === values[0] && row.customer_id === values[1]);
 
       if (!request) {
@@ -213,6 +238,8 @@ class SeededTestDatabase implements Queryable {
       }
 
       request.status = String(values[2]);
+      request.last_touched_by = values[3] === null ? request.last_touched_by : String(values[3]);
+      request.last_touched_at = values[3] === null ? request.last_touched_at : "2026-06-10T00:30:00.000Z";
       request.updated_at = "2026-06-10T00:30:00.000Z";
 
       return result<T>([
@@ -480,6 +507,7 @@ describe("PrototypeRepository", () => {
 
     const updated = await repository.updateServiceRequestStatusForCustomer({
       customerId: serviceRequest.customerId,
+      lastTouchedBy: "officer@example.test",
       referenceNumber: serviceRequest.referenceNumber,
       status: "UNDER_REVIEW"
     });
@@ -492,9 +520,37 @@ describe("PrototypeRepository", () => {
     expect(updated).toMatchObject({
       referenceNumber: "SSQ-TEST-0002",
       status: "UNDER_REVIEW",
+      lastTouchedBy: "officer@example.test",
       transactionKey: "seniors-card"
     });
     expect(otherCustomerUpdate).toBeUndefined();
+  });
+
+  it("updates submitted service request assignment fields", async () => {
+    const database = new SeededTestDatabase();
+    const repository = new PrototypeRepository(database);
+    const serviceRequest = await repository.createServiceRequest({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      transactionDefinitionId: "20000000-0000-4000-8000-000000000002",
+      referenceNumber: "SSQ-TEST-ASSIGN-0001",
+      status: "SUBMITTED",
+      payload: {}
+    });
+
+    const updated = await repository.updateServiceRequestAssignment({
+      assignedOfficerSubject: "officer@example.test",
+      assignedTeam: "Seniors Card",
+      lastTouchedBy: "teamlead@example.test",
+      referenceNumber: serviceRequest.referenceNumber
+    });
+
+    expect(updated).toMatchObject({
+      referenceNumber: "SSQ-TEST-ASSIGN-0001",
+      assignedOfficerSubject: "officer@example.test",
+      assignedTeam: "Seniors Card",
+      lastTouchedBy: "teamlead@example.test",
+      transactionKey: "seniors-card"
+    });
   });
 
   it("creates and reads service request events", async () => {

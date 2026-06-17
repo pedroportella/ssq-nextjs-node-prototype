@@ -5,6 +5,7 @@ import { canReadSubmittedRecords, isCitizen } from "../auth/demoIdentity.js";
 
 import type { GraphqlContext } from "./context.js";
 import type { CustomerRecord, ServiceRequestListInput } from "../repositories/prototypeRepository.js";
+import type { ServiceRequestBatchStatusLifecycleResult } from "../services/serviceRequestStatusLifecycleService.js";
 
 type JsonValue = boolean | number | string | null | JsonValue[] | { [key: string]: JsonValue };
 type ServiceRequestListQueryInput = Partial<{
@@ -123,6 +124,10 @@ export const schema = createSchema<GraphqlContext>({
       referenceNumber: String!
       status: String!
       payload: JSON!
+      assignedOfficerSubject: String
+      assignedTeam: String
+      lastTouchedBy: String
+      lastTouchedAt: String
       createdAt: String!
       updatedAt: String!
     }
@@ -209,6 +214,19 @@ export const schema = createSchema<GraphqlContext>({
       error: DraftMutationError
     }
 
+    type ServiceRequestBatchStatusItem {
+      ok: Boolean!
+      referenceNumber: String!
+      serviceRequest: ServiceRequest
+      error: DraftMutationError
+    }
+
+    type ServiceRequestBatchStatusMutationResult {
+      ok: Boolean!
+      results: [ServiceRequestBatchStatusItem!]!
+      error: DraftMutationError
+    }
+
     type ServiceRequestConnectionResult {
       ok: Boolean!
       connection: ServiceRequestConnection
@@ -234,6 +252,19 @@ export const schema = createSchema<GraphqlContext>({
     input UpdateServiceRequestStatusInput {
       referenceNumber: String!
       status: String!
+      reason: String
+    }
+
+    input BatchUpdateServiceRequestStatusInput {
+      referenceNumbers: [String!]!
+      status: String!
+      reason: String
+    }
+
+    input AssignServiceRequestInput {
+      referenceNumber: String!
+      assignedOfficerSubject: String
+      assignedTeam: String
       reason: String
     }
 
@@ -286,6 +317,8 @@ export const schema = createSchema<GraphqlContext>({
       updateServiceRequestDraft(input: UpdateServiceRequestDraftInput!): ServiceRequestDraftMutationResult!
       submitServiceRequest(input: SubmitServiceRequestInput!): SubmitServiceRequestMutationResult!
       updateServiceRequestStatus(input: UpdateServiceRequestStatusInput!): ServiceRequestStatusMutationResult!
+      batchUpdateServiceRequestStatus(input: BatchUpdateServiceRequestStatusInput!): ServiceRequestBatchStatusMutationResult!
+      assignServiceRequest(input: AssignServiceRequestInput!): ServiceRequestStatusMutationResult!
     }
   `,
   resolvers: {
@@ -450,7 +483,22 @@ export const schema = createSchema<GraphqlContext>({
       },
       async serviceRequest(_parent: unknown, args: { referenceNumber: string }, context: GraphqlContext) {
         if (canReadSubmittedRecords(context.demoIdentity)) {
-          return context.repository.getServiceRequestByReference(args.referenceNumber);
+          const serviceRequest = await context.repository.getServiceRequestByReference(args.referenceNumber);
+
+          if (serviceRequest && serviceRequest.status !== "DRAFT") {
+            await context.repository.createServiceRequestEvent({
+              serviceRequestId: serviceRequest.id,
+              eventType: "SERVICE_REQUEST_DETAIL_VIEWED",
+              eventPayload: {
+                actorRole: context.demoIdentity.role,
+                actorSubject: context.demoIdentity.subject,
+                correlationId: context.correlationId,
+                referenceNumber: serviceRequest.referenceNumber
+              }
+            });
+          }
+
+          return serviceRequest;
         }
 
         const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
@@ -622,11 +670,69 @@ export const schema = createSchema<GraphqlContext>({
         }
 
         const result = await context.serviceRequestStatusLifecycle.transitionStatus({
+          actorRole: context.demoIdentity.role,
+          actorSubject: context.demoIdentity.subject,
           customerId: serviceRequest.customerId,
           referenceNumber: args.input.referenceNumber,
           nextStatus: args.input.status,
           reason: args.input.reason ?? undefined,
           correlationId: context.correlationId
+        });
+
+        return result.ok
+          ? statusMutationSuccess(result.serviceRequest)
+          : statusMutationError(result.code, result.message);
+      },
+      async batchUpdateServiceRequestStatus(
+        _parent: unknown,
+        args: { input: { referenceNumbers: string[]; status: string; reason?: string | null } },
+        context: GraphqlContext
+      ) {
+        if (!canReadSubmittedRecords(context.demoIdentity)) {
+          return batchStatusMutationError("FORBIDDEN", "Role cannot update service request status.");
+        }
+
+        if (!isServiceRequestStatus(args.input.status)) {
+          return batchStatusMutationError("INVALID_STATUS", "Status is not supported.");
+        }
+
+        const referenceNumbers = args.input.referenceNumbers.map((referenceNumber) => referenceNumber.trim()).filter(Boolean);
+
+        if (referenceNumbers.length === 0) {
+          return batchStatusMutationError("INVALID_REFERENCE_NUMBERS", "At least one reference number is required.");
+        }
+
+        const result = await context.serviceRequestStatusLifecycle.batchTransitionStatus({
+          actorRole: context.demoIdentity.role,
+          actorSubject: context.demoIdentity.subject,
+          correlationId: context.correlationId,
+          nextStatus: args.input.status,
+          reason: args.input.reason ?? undefined,
+          referenceNumbers
+        });
+
+        return batchStatusMutationFromResult(result);
+      },
+      async assignServiceRequest(
+        _parent: unknown,
+        args: {
+          input: {
+            assignedOfficerSubject?: string | null;
+            assignedTeam?: string | null;
+            reason?: string | null;
+            referenceNumber: string;
+          };
+        },
+        context: GraphqlContext
+      ) {
+        const result = await context.serviceRequestStatusLifecycle.assignRequest({
+          actorRole: context.demoIdentity.role,
+          actorSubject: context.demoIdentity.subject,
+          assignedOfficerSubject: args.input.assignedOfficerSubject,
+          assignedTeam: args.input.assignedTeam,
+          correlationId: context.correlationId,
+          reason: args.input.reason ?? undefined,
+          referenceNumber: args.input.referenceNumber
         });
 
         return result.ok
@@ -695,6 +801,42 @@ function statusMutationError(code: string, message: string) {
   return {
     ok: false,
     serviceRequest: null,
+    error: {
+      code,
+      message
+    }
+  };
+}
+
+function batchStatusMutationFromResult(result: ServiceRequestBatchStatusLifecycleResult) {
+  return {
+    ok: result.ok,
+    results: result.results.map((item) => item.ok
+      ? {
+          ok: true,
+          referenceNumber: item.referenceNumber,
+          serviceRequest: item.serviceRequest,
+          error: null
+        }
+      : {
+          ok: false,
+          referenceNumber: item.referenceNumber,
+          serviceRequest: null,
+          error: item.error
+        }),
+    error: result.ok
+      ? null
+      : {
+          code: "PARTIAL_FAILURE",
+          message: "One or more service request status updates failed."
+        }
+  };
+}
+
+function batchStatusMutationError(code: string, message: string) {
+  return {
+    ok: false,
+    results: [],
     error: {
       code,
       message
@@ -784,7 +926,15 @@ function isServiceRequestStatus(status: string): status is "DRAFT" | "SUBMITTED"
 }
 
 function isServiceRequestSortBy(sortBy: string): sortBy is ServiceRequestListInput["sortBy"] {
-  return ["createdAt", "referenceNumber", "status", "transactionKey"].includes(sortBy);
+  return [
+    "assignedOfficer",
+    "assignedTeam",
+    "createdAt",
+    "lastTouchedAt",
+    "referenceNumber",
+    "status",
+    "transactionKey"
+  ].includes(sortBy);
 }
 
 function isServiceRequestSortDirection(direction: string): direction is ServiceRequestListInput["sortDirection"] {

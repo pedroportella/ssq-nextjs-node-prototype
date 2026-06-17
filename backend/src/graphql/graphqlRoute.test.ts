@@ -133,6 +133,10 @@ function createGraphqlTestDatabase(): DatabaseClient {
             reference_number: String(values[2]),
             status: String(values[3]),
             payload: JSON.parse(String(values[4])),
+            assigned_officer_subject: null,
+            assigned_team: null,
+            last_touched_by: null,
+            last_touched_at: null,
             created_at: "2026-06-10T00:00:00.000Z",
             updated_at: "2026-06-10T00:00:00.000Z"
           };
@@ -221,10 +225,54 @@ function createGraphqlTestDatabase(): DatabaseClient {
         }
 
         if (normalizedSql.startsWith("UPDATE service_requests sr")) {
+          if (normalizedSql.includes("assigned_officer_subject = $2")) {
+            const submitted = serviceRequests.find((row) => row.reference_number === values[0] && row.status !== "DRAFT");
+
+            if (submitted) {
+              submitted.assigned_officer_subject = values[1] === null ? null : String(values[1]);
+              submitted.assigned_team = values[2] === null ? null : String(values[2]);
+              submitted.last_touched_by = String(values[3]);
+              submitted.last_touched_at = "2026-06-10T00:35:00.000Z";
+
+              return result<T>([
+                {
+                  ...submitted,
+                  transaction_key: "seniors-card"
+                } as unknown as T
+              ]);
+            }
+
+            if (values[0] === "SSQ-DEMO-0001") {
+              return result<T>([
+                {
+                  id: "30000000-0000-4000-8000-000000000001",
+                  customer_id: "10000000-0000-4000-8000-000000000001",
+                  transaction_definition_id: "20000000-0000-4000-8000-000000000002",
+                  transaction_key: "seniors-card",
+                  reference_number: values[0],
+                  status: "SUBMITTED",
+                  payload: {
+                    prototype: true
+                  },
+                  assigned_officer_subject: values[1] === null ? null : String(values[1]),
+                  assigned_team: values[2] === null ? null : String(values[2]),
+                  last_touched_by: String(values[3]),
+                  last_touched_at: "2026-06-10T00:35:00.000Z",
+                  created_at: "2026-06-10T00:00:00.000Z",
+                  updated_at: "2026-06-10T00:35:00.000Z"
+                } as unknown as T
+              ]);
+            }
+
+            return result<T>([]);
+          }
+
           const submitted = serviceRequests.find((row) => row.reference_number === values[0] && row.customer_id === values[1]);
 
           if (submitted) {
             submitted.status = String(values[2]);
+            submitted.last_touched_by = values[3] === null ? submitted.last_touched_by : String(values[3]);
+            submitted.last_touched_at = values[3] === null ? submitted.last_touched_at : "2026-06-10T00:30:00.000Z";
 
             return result<T>([
               {
@@ -246,6 +294,10 @@ function createGraphqlTestDatabase(): DatabaseClient {
                 payload: {
                   prototype: true
                 },
+                assigned_officer_subject: null,
+                assigned_team: null,
+                last_touched_by: values[3] === null ? null : String(values[3]),
+                last_touched_at: values[3] === null ? null : "2026-06-10T00:30:00.000Z",
                 created_at: "2026-06-10T00:00:00.000Z",
                 updated_at: "2026-06-10T00:30:00.000Z"
               } as unknown as T
@@ -293,6 +345,10 @@ function createGraphqlTestDatabase(): DatabaseClient {
               payload: {
                 prototype: true
               },
+              assigned_officer_subject: null,
+              assigned_team: null,
+              last_touched_by: null,
+              last_touched_at: null,
               created_at: "2026-06-10T00:00:00.000Z",
               updated_at: "2026-06-10T00:00:00.000Z"
             }
@@ -1411,6 +1467,187 @@ describe("GraphQL route", () => {
             code: "INVALID_STATUS_TRANSITION",
             message: "Cannot transition service request from SUBMITTED to COMPLETED."
           }
+        }
+      }
+    });
+
+    await app.close();
+  });
+
+  it("assigns submitted service requests and records reviewer audit events", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-correlation-id": "assignment-correlation",
+        "x-ssq-demo-role": "TeamLead",
+        "x-ssq-demo-subject": "lead@example.test"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation Assign {
+            assignServiceRequest(input: {
+              referenceNumber: "SSQ-DEMO-0001"
+              assignedOfficerSubject: "officer@example.test"
+              assignedTeam: "Seniors Card"
+              reason: "Queue triage"
+            }) {
+              ok
+              error { code message }
+              serviceRequest {
+                referenceNumber
+                assignedOfficerSubject
+                assignedTeam
+                lastTouchedBy
+                lastTouchedAt
+              }
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        assignServiceRequest: {
+          ok: true,
+          error: null,
+          serviceRequest: {
+            referenceNumber: "SSQ-DEMO-0001",
+            assignedOfficerSubject: "officer@example.test",
+            assignedTeam: "Seniors Card",
+            lastTouchedBy: "lead@example.test",
+            lastTouchedAt: "2026-06-10T00:35:00.000Z"
+          }
+        }
+      }
+    });
+
+    const activityResponse = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-ssq-demo-role": "ServiceOfficer"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query Activity {
+            activityLogs(serviceRequestId: "30000000-0000-4000-8000-000000000001") {
+              eventType
+              eventPayload
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(activityResponse.statusCode).toBe(200);
+    expect(activityResponse.json()).toMatchObject({
+      data: {
+        activityLogs: [
+          {
+            eventType: "SERVICE_REQUEST_SEEDED"
+          },
+          {
+            eventType: "SERVICE_REQUEST_ASSIGNMENT_CHANGED",
+            eventPayload: {
+              actorRole: "TeamLead",
+              actorSubject: "lead@example.test",
+              assignedOfficerSubject: "officer@example.test",
+              assignedTeam: "Seniors Card",
+              correlationId: "assignment-correlation",
+              reason: "Queue triage"
+            }
+          }
+        ]
+      }
+    });
+
+    await app.close();
+  });
+
+  it("returns per-record results for batch service request status updates", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-correlation-id": "batch-correlation",
+        "x-ssq-demo-role": "ServiceOfficer",
+        "x-ssq-demo-subject": "officer@example.test"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          mutation BatchStatus {
+            batchUpdateServiceRequestStatus(input: {
+              referenceNumbers: ["SSQ-DEMO-0001", "SSQ-MISSING"]
+              status: "UNDER_REVIEW"
+            }) {
+              ok
+              error { code message }
+              results {
+                ok
+                referenceNumber
+                error { code message }
+                serviceRequest {
+                  referenceNumber
+                  status
+                  lastTouchedBy
+                }
+              }
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        batchUpdateServiceRequestStatus: {
+          ok: false,
+          error: {
+            code: "PARTIAL_FAILURE"
+          },
+          results: [
+            {
+              ok: true,
+              referenceNumber: "SSQ-DEMO-0001",
+              error: null,
+              serviceRequest: {
+                referenceNumber: "SSQ-DEMO-0001",
+                status: "UNDER_REVIEW",
+                lastTouchedBy: "officer@example.test"
+              }
+            },
+            {
+              ok: false,
+              referenceNumber: "SSQ-MISSING",
+              error: {
+                code: "SERVICE_REQUEST_NOT_FOUND"
+              },
+              serviceRequest: null
+            }
+          ]
         }
       }
     });

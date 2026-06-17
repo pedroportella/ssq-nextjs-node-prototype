@@ -58,6 +58,10 @@ export interface ServiceRequestRecord {
   referenceNumber: string;
   status: "DRAFT" | "SUBMITTED" | "UNDER_REVIEW" | "ACTION_REQUIRED" | "COMPLETED" | "WITHDRAWN";
   payload: Record<string, unknown>;
+  assignedOfficerSubject?: string;
+  assignedTeam?: string;
+  lastTouchedBy?: string;
+  lastTouchedAt?: string;
   createdAt: string;
   updatedAt: string;
   transactionKey?: string;
@@ -70,7 +74,7 @@ export interface ServiceRequestListInput {
   search?: string;
   page: number;
   pageSize: number;
-  sortBy: "createdAt" | "referenceNumber" | "status" | "transactionKey";
+  sortBy: "assignedOfficer" | "assignedTeam" | "createdAt" | "lastTouchedAt" | "referenceNumber" | "status" | "transactionKey";
   sortDirection: "ASC" | "DESC";
 }
 
@@ -217,6 +221,10 @@ interface ServiceRequestRow {
   reference_number: string;
   status: ServiceRequestRecord["status"];
   payload: Record<string, unknown>;
+  assigned_officer_subject?: string | null;
+  assigned_team?: string | null;
+  last_touched_by?: string | null;
+  last_touched_at?: Date | string | null;
   created_at: Date | string;
   updated_at: Date | string;
   transaction_key?: string;
@@ -444,7 +452,19 @@ export class PrototypeRepository {
           payload
         )
         VALUES ($1, $2, $3, $4, $5::jsonb)
-        RETURNING id, customer_id, transaction_definition_id, reference_number, status, payload, created_at, updated_at
+        RETURNING
+          id,
+          customer_id,
+          transaction_definition_id,
+          reference_number,
+          status,
+          payload,
+          assigned_officer_subject,
+          assigned_team,
+          last_touched_by,
+          last_touched_at,
+          created_at,
+          updated_at
       `,
       [
         input.customerId,
@@ -574,6 +594,10 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.assigned_officer_subject,
+          sr.assigned_team,
+          sr.last_touched_by,
+          sr.last_touched_at,
           sr.created_at,
           sr.updated_at,
           td.transaction_key
@@ -599,6 +623,10 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.assigned_officer_subject,
+          sr.assigned_team,
+          sr.last_touched_by,
+          sr.last_touched_at,
           sr.created_at,
           sr.updated_at,
           td.transaction_key
@@ -650,6 +678,10 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.assigned_officer_subject,
+          sr.assigned_team,
+          sr.last_touched_by,
+          sr.last_touched_at,
           sr.created_at,
           sr.updated_at,
           td.transaction_key
@@ -709,6 +741,10 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.assigned_officer_subject,
+          sr.assigned_team,
+          sr.last_touched_by,
+          sr.last_touched_at,
           sr.created_at,
           sr.updated_at,
           td.transaction_key
@@ -736,6 +772,10 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.assigned_officer_subject,
+          sr.assigned_team,
+          sr.last_touched_by,
+          sr.last_touched_at,
           sr.created_at,
           sr.updated_at,
           td.transaction_key
@@ -753,6 +793,7 @@ export class PrototypeRepository {
 
   async updateServiceRequestStatusForCustomer(input: {
     customerId: string;
+    lastTouchedBy?: string;
     referenceNumber: string;
     status: ServiceRequestRecord["status"];
   }): Promise<ServiceRequestRecord | undefined> {
@@ -760,6 +801,8 @@ export class PrototypeRepository {
       `
         UPDATE service_requests sr
         SET status = $3,
+            last_touched_by = COALESCE($4, last_touched_by),
+            last_touched_at = CASE WHEN $4 IS NULL THEN last_touched_at ELSE now() END,
             updated_at = now()
         FROM transaction_definitions td
         WHERE td.id = sr.transaction_definition_id
@@ -772,11 +815,59 @@ export class PrototypeRepository {
           sr.reference_number,
           sr.status,
           sr.payload,
+          sr.assigned_officer_subject,
+          sr.assigned_team,
+          sr.last_touched_by,
+          sr.last_touched_at,
           sr.created_at,
           sr.updated_at,
           td.transaction_key
       `,
-      [input.referenceNumber, input.customerId, input.status]
+      [input.referenceNumber, input.customerId, input.status, input.lastTouchedBy ?? null]
+    );
+
+    return result.rows[0] ? mapServiceRequest(result.rows[0]) : undefined;
+  }
+
+  async updateServiceRequestAssignment(input: {
+    assignedOfficerSubject?: string | null;
+    assignedTeam?: string | null;
+    lastTouchedBy: string;
+    referenceNumber: string;
+  }): Promise<ServiceRequestRecord | undefined> {
+    const result = await this.database.query<ServiceRequestRow>(
+      `
+        UPDATE service_requests sr
+        SET assigned_officer_subject = $2,
+            assigned_team = $3,
+            last_touched_by = $4,
+            last_touched_at = now(),
+            updated_at = now()
+        FROM transaction_definitions td
+        WHERE td.id = sr.transaction_definition_id
+          AND sr.reference_number = $1
+          AND sr.status <> 'DRAFT'
+        RETURNING
+          sr.id,
+          sr.customer_id,
+          sr.transaction_definition_id,
+          sr.reference_number,
+          sr.status,
+          sr.payload,
+          sr.assigned_officer_subject,
+          sr.assigned_team,
+          sr.last_touched_by,
+          sr.last_touched_at,
+          sr.created_at,
+          sr.updated_at,
+          td.transaction_key
+      `,
+      [
+        input.referenceNumber,
+        input.assignedOfficerSubject ?? null,
+        input.assignedTeam ?? null,
+        input.lastTouchedBy
+      ]
     );
 
     return result.rows[0] ? mapServiceRequest(result.rows[0]) : undefined;
@@ -1249,6 +1340,14 @@ function mapServiceRequest(row: ServiceRequestRow): ServiceRequestRecord {
     referenceNumber: row.reference_number,
     status: row.status,
     payload: row.payload,
+    assignedOfficerSubject: row.assigned_officer_subject ?? undefined,
+    assignedTeam: row.assigned_team ?? undefined,
+    lastTouchedBy: row.last_touched_by ?? undefined,
+    lastTouchedAt: row.last_touched_at
+      ? row.last_touched_at instanceof Date
+        ? row.last_touched_at.toISOString()
+        : row.last_touched_at
+      : undefined,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at,
     transactionKey: row.transaction_key
@@ -1264,12 +1363,18 @@ function mapServiceRequestStatusCount(row: ServiceRequestStatusCountRow): Servic
 
 function serviceRequestOrderBy(sortBy: ServiceRequestListInput["sortBy"]): string {
   switch (sortBy) {
+    case "assignedOfficer":
+      return "sr.assigned_officer_subject";
+    case "assignedTeam":
+      return "sr.assigned_team";
     case "referenceNumber":
       return "sr.reference_number";
     case "status":
       return "sr.status";
     case "transactionKey":
       return "td.transaction_key";
+    case "lastTouchedAt":
+      return "sr.last_touched_at";
     case "createdAt":
       return "sr.created_at";
   }
