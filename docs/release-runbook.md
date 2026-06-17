@@ -109,7 +109,7 @@ If any command is skipped in a later pass, record why in the private handover no
 - Backend-owned draft validation, submission flow, request activity, status transitions, summary download and metadata-only supporting document policy.
 - Demo reviewer roles and citizen identity boundaries for the prototype.
 - Correlation IDs, safe error responses, CORS allow-list configuration, simple local rate limiting and security headers.
-- Guard scripts that block generated artifacts, local deployment specs and browser-visible backend secrets.
+- Guard scripts that block generated artefacts, local deployment specs and browser-visible backend secrets.
 
 ## What Is Simulated
 
@@ -119,11 +119,11 @@ If any command is skipped in a later pass, record why in the private handover no
 - Submission summaries are plain text prototype downloads, not official receipts.
 - Outbox events are persisted for review, but no production queue worker is attached.
 - DigitalOcean uses review infrastructure and a review database posture, not hardened production infrastructure.
-- Review roles demonstrate boundaries, but they are not a final auditable authorization policy.
+- Review roles demonstrate boundaries, but they are not a final auditable authorisation policy.
 
 ## Production-Next
 
-- Replace demo identity headers with real identity, session management, SSO/IAM and auditable authorization.
+- Replace demo identity headers with real identity, session management, SSO/IAM and auditable authorisation.
 - Move from review database posture to production database operations, including backups, high availability, point-in-time restore, migration policy and credential rotation.
 - Add private object storage, malware scanning, retention controls and privacy review for documents.
 - Attach real queue publishing, retry policy, dead-letter handling and outbox processing.

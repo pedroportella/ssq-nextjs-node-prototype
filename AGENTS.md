@@ -119,7 +119,7 @@ You are working in the SSQ Next.js + Node.js prototype.
 - Maintain correlation IDs, correlated problem responses and operational status behaviour once introduced.
 - Add `/health` for runtime health and `/status` for reviewer-friendly status where appropriate.
 - Add debug routes only when explicitly gated by non-production environment and an explicit debug flag.
-- Do not imply real Queensland Digital Identity, myGov, PRODA, SSO, enterprise IAM, row-level security, malware scanning, private file storage, retention governance or production authorization unless it is implemented.
+- Do not imply real Queensland Digital Identity, myGov, PRODA, SSO, enterprise IAM, row-level security, malware scanning, private file storage, retention governance or production authorisation unless it is implemented.
 - If demo identity or roles are added, document them as prototype-only and keep the boundary obvious in code and docs.
 - Store local prototype uploads safely enough for review, but document production-next needs: MIME/content validation, malware scanning, private storage, access control, retention, audit and privacy review.
 - Use an outbox table or equivalent persisted event record to demonstrate event-driven integration thinking without needing a real queue.
@@ -197,4 +197,4 @@ You are working in the SSQ Next.js + Node.js prototype.
 - Keep route/page code thin; move reusable behaviour into services, containers, packages or backend modules.
 - Keep comments short and useful. Avoid narrating obvious code.
 - Do not rewrite unrelated files or planning notes while implementing a scoped repo change.
-- Before finishing a change, scan for endpoint leaks, generated artifacts, accidental secrets, misleading production claims and public docs containing internal planning labels.
+- Before finishing a change, scan for endpoint leaks, generated artefacts, accidental secrets, misleading production claims and public docs containing internal planning labels.

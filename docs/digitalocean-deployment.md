@@ -33,7 +33,7 @@ cp .do/ssq-seniors-card.template.yml .do/ssq-seniors-card.local.yml
 cp .do/ssq-rental-security-subsidy.template.yml .do/ssq-rental-security-subsidy.local.yml
 ```
 
-`.do/*.local.yml` and `.do/*.generated.yml` are intentionally blocked by the artifact guard and must not be committed.
+`.do/*.local.yml` and `.do/*.generated.yml` are intentionally blocked by the artefact guard and must not be committed.
 
 Replace these values in local specs:
 

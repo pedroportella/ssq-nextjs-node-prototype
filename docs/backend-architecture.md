@@ -1,6 +1,6 @@
 # Backend Architecture
 
-This backend is a production-shaped prototype for SSQ-style digital transaction workflows. It is not an official government platform and does not claim production identity, authorization, document storage, queueing or agency integration.
+This backend is a production-shaped prototype for SSQ-style digital transaction workflows. It is not an official government platform and does not claim production identity, authorisation, document storage, queueing or agency integration.
 
 ## Runtime Shape
 

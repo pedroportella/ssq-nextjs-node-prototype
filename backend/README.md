@@ -79,13 +79,13 @@ Draft submission validates the stored payload against the seeded transaction sch
 
 Submitted requests capture simulated profile evidence for transaction-declared prefill attributes. This evidence is marked `SIMULATED_PROFILE` and includes production-next metadata rather than claiming real Digital Identity integration.
 
-Supporting document uploads use a metadata-backed local prototype evidence storage adapter for review. The backend validates target ownership, transaction-specific category/person-bucket policy, file extension, MIME type, per-file size and per-person count/total-size limits, then records a replaceable storage key, deterministic prototype scan state, retention class and production-next storage/scanning notes. Download routes return a generated text artifact through the backend boundary rather than exposing browser-visible assets or claiming production binary storage.
+Supporting document uploads use a metadata-backed local prototype evidence storage adapter for review. The backend validates target ownership, transaction-specific category/person-bucket policy, file extension, MIME type, per-file size and per-person count/total-size limits, then records a replaceable storage key, deterministic prototype scan state, retention class and production-next storage/scanning notes. Download routes return a generated text artefact through the backend boundary rather than exposing browser-visible assets or claiming production binary storage.
 
 Service request status changes are backend-owned and policy-driven. The current lifecycle supports `SUBMITTED -> UNDER_REVIEW`, `SUBMITTED -> WITHDRAWN`, `UNDER_REVIEW -> ACTION_REQUIRED`, `UNDER_REVIEW -> COMPLETED`, and `ACTION_REQUIRED -> UNDER_REVIEW` or `WITHDRAWN`. Outcome-style transitions require reviewer reasons, role policy is enforced in the lifecycle service, and each accepted transition is recorded as an activity event with actor and correlation metadata.
 
 Submitted service requests also carry prototype reviewer queue fields: assigned officer subject, assigned team, last touched by and last touched at. Assignment changes are backend mutations with audit events; staff detail reads of submitted records are audit-visible.
 
-Draft submission also generates a text submission summary for the submitted request. The summary is a prototype review artifact with metadata and payload context, not an official receipt or production document store.
+Draft submission also generates a text submission summary for the submitted request. The summary is a prototype review artefact with metadata and payload context, not an official receipt or production document store.
 
 Successful submission records pending outbox events for submitted request, summary-created, notification-requested and agency-review-requested integration seams. The outbox demonstrates persisted event-driven handoff points for review; it does not publish to a production queue.
 
@@ -104,7 +104,7 @@ The admin-only operations posture endpoint aggregates safe operational signals f
 Current REST surface:
 
 - `POST /uploads/supporting-documents`: records validated supporting document metadata for a customer-owned draft or service request.
-- `GET /service-requests/:referenceNumber/supporting-documents/:documentId/download`: downloads an available prototype evidence artifact for an owned submitted request, or for reviewer roles with submitted-record access.
+- `GET /service-requests/:referenceNumber/supporting-documents/:documentId/download`: downloads an available prototype evidence artefact for an owned submitted request, or for reviewer roles with submitted-record access.
 - `GET /service-requests/:referenceNumber/summary/download`: downloads the generated text submission summary for a customer-owned submitted request with `content-type` and `content-disposition` headers.
 - `GET /operations/outbox-events`: summarises outbox event counts by event type and status for local operations review.
 - `GET /operations/posture`: returns an admin-only operational posture summary with derived next actions.
@@ -146,9 +146,9 @@ Prototype role headers are also supported:
 - `X-SSQ-DEMO-ROLE`: `Citizen`, `ServiceOfficer`, `TeamLead` or `Admin`.
 - `X-SSQ-DEMO-SUBJECT`: demo subject identifier. For citizens this is the customer email.
 
-Demo headers resolve into a backend identity contract with subject, user id, display name, email, roles, source and assurance level. This resolver is deliberately marked `DEMO_HEADER` / `DEMO_LOW_ASSURANCE`; a real IAM/OIDC provider should replace the resolver behind the same contract rather than changing resolver/service authorization logic.
+Demo headers resolve into a backend identity contract with subject, user id, display name, email, roles, source and assurance level. This resolver is deliberately marked `DEMO_HEADER` / `DEMO_LOW_ASSURANCE`; a real IAM/OIDC provider should replace the resolver behind the same contract rather than changing resolver/service authorisation logic.
 
-Citizen role access is scoped to owned drafts, requests, uploads and summary downloads. Service officer, team lead and admin roles can read submitted service requests, update request status and manage assignments. Admin role is required for operations endpoints. Authorization decisions are centralized in the backend policy service. These headers are local review controls only, not production authentication.
+Citizen role access is scoped to owned drafts, requests, uploads and summary downloads. Service officer, team lead and admin roles can read submitted service requests, update request status and manage assignments. Admin role is required for operations endpoints. Authorisation decisions are centralised in the backend policy service. These headers are local review controls only, not production authentication.
 
 All backend responses preserve a supplied `x-correlation-id` or generate one when absent. Safe not-found and unhandled-error responses include the correlation ID and avoid stack traces or raw infrastructure details. Runtime logs redact common secret-bearing headers and payload/body fields.
 

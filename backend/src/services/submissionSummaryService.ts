@@ -24,7 +24,7 @@ export class SubmissionSummaryService {
       "Submitted payload:",
       JSON.stringify(input.serviceRequest.payload, null, 2),
       "",
-      "Prototype note: this text file is a local review artifact, not an official receipt."
+      "Prototype note: this text file is a local review artefact, not an official receipt."
     ].join("\n");
 
     return this.repository.createSubmissionSummary({

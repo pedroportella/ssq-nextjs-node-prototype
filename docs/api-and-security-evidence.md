@@ -1,6 +1,6 @@
 # API And Security Evidence
 
-This note maps the SSQ prototype backend/API, GraphQL integration, authorization boundary and security controls to reviewer evidence.
+This note maps the SSQ prototype backend/API, GraphQL integration, authorisation boundary and security controls to reviewer evidence.
 
 It is evidence for a review prototype, not a production security assurance claim. The prototype uses demo identity headers and seeded data only.
 
@@ -120,7 +120,7 @@ If SSQ required browser Apollo Client for a future authenticated surface, the ad
 - wrap Apollo Client behind the existing `@ssq/services` contracts so app pages do not depend directly on transport details;
 - preserve browser-bundle and source guards for backend/internal URL leakage.
 
-## Demo Identity And Authorization Matrix
+## Demo Identity And Authorisation Matrix
 
 Demo identity is selected through headers:
 
@@ -146,11 +146,11 @@ Unknown or missing roles resolve to `Citizen`, which is the safest demo role. Th
 | Transaction catalogue and schema reads | Public to prototype roles. Feature flags control startability. | `TransactionCatalogueService`. | `transaction_definitions`, `transaction_schemas`, `feature_flags`. | [transactionCatalogueService.test.ts](../backend/src/services/transactionCatalogueService.test.ts), [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts). | Apply production entitlement and release-management policy if catalogue visibility becomes role-specific. |
 | Draft list/read/create/update | Citizen-owned. | GraphQL role checks and `DraftLifecycleService`. | `service_request_drafts`. | [draftLifecycleService.test.ts](../backend/src/services/draftLifecycleService.test.ts), [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts). | Real user/session identity, draft ownership audit and save-event audit trail. |
 | Submit draft | Citizen-owned. | `SubmissionLifecycleService` and [submissionValidation.ts](../backend/src/services/submissionValidation.ts). | `service_requests`, events, evidence, summaries, outbox. | [submissionLifecycleService.test.ts](../backend/src/services/submissionLifecycleService.test.ts), [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts). | Auditable submission identity, non-repudiation, receipt policy and agency handoff controls. |
-| Citizen service request list/query/read | Citizen-owned. | Resolver role and customer lookup. | `service_requests`. | [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts), [prototypeRepository.test.ts](../backend/src/repositories/prototypeRepository.test.ts). | Real authorization policy, row-level ownership checks and audit trails. |
+| Citizen service request list/query/read | Citizen-owned. | Resolver role and customer lookup. | `service_requests`. | [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts), [prototypeRepository.test.ts](../backend/src/repositories/prototypeRepository.test.ts). | Real authorisation policy, row-level ownership checks and audit trails. |
 | Submitted service request queue/query/read | ServiceOfficer, TeamLead, Admin. | Resolver role checks and query validation. | `service_requests`. | [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts), [serviceRequestStatusLifecycleService.test.ts](../backend/src/services/serviceRequestStatusLifecycleService.test.ts). | Real staff IAM/RBAC/ABAC, team/agency scoping and operational read audit. |
 | Status transition | ServiceOfficer, TeamLead, Admin. | `ServiceRequestStatusLifecycleService`. | `service_requests`, `service_request_events`, `outbox_events`. | [serviceRequestStatusLifecycleService.test.ts](../backend/src/services/serviceRequestStatusLifecycleService.test.ts), [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts). | Audited officer identity, reason capture policy, notification policy and segregation-of-duties review. |
-| Supporting document metadata upload | Citizen-owned draft/request. | `SupportingDocumentUploadService` and [supportingDocumentPolicy.ts](../backend/src/policies/supportingDocumentPolicy.ts). | `supporting_documents`. | [supportingDocumentUploadService.test.ts](../backend/src/services/supportingDocumentUploadService.test.ts), [supportingDocuments.test.ts](../backend/src/routes/supportingDocuments.test.ts). | Private object storage, malware scanning, retention, privacy review and real file authorization. |
-| Supporting document metadata read | Citizen-owned draft/request. | Resolver checks customer ownership before listing documents. | `supporting_documents`. | [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts). | Real document authorization policy, access audit and retention controls. |
+| Supporting document metadata upload | Citizen-owned draft/request. | `SupportingDocumentUploadService` and [supportingDocumentPolicy.ts](../backend/src/policies/supportingDocumentPolicy.ts). | `supporting_documents`. | [supportingDocumentUploadService.test.ts](../backend/src/services/supportingDocumentUploadService.test.ts), [supportingDocuments.test.ts](../backend/src/routes/supportingDocuments.test.ts). | Private object storage, malware scanning, retention, privacy review and real file authorisation. |
+| Supporting document metadata read | Citizen-owned draft/request. | Resolver checks customer ownership before listing documents. | `supporting_documents`. | [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts). | Real document authorisation policy, access audit and retention controls. |
 | Submission summary read/download | Citizen-owned submitted request. | Resolver/route customer ownership lookup. | `submission_summaries`. | [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts), [submissionSummaries.test.ts](../backend/src/routes/submissionSummaries.test.ts). | Official receipt policy, signed download links if needed, retention and audit trails. |
 | Activity logs and customer profile evidence reads | Prototype support reads by service request id. | Current prototype resolver delegates to repository by id. | `service_request_events`, `customer_profile_evidence`. | [graphqlRoute.test.ts](../backend/src/graphql/graphqlRoute.test.ts) covers projection after submission/status change. | Must be scoped by customer/staff role and audited before production; this is intentionally a production-next gap. |
 | Outbox operations summary | Admin only. | REST route role check. | `outbox_events`. | [operations.test.ts](../backend/src/routes/operations.test.ts). | Real operations IAM, audit logs, queue visibility policy and alerting integration. |
@@ -167,14 +167,14 @@ Unknown or missing roles resolve to `Citizen`, which is the safest demo role. Th
 | Security response headers | [hardening.ts](../backend/src/plugins/hardening.ts), [app.test.ts](../backend/src/app.test.ts). |
 | Debug route disabled by default | [debug.ts](../backend/src/routes/debug.ts), [app.test.ts](../backend/src/app.test.ts). |
 | Browser/backend URL leak guards | [quality guards](../scripts/quality-guards.mjs), [frontend deployment readiness](frontend-deployment-readiness.md). |
-| Artifact and local spec guards | [quality guards](../scripts/quality-guards.mjs). |
+| Artefact and local spec guards | [quality guards](../scripts/quality-guards.mjs). |
 
 ## Production-Next Security Work
 
 Before any real citizen or agency data could be used, this prototype would need:
 
 - real myQLD/QIB/SSO session integration;
-- auditable authorization policy for citizens, staff, teams, agencies and operations users;
+- auditable authorisation policy for citizens, staff, teams, agencies and operations users;
 - row-level or policy-enforced data ownership checks;
 - operational read and status-change audit trails;
 - private document storage, malware scanning, retention enforcement and privacy review;

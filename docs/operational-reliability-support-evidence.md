@@ -12,7 +12,7 @@ It is a review-runtime evidence pack, not a production operations claim. Digital
 | Backend API | Fastify service with `/health`, `/health/live`, `/health/ready`, GraphQL and REST upload/download routes. | Horizontal scaling policy, private networking, production ingress, capacity planning and SLO/error-budget management. |
 | Database | PostgreSQL migrations, seeds, readiness check and local Docker volume; review deployment uses review database posture. | Managed database operations with backups, point-in-time recovery, high availability, maintenance windows, credential rotation and restore drills. |
 | Async handoff | Persisted outbox events and admin summary route. | Real queue worker, retry policy, idempotency, dead-letter handling, alerting and replay/reconciliation controls. |
-| Identity and authorization | Demo role headers with citizen/reviewer/admin boundaries for review. | Real myQLD/QIB/SSO/IAM integration, auditable authorization, staff/team/agency scoping and access-review process. |
+| Identity and authorisation | Demo role headers with citizen/reviewer/admin boundaries for review. | Real myQLD/QIB/SSO/IAM integration, auditable authorisation, staff/team/agency scoping and access-review process. |
 | Documents | Metadata-only upload policy with ownership/type/size/category checks. | Private object storage, malware scanning, retention, privacy review, encryption policy and document access audit. |
 
 ## Health And Readiness Evidence
@@ -75,7 +75,7 @@ pnpm guard:frontend-source
 | Redaction | Logger redacts common secret-bearing headers and payload fields. | [logger.ts](../backend/src/logger.ts). |
 | Status lifecycle | Status changes write activity events with correlation ID, previous status, next status and reason. | [serviceRequestStatusLifecycleService.ts](../backend/src/services/serviceRequestStatusLifecycleService.ts), [GraphQL tests](../backend/src/graphql/graphqlRoute.test.ts). |
 | Outbox | Submission and status work can persist outbox events; admin route summarises event counts by status/type. | [outboxEventService.ts](../backend/src/services/outboxEventService.ts), [operations route](../backend/src/routes/operations.ts), [operations tests](../backend/src/routes/operations.test.ts). |
-| Guardrails | Artifact, frontend-source and browser-bundle guards reduce accidental local/spec/secret leakage. | [quality guards](../scripts/quality-guards.mjs), [CI workflow](../.github/workflows/ci.yml). |
+| Guardrails | Artefact, frontend-source and browser-bundle guards reduce accidental local/spec/secret leakage. | [quality guards](../scripts/quality-guards.mjs), [CI workflow](../.github/workflows/ci.yml). |
 
 ## Release And Quality Gates
 
@@ -84,7 +84,7 @@ The review release path uses:
 - pinned Node.js and pnpm versions;
 - lint, typecheck and test gates;
 - production builds for backend, shared packages and three apps;
-- artifact and frontend-source guards;
+- artefact and frontend-source guards;
 - browser bundle guard after frontend production builds;
 - Docker Compose validation and Docker image builds;
 - local and deployed full-stack smoke paths.
@@ -99,10 +99,10 @@ Evidence:
 
 ## Production Hardening Backlog
 
-### Identity And Authorization
+### Identity And Authorisation
 
 - Replace demo headers with real myQLD/QIB/SSO/IAM.
-- Add auditable authorization for citizens, staff, teams, agencies and operations users.
+- Add auditable authorisation for citizens, staff, teams, agencies and operations users.
 - Scope activity, evidence and operational reads by role and ownership.
 - Add access-review and privileged-operation audit trails.
 

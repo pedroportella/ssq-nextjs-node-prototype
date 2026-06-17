@@ -14,13 +14,13 @@ Start here:
 
 1. Open the [live review apps](docs/live-review-links.md), especially the dashboard and Seniors Card apply flow.
 2. Scan the [selection criteria map](docs/selection-criteria-map.md) for role criteria, concrete evidence, verification commands and honest production-next gaps.
-3. Review the [API and security evidence](docs/api-and-security-evidence.md) for GraphQL, REST, demo authorization, safe errors and production-next security gaps.
+3. Review the [API and security evidence](docs/api-and-security-evidence.md) for GraphQL, REST, demo authorisation, safe errors and production-next security gaps.
 4. Review the [operational reliability and support evidence](docs/operational-reliability-support-evidence.md) for health checks, smoke tests, support triage and high-assurance gaps.
 5. Review the [AWS platform mapping](docs/aws-platform-mapping.md) for AWS, Kubernetes, serverless, GitHub Actions promotion and platform-support evidence.
 6. Review the [accessibility and UI Library evidence](docs/accessibility-and-ui-library-evidence.md) for QHDS, responsive and Playwright coverage.
 7. Use the [release handover runbook](docs/release-runbook.md) to run the same stack locally or review the quality gates.
 
-The short version: the prototype demonstrates the role's core frontend, backend, testing and delivery expectations now. AWS, production identity, high-availability operations, auditable authorization and full security/privacy assurance are mapped as production-next work rather than claimed as implemented.
+The short version: the prototype demonstrates the role's core frontend, backend, testing and delivery expectations now. AWS, production identity, high-availability operations, auditable authorisation and full security/privacy assurance are mapped as production-next work rather than claimed as implemented.
 
 ## Live Review
 
@@ -57,7 +57,7 @@ Captured from local review builds on 2026-06-17.
 - Server-only frontend service layer that keeps backend origins out of browser code.
 - Docker Compose local runtime for PostgreSQL, backend and the three frontend app containers.
 - DigitalOcean App Platform review deployment for the three public frontend apps.
-- Correlation IDs, safe REST errors, CORS allow-list configuration, local rate limiting, security headers and artifact/secret guards.
+- Correlation IDs, safe REST errors, CORS allow-list configuration, local rate limiting, security headers and artefact/secret guards.
 
 ## What Is Simulated
 
@@ -130,7 +130,7 @@ pnpm guard:frontend-source
 pnpm check
 ```
 
-The reviewer evidence smoke checks the public handover path, required docs, screenshots, local Markdown links, live frontend/status URLs and obvious private-info leakage patterns. The guard scripts fail when generated artifacts, local env files, local databases, reports, generated DigitalOcean specs, browser-visible backend origins or backend-only environment variable names are tracked or leaked.
+The reviewer evidence smoke checks the public handover path, required docs, screenshots, local Markdown links, live frontend/status URLs and obvious private-info leakage patterns. The guard scripts fail when generated artefacts, local env files, local databases, reports, generated DigitalOcean specs, browser-visible backend origins or backend-only environment variable names are tracked or leaked.
 
 ## Key Docs
 
@@ -151,7 +151,7 @@ The reviewer evidence smoke checks the public handover path, required docs, scre
 
 ## Production Next Steps
 
-- Replace demo identity headers with real identity, session management, SSO/IAM and auditable authorization.
+- Replace demo identity headers with real identity, session management, SSO/IAM and auditable authorisation.
 - Move from review database posture to production database operations, including backups, high availability, point-in-time restore, migration policy and credential rotation.
 - Add private object storage, malware scanning, retention controls and privacy review for documents.
 - Attach real queue publishing, retry policy, dead-letter handling and outbox processing.

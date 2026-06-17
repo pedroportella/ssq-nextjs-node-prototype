@@ -120,7 +120,7 @@ function checkTrackedArtifacts() {
   }
 
   if (failures.length > 0) {
-    console.error("Tracked generated artifacts or local-only files were found:");
+    console.error("Tracked generated artefacts or local-only files were found:");
     for (const failure of failures) {
       console.error(`- ${failure}`);
     }
@@ -128,7 +128,7 @@ function checkTrackedArtifacts() {
     return;
   }
 
-  console.log("Tracked artifact guard passed.");
+  console.log("Tracked artefact guard passed.");
 }
 
 function checkFrontendSourceConfig() {

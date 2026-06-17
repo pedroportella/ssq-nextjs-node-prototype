@@ -86,7 +86,7 @@ export function RentalSecuritySubsidyStatusContent({
 
       <QhdsContentSection heading="Supporting documents" id="supporting-documents">
         <QhdsFileUpload
-          hint="Document links are available when the prototype evidence store has an uploaded artifact."
+          hint="Document links are available when the prototype evidence store has an uploaded artefact."
           id="supporting-documents-upload"
           label="Upload supporting documents"
           name="supportingDocuments"

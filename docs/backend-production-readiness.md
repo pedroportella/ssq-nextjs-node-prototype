@@ -16,7 +16,7 @@ This note separates implemented prototype controls from production-next work.
 
 ## Production-Next Gaps
 
-- Replace demo headers with real identity, session management, SSO/IAM integration and auditable authorization policy.
+- Replace demo headers with real identity, session management, SSO/IAM integration and auditable authorisation policy.
 - Add production-grade rate limiting backed by shared infrastructure rather than per-process memory.
 - Add full CORS environment management for deployed frontend origins.
 - Add malware scanning, private object storage, retention policy enforcement and privacy review for documents.

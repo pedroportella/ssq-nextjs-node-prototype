@@ -494,7 +494,7 @@ describe("Reviewer queue containers", () => {
     expect(html).toContain("Reason");
   });
 
-  it("renders a clear unauthorized reviewer state without staff controls", () => {
+  it("renders a clear unauthorised reviewer state without staff controls", () => {
     const html = renderToStaticMarkup(
       <ReviewerQueueContent
         queue={{

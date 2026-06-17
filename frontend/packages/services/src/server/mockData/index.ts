@@ -667,7 +667,7 @@ export function createMockSupportingDocumentDownload(
 
   return {
     body: [
-      "SSQ prototype supporting document artifact",
+      "SSQ prototype supporting document artefact",
       `Document ID: ${documentId}`,
       `Reference: ${referenceNumber}`,
       `Original filename: ${document.fileName}`,

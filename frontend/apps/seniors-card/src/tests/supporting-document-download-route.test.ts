@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { GET } from "../app/service-requests/[referenceNumber]/supporting-documents/[documentId]/download/route";
 
 describe("seniors card supporting document download route", () => {
-  it("streams the mock document artifact with filename disposition", async () => {
+  it("streams the mock document artefact with filename disposition", async () => {
     const response = await GET(
       new Request("http://localhost/service-requests/SC-2026-0001/supporting-documents/mock-sc-identity-evidence/download"),
       {

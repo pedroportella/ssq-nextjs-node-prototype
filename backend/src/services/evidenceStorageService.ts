@@ -87,7 +87,7 @@ export class EvidenceStorageService {
       ok: true,
       download: {
         body: [
-          "SSQ prototype supporting document artifact",
+          "SSQ prototype supporting document artefact",
           `Document ID: ${document.id}`,
           `Original filename: ${document.fileName}`,
           `Category: ${document.category}`,
