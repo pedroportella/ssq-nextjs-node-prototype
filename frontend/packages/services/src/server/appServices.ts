@@ -49,6 +49,7 @@ import type {
   PrototypeReviewerQueueData,
   PrototypeReviewerQueueFilters,
   PrototypeReviewerRequestDetailData,
+  PrototypeSessionSummary,
   PrototypeSupportingDocumentDownload,
   PrototypeSupportingDocumentUploadInput,
   PrototypeSupportingDocumentUploadResult,
@@ -64,17 +65,18 @@ export interface AppShellData {
   app: PrototypeAppSummary;
   backendBoundary: "server-only";
   dataSource: FrontendDataSource;
+  session: PrototypeSessionSummary;
 }
 
 function getRuntimeConfig(config?: FrontendRuntimeConfig): FrontendRuntimeConfig {
   return config ?? resolveFrontendRuntimeConfig();
 }
 
-function createAppShellData(key: PrototypeAppKey, config?: FrontendRuntimeConfig): AppShellData {
+async function createAppShellData(key: PrototypeAppKey, config?: FrontendRuntimeConfig): Promise<AppShellData> {
   const runtimeConfig = getRuntimeConfig(config);
 
   if (runtimeConfig.dataSource === "backend") {
-    return createBackendAppShellData(key);
+    return createBackendAppShellData(key, runtimeConfig);
   }
 
   return createMockAppShellData(key);

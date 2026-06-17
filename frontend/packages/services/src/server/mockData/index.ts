@@ -18,6 +18,8 @@ import type {
   PrototypeReviewerRequestSummary,
   PrototypeReviewerStatus,
   PrototypeServiceCatalogueEntry,
+  PrototypeSessionRole,
+  PrototypeSessionSummary,
   PrototypeSupportingDocumentDownload,
   PrototypeSupportingDocumentUploadInput,
   PrototypeSupportingDocumentUploadResult,
@@ -37,6 +39,33 @@ export const mockProfileSummary: PrototypeProfileSummary = {
   email: "avery.taylor@example.test",
   identityStrength: "verified"
 };
+
+export function isPrototypeSessionRole(value: unknown): value is PrototypeSessionRole {
+  return value === "Citizen" || value === "ServiceOfficer" || value === "TeamLead" || value === "Admin";
+}
+
+export function createSessionCapabilities(role: PrototypeSessionRole): PrototypeSessionSummary["capabilities"] {
+  return {
+    canAccessCitizenServices: role === "Citizen",
+    canReadOperations: role === "Admin",
+    canReviewSubmittedRequests: role === "ServiceOfficer" || role === "TeamLead" || role === "Admin"
+  };
+}
+
+export function createMockSessionSummary(env: NodeJS.ProcessEnv = process.env): PrototypeSessionSummary {
+  const role = isPrototypeSessionRole(env.SSQ_FRONTEND_DEMO_ROLE) ? env.SSQ_FRONTEND_DEMO_ROLE : "Citizen";
+  const subject = env.SSQ_FRONTEND_DEMO_SUBJECT ?? (role === "Citizen" ? mockProfileSummary.email : "officer@example.test");
+
+  return {
+    capabilities: createSessionCapabilities(role),
+    displayName: role === "Citizen" ? mockProfileSummary.displayName : `${role} ${subject}`,
+    identityStrength: role === "Citizen" ? "verified" : "basic",
+    roles: [role],
+    signedIn: true,
+    source: "MOCK",
+    subject
+  };
+}
 
 export function createMockServiceCatalogue(publicUrls: FrontendPublicUrlConfig): PrototypeServiceCatalogueEntry[] {
   return [
@@ -274,21 +303,23 @@ function createMockReviewerStatusCounts(requests = mockReviewerRequests): Protot
 }
 
 export function createMockReviewerQueueData(filters: PrototypeReviewerQueueFilters = {}): PrototypeReviewerQueueData {
+  const session = createMockSessionSummary();
+  const canReview = session.capabilities.canReviewSubmittedRequests;
   const filteredRequests = filterMockReviewerRequests(filters);
 
   return {
-    canReview: true,
+    canReview,
     filters,
     pageInfo: {
       page: 1,
       pageSize: 20,
-      totalItems: filteredRequests.length,
-      totalPages: filteredRequests.length > 0 ? 1 : 0
+      totalItems: canReview ? filteredRequests.length : 0,
+      totalPages: canReview && filteredRequests.length > 0 ? 1 : 0
     },
-    requests: filteredRequests.map(({ payload: _payload, ...request }) => request),
-    reviewerRole: "ServiceOfficer",
-    reviewerSubject: "officer@example.test",
-    statusCounts: createMockReviewerStatusCounts()
+    requests: canReview ? filteredRequests.map(({ payload: _payload, ...request }) => request) : [],
+    reviewerRole: session.roles[0] ?? "Citizen",
+    reviewerSubject: session.subject,
+    statusCounts: canReview ? createMockReviewerStatusCounts() : []
   };
 }
 
@@ -319,15 +350,17 @@ function createMockReviewerActivity(request: PrototypeReviewerRequestSummary): P
 }
 
 export function createMockReviewerRequestDetailData(referenceNumber: string): PrototypeReviewerRequestDetailData {
+  const session = createMockSessionSummary();
+  const canReview = session.capabilities.canReviewSubmittedRequests;
   const request = mockReviewerRequests.find((candidate) => candidate.referenceNumber === referenceNumber);
 
-  if (!request) {
+  if (!canReview || !request) {
     return {
       activity: [],
-      canReview: true,
+      canReview,
       payloadItems: [],
-      reviewerRole: "ServiceOfficer",
-      reviewerSubject: "officer@example.test",
+      reviewerRole: session.roles[0] ?? "Citizen",
+      reviewerSubject: session.subject,
       supportingDocuments: []
     };
   }
@@ -336,11 +369,11 @@ export function createMockReviewerRequestDetailData(referenceNumber: string): Pr
 
   return {
     activity: createMockReviewerActivity(summary),
-    canReview: true,
+    canReview,
     payloadItems: createPayloadItems(payload),
     request: summary,
-    reviewerRole: "ServiceOfficer",
-    reviewerSubject: "officer@example.test",
+    reviewerRole: session.roles[0] ?? "Citizen",
+    reviewerSubject: session.subject,
     supportingDocuments: createMockUploadedDocuments(summary.appKey).filter((document) => document.status === "uploaded")
   };
 }

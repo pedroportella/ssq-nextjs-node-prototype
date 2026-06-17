@@ -26,6 +26,8 @@ import type {
   PrototypeReviewerStatus,
   PrototypeReviewerStatusCount,
   PrototypeServiceCatalogueEntry,
+  PrototypeSessionRole,
+  PrototypeSessionSummary,
   PrototypeSupportingDocumentDownload,
   PrototypeSupportingDocumentUploadInput,
   PrototypeSupportingDocumentUploadResult,
@@ -101,7 +103,9 @@ interface BackendServiceRequest {
 interface BackendPlatformInfo {
   demoRole: string;
   demoSubject: string;
+  identityAssuranceLevel?: string;
   identityDisplayName: string;
+  identitySource?: string;
 }
 
 interface BackendSupportingDocument {
@@ -358,6 +362,18 @@ const SUPPORTING_DOCUMENTS_QUERY = /* GraphQL */ `
   }
 `;
 
+const PLATFORM_QUERY = /* GraphQL */ `
+  query FrontendPlatform {
+    platform {
+      demoRole
+      demoSubject
+      identityAssuranceLevel
+      identityDisplayName
+      identitySource
+    }
+  }
+`;
+
 const REVIEWER_QUEUE_QUERY = /* GraphQL */ `
   query FrontendReviewerQueue($input: ServiceRequestListInput) {
     platform {
@@ -500,11 +516,22 @@ const REVIEWER_ASSIGN_MUTATION = /* GraphQL */ `
   }
 `;
 
-export function createBackendAppShellData(key: PrototypeAppKey): AppShellData {
+export async function createBackendAppShellData(
+  key: PrototypeAppKey,
+  config: FrontendRuntimeConfig
+): Promise<AppShellData> {
+  const data = await executeBackendSessionData<{
+    platform: BackendPlatformInfo;
+  }>({
+    config,
+    query: PLATFORM_QUERY
+  });
+
   return {
     app: createPrototypeAppSummary(key),
     backendBoundary: "server-only",
-    dataSource: "backend"
+    dataSource: "backend",
+    session: mapPlatformSession(data.platform)
   };
 }
 
@@ -939,6 +966,28 @@ function mapProfileSummary(profile: BackendCustomerProfile | null): PrototypePro
   };
 }
 
+function mapPlatformSession(platform: BackendPlatformInfo): PrototypeSessionSummary {
+  const role = isPrototypeSessionRole(platform.demoRole) ? platform.demoRole : "Citizen";
+
+  return {
+    capabilities: {
+      canAccessCitizenServices: role === "Citizen",
+      canReadOperations: role === "Admin",
+      canReviewSubmittedRequests: isReviewerRole(role)
+    },
+    displayName: platform.identityDisplayName,
+    identityStrength: platform.identityAssuranceLevel === "DEMO_LOW_ASSURANCE" ? "basic" : "verified",
+    roles: [role],
+    signedIn: true,
+    source: "DEMO_HEADER",
+    subject: platform.demoSubject
+  };
+}
+
+function isPrototypeSessionRole(value: string): value is PrototypeSessionRole {
+  return value === "Citizen" || value === "ServiceOfficer" || value === "TeamLead" || value === "Admin";
+}
+
 function mapDraftSummary(
   draft: BackendServiceRequestDraft,
   fallbackAppKey?: TransactionAppKey
@@ -1354,6 +1403,25 @@ async function executeBackendReviewerData<TData, TVariables extends Record<strin
   return unwrapBackendResponse(response);
 }
 
+async function executeBackendSessionData<TData, TVariables extends Record<string, unknown> = Record<string, never>>(input: {
+  config: FrontendRuntimeConfig;
+  query: string;
+  variables?: TVariables;
+}): Promise<TData> {
+  const response = await executeBackendGraphql<TData, TVariables>(
+    {
+      query: input.query,
+      variables: input.variables
+    },
+    {
+      config: toBackendClientConfig(input.config),
+      headers: createFrontendSessionHeaders()
+    }
+  );
+
+  return unwrapBackendResponse(response);
+}
+
 function unwrapBackendResponse<TData>(response: BackendGraphqlResponse<TData>): TData {
   if (response.errors && response.errors.length > 0) {
     throw new BackendClientError(response.errors[0]?.message ?? "Backend GraphQL request failed.", response.correlationId);
@@ -1388,6 +1456,13 @@ function createReviewerHeaders(): HeadersInit {
   return {
     "x-ssq-demo-role": process.env.SSQ_REVIEWER_DEMO_ROLE ?? "ServiceOfficer",
     "x-ssq-demo-subject": process.env.SSQ_REVIEWER_DEMO_SUBJECT ?? "officer@example.test"
+  };
+}
+
+function createFrontendSessionHeaders(): HeadersInit {
+  return {
+    ...(process.env.SSQ_FRONTEND_DEMO_ROLE ? { "x-ssq-demo-role": process.env.SSQ_FRONTEND_DEMO_ROLE } : {}),
+    ...(process.env.SSQ_FRONTEND_DEMO_SUBJECT ? { "x-ssq-demo-subject": process.env.SSQ_FRONTEND_DEMO_SUBJECT } : {})
   };
 }
 

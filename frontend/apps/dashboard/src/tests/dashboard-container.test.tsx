@@ -19,7 +19,37 @@ import type {
 const shell: AppShellData = {
   app: createPrototypeAppSummary("dashboard"),
   backendBoundary: "server-only",
-  dataSource: "mock"
+  dataSource: "mock",
+  session: {
+    capabilities: {
+      canAccessCitizenServices: true,
+      canReadOperations: false,
+      canReviewSubmittedRequests: false
+    },
+    displayName: "Avery Taylor",
+    identityStrength: "verified",
+    roles: ["Citizen"],
+    signedIn: true,
+    source: "MOCK",
+    subject: "avery.taylor@example.test"
+  }
+};
+
+const staffShell: AppShellData = {
+  ...shell,
+  session: {
+    capabilities: {
+      canAccessCitizenServices: false,
+      canReadOperations: false,
+      canReviewSubmittedRequests: true
+    },
+    displayName: "ServiceOfficer officer@example.test",
+    identityStrength: "basic",
+    roles: ["ServiceOfficer"],
+    signedIn: true,
+    source: "MOCK",
+    subject: "officer@example.test"
+  }
 };
 
 const summary: PrototypeDashboardSummaryData = {
@@ -133,6 +163,7 @@ describe("DashboardContent", () => {
     expect(html).toContain('href="#available-services"');
     expect(html).toContain('href="#current-records"');
     expect(html).toContain('href="#recent-activity"');
+    expect(html).not.toContain("Staff review");
     expect(html).toContain("ssq-layout__content--full");
     expect(html).toContain('aria-labelledby="page-title"');
     expect(html).toContain("row");
@@ -162,6 +193,15 @@ describe("DashboardContent", () => {
     expect(html).toContain(
       'href="https://example.test/rental-security-subsidy/service-requests/RSS-2026-0001/supporting-documents/mock-rss-rental-evidence/download"'
     );
+  });
+
+  it("renders staff review navigation for reviewer sessions", () => {
+    const html = renderToStaticMarkup(<DashboardContent shell={staffShell} summary={summary} />);
+
+    expect(html).toContain("Staff review");
+    expect(html).toContain('href="/reviewer"');
+    expect(html).toContain("ServiceOfficer officer@example.test");
+    expect(html).toContain("No services are available right now.");
   });
 
   it("renders safe empty states when dashboard data is missing", () => {
@@ -263,7 +303,7 @@ describe("Reviewer queue containers", () => {
   });
 
   it("renders the reviewer queue with filters, selection and batch action controls", () => {
-    const html = renderToStaticMarkup(<ReviewerQueueContent queue={reviewerQueue} shell={shell} />);
+    const html = renderToStaticMarkup(<ReviewerQueueContent queue={reviewerQueue} shell={staffShell} />);
 
     expect(html).toContain("Reviewer queue");
     expect(html).toContain("Search queue");
@@ -276,8 +316,24 @@ describe("Reviewer queue containers", () => {
     expect(html).toContain("Reason");
   });
 
+  it("renders a clear unauthorized reviewer state without staff controls", () => {
+    const html = renderToStaticMarkup(
+      <ReviewerQueueContent
+        queue={{
+          ...reviewerQueue,
+          canReview: false
+        }}
+        shell={shell}
+      />
+    );
+
+    expect(html).toContain("Staff access required");
+    expect(html).not.toContain("Batch transition");
+    expect(html).not.toContain('action="/reviewer/actions/batch-status"');
+  });
+
   it("renders reviewer detail with payload, documents, assignment and activity", () => {
-    const html = renderToStaticMarkup(<ReviewerRequestDetailContent detail={reviewerDetail} shell={shell} />);
+    const html = renderToStaticMarkup(<ReviewerRequestDetailContent detail={reviewerDetail} shell={staffShell} />);
 
     expect(html).toContain("Review submitted request details and supporting evidence.");
     expect(html).toContain("SC-2026-0001");

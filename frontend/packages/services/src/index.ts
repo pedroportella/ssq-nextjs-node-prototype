@@ -16,6 +16,24 @@ export interface PrototypeProfileSummary {
   identityStrength: "basic" | "verified";
 }
 
+export type PrototypeSessionRole = "Citizen" | "ServiceOfficer" | "TeamLead" | "Admin";
+
+export interface PrototypeSessionCapabilities {
+  canAccessCitizenServices: boolean;
+  canReadOperations: boolean;
+  canReviewSubmittedRequests: boolean;
+}
+
+export interface PrototypeSessionSummary {
+  capabilities: PrototypeSessionCapabilities;
+  displayName: string;
+  identityStrength: "basic" | "verified";
+  roles: PrototypeSessionRole[];
+  signedIn: boolean;
+  source: "DEMO_HEADER" | "MOCK";
+  subject: string;
+}
+
 export interface PrototypeServiceCatalogueEntry {
   appKey: PrototypeAppKey;
   description: string;

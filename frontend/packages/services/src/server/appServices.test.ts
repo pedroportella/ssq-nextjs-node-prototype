@@ -116,6 +116,7 @@ function mockBackendFetch(
 describe("server app services", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it("returns dashboard shell data", async () => {
@@ -125,7 +126,15 @@ describe("server app services", () => {
         status: "UP"
       },
       backendBoundary: "server-only",
-      dataSource: "mock"
+      dataSource: "mock",
+      session: {
+        capabilities: {
+          canAccessCitizenServices: true,
+          canReviewSubmittedRequests: false
+        },
+        roles: ["Citizen"],
+        source: "MOCK"
+      }
     });
   });
 
@@ -143,11 +152,38 @@ describe("server app services", () => {
   });
 
   it("can return backend shell metadata when backend mode is configured", async () => {
+    mockBackendFetch(({ body, init }) => {
+      expect(body?.query).toContain("FrontendPlatform");
+      expect((init?.headers as Headers).get("x-ssq-demo-role")).toBe("TeamLead");
+
+      return Response.json({
+        data: {
+          platform: {
+            demoRole: "TeamLead",
+            demoSubject: "lead@example.test",
+            identityAssuranceLevel: "DEMO_LOW_ASSURANCE",
+            identityDisplayName: "TeamLead lead@example.test",
+            identitySource: "DEMO_HEADER"
+          }
+        }
+      });
+    });
+    vi.stubEnv("SSQ_FRONTEND_DEMO_ROLE", "TeamLead");
+    vi.stubEnv("SSQ_FRONTEND_DEMO_SUBJECT", "lead@example.test");
+
     await expect(getDashboardShellData({ backendUrl: "http://backend:7001", dataSource: "backend" })).resolves.toMatchObject({
       app: {
         key: "dashboard"
       },
-      dataSource: "backend"
+      dataSource: "backend",
+      session: {
+        capabilities: {
+          canReviewSubmittedRequests: true
+        },
+        roles: ["TeamLead"],
+        source: "DEMO_HEADER",
+        subject: "lead@example.test"
+      }
     });
   });
 
@@ -313,6 +349,9 @@ describe("server app services", () => {
   });
 
   it("returns mock reviewer queue, detail and mutation results", async () => {
+    vi.stubEnv("SSQ_FRONTEND_DEMO_ROLE", "ServiceOfficer");
+    vi.stubEnv("SSQ_FRONTEND_DEMO_SUBJECT", "officer@example.test");
+
     await expect(getReviewerQueueData({ status: "SUBMITTED" }, { dataSource: "mock" })).resolves.toMatchObject({
       canReview: true,
       pageInfo: {

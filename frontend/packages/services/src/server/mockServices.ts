@@ -5,6 +5,7 @@ import {
   createMockActivity,
   createMockDashboardSummaryData,
   createMockDraftSummary,
+  createMockSessionSummary,
   createMockReviewerAssignResult,
   createMockReviewerBatchStatusResult,
   createMockReviewerQueueData,
@@ -46,7 +47,8 @@ export function createMockAppShellData(key: PrototypeAppKey): AppShellData {
   return {
     app: createPrototypeAppSummary(key),
     backendBoundary: "server-only",
-    dataSource: "mock"
+    dataSource: "mock",
+    session: createMockSessionSummary()
   };
 }
 

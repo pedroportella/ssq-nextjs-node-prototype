@@ -30,6 +30,7 @@ import type {
   PrototypeReviewerRequestDetailData,
   PrototypeReviewerRequestSummary,
   PrototypeReviewerStatus,
+  PrototypeSessionSummary,
   PrototypeUploadedDocument
 } from "@ssq/services";
 
@@ -81,7 +82,27 @@ function formatStatus(status: string): string {
     .join(" ");
 }
 
-function ReviewerSideNav({ activeHref }: { activeHref: string }) {
+function ReviewerSideNav({
+  activeHref,
+  session
+}: {
+  activeHref: string;
+  session: PrototypeSessionSummary;
+}) {
+  const staffItems = session.capabilities.canReviewSubmittedRequests
+    ? [
+        {
+          expanded: true,
+          href: "/reviewer",
+          icon: <QhdsIcon size="md" symbol="document" />,
+          items: [
+            { href: "/reviewer", label: "Reviewer queue" }
+          ],
+          label: "Staff review"
+        }
+      ]
+    : [];
+
   return (
     <QhdsSideNav
       activeHref={activeHref}
@@ -95,15 +116,7 @@ function ReviewerSideNav({ activeHref }: { activeHref: string }) {
           icon: <QhdsIcon size="md" symbol="document" />,
           label: "Customer dashboard"
         },
-        {
-          expanded: true,
-          href: "/reviewer",
-          icon: <QhdsIcon size="md" symbol="document" />,
-          items: [
-            { href: "/reviewer", label: "Reviewer queue" }
-          ],
-          label: "Staff review"
-        }
+        ...staffItems
       ]}
     />
   );
@@ -305,7 +318,7 @@ export function ReviewerQueueContent({ queue, shell }: { queue: PrototypeReviewe
       contentLabelledBy="page-title"
       footer={<QhdsFooter />}
       header={<QhdsHeader />}
-      sideNav={<ReviewerSideNav activeHref="/reviewer" />}
+      sideNav={<ReviewerSideNav activeHref="/reviewer" session={shell.session} />}
     >
       <QhdsPageHeader
         aside={
@@ -363,7 +376,7 @@ export function ReviewerRequestDetailContent({
       contentLabelledBy="page-title"
       footer={<QhdsFooter />}
       header={<QhdsHeader />}
-      sideNav={<ReviewerSideNav activeHref="/reviewer" />}
+      sideNav={<ReviewerSideNav activeHref="/reviewer" session={shell.session} />}
     >
       <QhdsPageHeader
         aside={
@@ -457,8 +470,14 @@ export async function ReviewerQueueContainer({ searchParams = {} }: { searchPara
     getDashboardShellData(),
     getReviewerQueueData(filters)
   ]);
+  const queueForSession = {
+    ...queue,
+    canReview: shell.session.capabilities.canReviewSubmittedRequests,
+    reviewerRole: shell.session.roles[0] ?? queue.reviewerRole,
+    reviewerSubject: shell.session.subject
+  };
 
-  return <ReviewerQueueContent queue={queue} shell={shell} />;
+  return <ReviewerQueueContent queue={queueForSession} shell={shell} />;
 }
 
 export async function ReviewerRequestDetailContainer({ referenceNumber }: { referenceNumber: string }) {
@@ -466,6 +485,12 @@ export async function ReviewerRequestDetailContainer({ referenceNumber }: { refe
     getDashboardShellData(),
     getReviewerRequestDetailData(referenceNumber)
   ]);
+  const detailForSession = {
+    ...detail,
+    canReview: shell.session.capabilities.canReviewSubmittedRequests,
+    reviewerRole: shell.session.roles[0] ?? detail.reviewerRole,
+    reviewerSubject: shell.session.subject
+  };
 
-  return <ReviewerRequestDetailContent detail={detail} shell={shell} />;
+  return <ReviewerRequestDetailContent detail={detailForSession} shell={shell} />;
 }

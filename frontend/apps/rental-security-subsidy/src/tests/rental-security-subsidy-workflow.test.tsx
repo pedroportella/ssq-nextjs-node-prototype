@@ -16,7 +16,20 @@ import type { AppShellData } from "@ssq/services/server";
 const shell: AppShellData = {
   app: createPrototypeAppSummary("rental-security-subsidy"),
   backendBoundary: "server-only",
-  dataSource: "mock"
+  dataSource: "mock",
+  session: {
+    capabilities: {
+      canAccessCitizenServices: true,
+      canReadOperations: false,
+      canReviewSubmittedRequests: false
+    },
+    displayName: "Avery Taylor",
+    identityStrength: "verified",
+    roles: ["Citizen"],
+    signedIn: true,
+    source: "MOCK",
+    subject: "avery.taylor@example.test"
+  }
 };
 
 const workflow: PrototypeWorkflowData = {

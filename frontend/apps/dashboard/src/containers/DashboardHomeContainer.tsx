@@ -23,6 +23,7 @@ import type {
   PrototypeActivityEntry,
   PrototypeDashboardSummaryData,
   PrototypeServiceCatalogueEntry,
+  PrototypeSessionSummary,
   PrototypeSubmittedRequestSummary,
   PrototypeUploadedDocument
 } from "@ssq/services";
@@ -125,16 +126,16 @@ function FileLinks({
   );
 }
 
-function DashboardSideNav({ services }: { services: PrototypeServiceCatalogueEntry[] }) {
-  return (
-    <QhdsSideNav
-      activeHref="/"
-      ariaLabel="Dashboard navigation"
-      heading="Home"
-      headingHref="/"
-      headingIcon={<QhdsIcon size="md" symbol="home" />}
-      items={[
-        {
+function DashboardSideNav({
+  services,
+  session
+}: {
+  services: PrototypeServiceCatalogueEntry[];
+  session: PrototypeSessionSummary;
+}) {
+  const items = [
+    services.length > 0
+      ? {
           expanded: true,
           href: "#available-services",
           icon: <QhdsIcon size="md" symbol="document" />,
@@ -143,23 +144,44 @@ function DashboardSideNav({ services }: { services: PrototypeServiceCatalogueEnt
             label: service.label
           })),
           label: "Services"
-        },
-        {
+        }
+      : undefined,
+    {
+      expanded: true,
+      href: "#current-records",
+      icon: <QhdsIcon size="md" symbol="document" />,
+      items: [
+        { href: "#saved-drafts", label: "Saved drafts" },
+        { href: "#submitted-requests", label: "Submitted requests" }
+      ],
+      label: "Current records"
+    },
+    session.capabilities.canReviewSubmittedRequests
+      ? {
           expanded: true,
-          href: "#current-records",
+          href: "/reviewer",
           icon: <QhdsIcon size="md" symbol="document" />,
           items: [
-            { href: "#saved-drafts", label: "Saved drafts" },
-            { href: "#submitted-requests", label: "Submitted requests" }
+            { href: "/reviewer", label: "Reviewer queue" }
           ],
-          label: "Current records"
-        },
-        {
-          href: "#recent-activity",
-          icon: <QhdsIcon size="md" symbol="clock" />,
-          label: "Recent activity"
+          label: "Staff review"
         }
-      ]}
+      : undefined,
+    {
+      href: "#recent-activity",
+      icon: <QhdsIcon size="md" symbol="clock" />,
+      label: "Recent activity"
+    }
+  ].filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  return (
+    <QhdsSideNav
+      activeHref="/"
+      ariaLabel="Dashboard navigation"
+      heading="Home"
+      headingHref="/"
+      headingIcon={<QhdsIcon size="md" symbol="home" />}
+      items={items}
     />
   );
 }
@@ -279,22 +301,24 @@ function ActivityTable({ activity }: { activity: PrototypeActivityEntry[] }) {
 
 export function DashboardContent({ shell, summary }: { shell: AppShellData; summary: PrototypeDashboardSummaryData }) {
   const activeRequests = summary.drafts.length + summary.submittedRequests.length;
+  const visibleServices = shell.session.capabilities.canAccessCitizenServices ? summary.availableServices : [];
 
   return (
     <QhdsLayout
       contentLabelledBy="page-title"
       footer={<QhdsFooter />}
       header={<QhdsHeader />}
-      sideNav={<DashboardSideNav services={summary.availableServices} />}
+      sideNav={<DashboardSideNav services={visibleServices} session={shell.session} />}
     >
       <QhdsPageHeader
         aside={
           <QhdsSummaryList
-            ariaLabel="Profile summary"
+            ariaLabel="Session summary"
             items={[
-              { description: summary.profile.displayName, term: "Signed in as" },
-              { description: summary.profile.email, term: "Email" },
-              { description: formatStatus(summary.profile.identityStrength), term: "Identity" }
+              { description: shell.session.displayName, term: "Signed in as" },
+              { description: shell.session.subject, term: "Subject" },
+              { description: shell.session.roles.join(", "), term: "Demo role" },
+              { description: formatStatus(shell.session.identityStrength), term: "Identity" }
             ]}
           />
         }
@@ -322,7 +346,7 @@ export function DashboardContent({ shell, summary }: { shell: AppShellData; summ
       </QhdsContentSection>
 
       <QhdsContentSection heading="Available services" id="available-services">
-        <ServiceCards services={summary.availableServices} />
+        <ServiceCards services={visibleServices} />
       </QhdsContentSection>
 
       <QhdsContentSection heading="Current records" id="current-records">
