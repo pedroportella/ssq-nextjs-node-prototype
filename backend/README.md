@@ -97,6 +97,8 @@ Integration seams are expressed through backend gateway contracts with determini
 
 Gateway payloads include `gateway`, `gatewayMode`, `availability` and production-next notes. Local adapters can emit explicit unavailable states for deterministic failure tests; they do not claim real upstream access.
 
+The admin-only operations posture endpoint aggregates safe operational signals for local runbook evidence: runtime, database readiness, outbox counts, feature-flag state, migration/seed file posture and hardening configuration. It returns derived next actions such as database down, failed/pending outbox events, disabled features, unapplied migrations, debug routes enabled or rate limiting disabled. It does not expose secrets or connection strings.
+
 ## REST
 
 Current REST surface:
@@ -105,6 +107,7 @@ Current REST surface:
 - `GET /service-requests/:referenceNumber/supporting-documents/:documentId/download`: downloads an available prototype evidence artifact for an owned submitted request, or for reviewer roles with submitted-record access.
 - `GET /service-requests/:referenceNumber/summary/download`: downloads the generated text submission summary for a customer-owned submitted request with `content-type` and `content-disposition` headers.
 - `GET /operations/outbox-events`: summarises outbox event counts by event type and status for local operations review.
+- `GET /operations/posture`: returns an admin-only operational posture summary with derived next actions.
 
 ## GraphQL
 

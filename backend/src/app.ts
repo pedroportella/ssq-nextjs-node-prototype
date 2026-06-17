@@ -42,7 +42,7 @@ export async function buildApp(options: BuildAppOptions = {}) {
   await registerHealthRoutes(app, config, database);
   await registerDebugRoutes(app, config);
   await registerGraphqlRoute(app, database.queryable);
-  await registerOperationsRoutes(app, database.queryable);
+  await registerOperationsRoutes(app, database.queryable, config, database);
   await registerSubmissionSummaryRoutes(app, database.queryable);
   await registerSupportingDocumentRoutes(app, database.queryable);
 
