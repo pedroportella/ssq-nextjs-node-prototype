@@ -147,6 +147,20 @@ For a headed run of the complete mock smoke suite across all frontend apps:
 pnpm test:e2e:mock:headed
 ```
 
+Run the heavier workflow scenario matrix when you want SC/RSS field combinations, evidence validation limits and dashboard/summary checks without adding runtime to the default smoke gate:
+
+```bash
+pnpm test:e2e:scenarios
+pnpm test:e2e:scenarios:seniors-card
+pnpm test:e2e:scenarios:rental-security-subsidy
+```
+
+Use the headed scenario suite when you want to watch Chromium drive the matrix:
+
+```bash
+pnpm test:e2e:scenarios:headed
+```
+
 The mock E2E Playwright config starts the selected Next.js apps automatically. In managed sandboxes, headed runs may need permission to bind the selected local app ports: `3000`, `3001` or `3002`.
 
 Run visual baseline checks when reviewing QHDS-facing layout changes:
@@ -172,6 +186,7 @@ Verified locally on 2026-06-17:
 | `pnpm test:e2e:mock:rental-security-subsidy` | Passed | Rental Security Subsidy-focused mock suite; 18 Chromium tests. |
 | `pnpm test:e2e:mock:headed` | Passed | Full visible-browser mock suite; 42 Chromium tests. |
 | `pnpm test:e2e:mock:rss-dashboard:headed` | Passed | Focused visible RSS submission to Dashboard flow; 1 Chromium test. |
+| `pnpm test:e2e:scenarios` | Passed | Heavier SC/RSS scenario matrix; 9 Chromium tests covering workflow field combinations, evidence validation, summary and dashboard behaviours. |
 | `pnpm test:e2e:real` | Passed | Docker-backed real backend suite; 3 Chromium tests. The first run may build local images. |
 | `pnpm test:e2e:real:headed` | Passed | Visible-browser Docker-backed real backend suite; 3 Chromium tests. |
 | `pnpm test:e2e:real:rss-dashboard:headed` | Passed | Focused visible real backend RSS submission flow; 1 Chromium test. |
