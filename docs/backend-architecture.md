@@ -1,40 +1,33 @@
 # Backend Architecture
 
-This backend is a production-shaped prototype for SSQ-style digital transaction workflows. It is not an official government platform and does not claim production identity, authorisation, document storage, queueing or agency integration.
+Production-shaped Node.js prototype backend for SSQ-style service request workflows. It is not a production identity, document, queue or agency-integration platform.
 
-## Runtime Shape
+## Shape
 
-- Fastify owns HTTP routing, health probes, REST upload/download endpoints and GraphQL transport.
+- Fastify owns HTTP routing, health probes, REST endpoints and GraphQL transport.
 - PostgreSQL owns durable prototype state through SQL migrations and seed data.
-- GraphQL exposes platform data contracts for viewer/profile, catalogue, drafts, submissions, lifecycle, activity and query contracts.
-- REST is used where HTTP semantics are a better fit: health, supporting document metadata upload, submission summary download, debug and operations endpoints.
+- GraphQL exposes profile, catalogue, draft, submission, status, activity and query contracts.
+- REST handles health, supporting document metadata, submission summary downloads, debug and operations surfaces.
 
 ## Layers
 
-- Routes and resolvers coordinate transport, identity headers, response shape and service calls.
-- Services own workflow rules such as draft lifecycle, submission validation, status transitions, summary generation, outbox creation and upload policy.
-- Repository methods own SQL access and mapping from rows to backend records.
-- Migrations own schema evolution. Seeds own prototype catalogue, flags and demo customer data.
+- Routes/resolvers coordinate transport, demo identity, responses and errors.
+- Services own validation, workflow rules, activity history, outbox events and document policy.
+- Repositories own SQL access.
+- Policies centralise rules that must be shared by routes, services and tests.
 
-## Identity Boundary
+## Boundaries
 
-Local review identity is selected by headers:
+- Demo headers represent prototype citizen/reviewer identity only.
+- Backend validation is authoritative for writes.
+- Supporting document upload is metadata-only.
+- Outbox events are persisted to show integration shape, but no production worker is attached.
+- Correlation IDs, safe errors, CORS, rate limiting and security headers are implemented for review.
 
-- `X-SSQ-DEMO-ROLE`: `Citizen`, `ServiceOfficer`, `TeamLead` or `Admin`.
-- `X-SSQ-DEMO-SUBJECT`: demo subject identifier. For citizens this is a customer email.
-- `x-demo-customer-email`: legacy citizen fallback.
+## Verify
 
-Citizen access is scoped to owned drafts, requests, uploads and summary downloads. Service officer, team lead and admin roles can read submitted records and update request status. Admin is required for operations endpoints. These controls are prototype-only and are not production authentication, SSO, IAM, RBAC or row-level security.
-
-## Operational Seams
-
-- `x-correlation-id` is preserved when supplied and generated when absent.
-- Safe REST errors include the correlation ID and avoid stack traces.
-- Runtime logs redact common secret-bearing headers and payload/body fields.
-- Pending outbox events demonstrate event-driven handoff points without a real broker.
-- `GET /operations/outbox-events` summarises outbox counts for admin review.
-- `GET /debug/request` is disabled by default and can only be enabled outside production.
-
-## Query Contracts
-
-Service request connection queries support status filtering, lightweight search, validated paging, allowlisted sorting, total counts and status counts. Existing simple list fields remain for compatibility.
+```bash
+pnpm --dir backend test
+pnpm --dir backend typecheck
+pnpm test:full-stack-smoke
+```

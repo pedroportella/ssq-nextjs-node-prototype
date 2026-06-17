@@ -1,115 +1,36 @@
 # DigitalOcean Review Deployment
 
-This repository includes safe DigitalOcean App Platform templates for the SSQ prototype review runtime.
+DigitalOcean App Platform hosts the public review apps. It is not Queensland Government production infrastructure.
 
-The templates are committed under `.do/`:
+## Shape
 
-- `.do/ssq-node-api.template.yml`
-- `.do/ssq-dashboard.template.yml`
-- `.do/ssq-seniors-card.template.yml`
-- `.do/ssq-rental-security-subsidy.template.yml`
+- One shared backend service.
+- Three public frontend apps: dashboard, Seniors Card and Rental Security Subsidy.
+- Managed PostgreSQL for review data.
+- Generated deployment specs stay out of Git; safe templates live under [.do](../.do).
 
-They are templates, not live deployment specs. Keep app IDs, generated default domains, personal access tokens, encrypted secret blobs and private notes out of Git.
+## Public Apps
 
-## Deployment Shape
+- Dashboard: https://ssq-dashboard-swgsm.ondigitalocean.app
+- Seniors Card: https://ssq-seniors-card-lfzpt.ondigitalocean.app
+- Rental Security Subsidy: https://ssq-rental-security-subsidy-kgbzf.ondigitalocean.app
 
-The review deployment uses four separate App Platform apps:
+## Deploy Order
 
-- `ssq-node-api`: shared backend API built from `backend/Dockerfile`.
-- `ssq-dashboard`: dashboard app built from `frontend/apps/dashboard/Dockerfile`.
-- `ssq-seniors-card`: Seniors Card app built from `frontend/apps/seniors-card/Dockerfile`.
-- `ssq-rental-security-subsidy`: Rental Security Subsidy app built from `frontend/apps/rental-security-subsidy/Dockerfile`.
+1. Run local quality checks.
+2. Build images or app artefacts.
+3. Update backend/review database config in the platform.
+4. Deploy backend first.
+5. Deploy frontend apps with server-side backend config.
+6. Run status checks and smoke tests.
 
-This mirrors the prototype boundary: three separately deployable public apps, one shared backend, and backend access kept behind the server-only frontend service layer.
-
-## Template Values To Replace
-
-Copy each template to a local spec before editing:
-
-```bash
-cp .do/ssq-node-api.template.yml .do/ssq-node-api.local.yml
-cp .do/ssq-dashboard.template.yml .do/ssq-dashboard.local.yml
-cp .do/ssq-seniors-card.template.yml .do/ssq-seniors-card.local.yml
-cp .do/ssq-rental-security-subsidy.template.yml .do/ssq-rental-security-subsidy.local.yml
-```
-
-`.do/*.local.yml` and `.do/*.generated.yml` are intentionally blocked by the artefact guard and must not be committed.
-
-Replace these values in local specs:
-
-- `region`: defaults to `syd`; change only if the review account needs another App Platform region.
-- The templates use the public Git clone URL for this repository so the review deployment does not depend on a connected DigitalOcean GitHub integration.
-- `BACKEND_INTERNAL_URL`: set this on all three frontend apps to the backend App Platform URL, for example `https://ssq-node-api-xxxxx.ondigitalocean.app`.
-- `DASHBOARD_PUBLIC_URL`, `SENIORS_CARD_PUBLIC_URL`, `RENTAL_SECURITY_SUBSIDY_PUBLIC_URL`: set these to the live public URLs for the three frontend apps.
-- `CORS_ALLOWED_ORIGINS`: set this on the backend to the comma-separated live frontend origins. This is mainly for manual API review because browser app code should not call the backend directly.
-
-Do not replace `DATABASE_URL` with a literal PostgreSQL connection string in a committed file. The backend template uses the App Platform bindable variable `${ssq-prototype-db.DATABASE_URL}` so DigitalOcean injects the database connection at runtime.
-
-## Database
-
-The backend template defines an App Platform dev PostgreSQL database:
-
-```yaml
-databases:
-  - name: ssq-prototype-db
-    engine: PG
-    version: "16"
-```
-
-Use this only for review infrastructure. For a managed database, create or select the managed cluster in DigitalOcean and adjust the local backend spec with the cluster details before deployment.
-
-The backend service runs migrations and seed data before startup:
-
-```text
-cd backend && pnpm db:migrate && pnpm db:seed && pnpm start
-```
-
-## Deployment Order
-
-1. Create or update the backend app from `.do/ssq-node-api.local.yml`.
-2. Capture the backend public URL from DigitalOcean.
-3. Set that URL as `BACKEND_INTERNAL_URL` in the three frontend local specs.
-4. Create or update the three frontend apps.
-5. Capture the three frontend public URLs.
-6. Update the three frontend local specs with cross-app public URLs.
-7. Update the backend local spec `CORS_ALLOWED_ORIGINS` with the three frontend origins.
-8. Redeploy any app whose local spec changed.
-
-With `doctl`, the create/update shape is:
+## Verify
 
 ```bash
-doctl apps create --spec .do/ssq-node-api.local.yml
-doctl apps update <app-id> --spec .do/ssq-node-api.local.yml
-doctl apps create-deployment <app-id> --force-rebuild
+curl -i https://ssq-dashboard-swgsm.ondigitalocean.app/status
+curl -i https://ssq-seniors-card-lfzpt.ondigitalocean.app/status
+curl -i https://ssq-rental-security-subsidy-kgbzf.ondigitalocean.app/status
+pnpm test:reviewer-evidence
 ```
 
-The same pattern applies to the three frontend specs.
-
-## Verification
-
-After deployment, check the backend and frontend status endpoints:
-
-```bash
-curl -i https://ssq-node-api-xxxxx.ondigitalocean.app/health/ready
-curl -i https://ssq-dashboard-xxxxx.ondigitalocean.app/status
-curl -i https://ssq-seniors-card-xxxxx.ondigitalocean.app/status
-curl -i https://ssq-rental-security-subsidy-xxxxx.ondigitalocean.app/status
-```
-
-The same full-stack smoke script can validate deployed URLs:
-
-```bash
-SSQ_SMOKE_BACKEND_READY_URL=https://ssq-node-api-xxxxx.ondigitalocean.app/health/ready \
-SSQ_SMOKE_GRAPHQL_URL=https://ssq-node-api-xxxxx.ondigitalocean.app/graphql \
-SSQ_SMOKE_DASHBOARD_URL=https://ssq-dashboard-xxxxx.ondigitalocean.app \
-SSQ_SMOKE_SENIORS_CARD_URL=https://ssq-seniors-card-xxxxx.ondigitalocean.app \
-SSQ_SMOKE_RENTAL_SECURITY_SUBSIDY_URL=https://ssq-rental-security-subsidy-xxxxx.ondigitalocean.app \
-pnpm test:full-stack-smoke
-```
-
-Keep live review links in `docs/live-review-links.md` during the live deployment stage, not in these templates.
-
-## References
-
-- DigitalOcean App Spec reference: https://docs.digitalocean.com/products/app-platform/reference/app-spec/
-- DigitalOcean App Platform database management: https://docs.digitalocean.com/products/app-platform/how-to/manage-databases/
+Use [aws-platform-mapping.md](aws-platform-mapping.md) for the production platform direction.

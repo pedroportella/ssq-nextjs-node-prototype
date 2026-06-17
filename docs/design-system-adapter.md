@@ -1,89 +1,33 @@
 # Design-System Adapter
 
-The prototype uses `@ssq/ui-library` as a React adapter for QHDS-style application UI. The adapter exists so apps can depend on stable React component APIs while design-system implementation details remain replaceable.
+The prototype uses local React wrappers to express QHDS-style application UI without importing upstream browser runtime code.
 
 ## Package Roles
 
-- `@ssq/ui-library` owns React components and component SCSS.
-- `@ssq/ui-tokens` owns shared design tokens and palette values.
-- `@ssq/ui-assets` owns shared static assets.
-- Apps import `@ssq/ui-library/theme.css` once from their app-level CSS.
+- [ui-tokens](../frontend/packages/ui-tokens): colour, spacing and typography primitives.
+- [ui-assets](../frontend/packages/ui-assets): icons and reusable visual assets.
+- [ui-library](../frontend/packages/ui-library): React components, theme entrypoint and app-facing API.
 
 ## Adapter Rules
 
-- Keep app pages composed from `@ssq/ui-library` components where practical.
-- Keep component styles beside the component, not in app-specific global CSS.
-- Keep backend/data concerns out of UI components.
-- Prefer server-renderable components by default.
-- Use `"use client"` only for components that own browser interaction, such as tabs or accordions.
-- Keep accessibility semantics inside the adapter when they are part of the component contract.
+- Preserve useful QHDS/QGDS class hooks, visual states and semantics.
+- Implement behaviour locally in TypeScript/React or Lit.
+- Keep application routes thin; pages compose containers and shared components.
+- Keep tokens and shared styles in packages rather than route-level one-offs.
+- Use Playwright and visual baselines to protect layout, focus, contrast and responsive behaviour.
 
-## Current Components
+## Current Component Coverage
 
-The current workflow-facing adapter surface includes:
+- Layout, header, footer, side navigation and workflow layout.
+- Buttons, links, cards, alerts, tabs, accordions and progress/status surfaces.
+- Text input, select, checkbox, radio, textarea and validation summary.
+- Tables, summary lists and file upload controls.
+- Dashboard UI Library showcase for component-state review.
 
-- `QhdsLayout`
-- `QhdsHeader`
-- `QhdsIcon`
-- `QhdsFooter`
-- `QhdsSideNav`
-- `QhdsWorkflowLayout`
-- `QhdsPageHeader`
-- `QhdsContentSection`
-- `QhdsSummaryList`
-- `QhdsCard`
-- `QhdsPageAlert`
-- `QhdsButton`
-- `QhdsAccordion`
-- `QhdsTabs`
-- `QhdsTable`
-- `QhdsProgressIndicator`
-- `QhdsFileUpload`
-- form controls under `components/forms`
+## Verify
 
-## Future QHDS Integration
-
-If a real QHDS React package or another official adapter becomes available, migrate behind these component contracts first. Avoid changing app pages directly until the adapter API has been mapped.
-
-A replacement should preserve:
-
-- accessible names, roles and keyboard behaviour;
-- SSR compatibility for non-interactive components;
-- token-driven colours, spacing and typography;
-- app-level import stability from `@ssq/ui-library`.
-
-The prototype should not reintroduce local web components or generated custom-element manifests unless the frontend direction changes explicitly.
-
-## Button Contract
-
-`QhdsButton` supports QHDS-style anchor buttons, native buttons and route-style anchors without importing an app router. It preserves native `href`, `target`, `rel` and button `type` semantics, defaults native buttons to `type="button"`, supports `leadingIcon` and `trailingIcon` class hooks, and treats disabled anchor-style buttons with `aria-disabled`, no `href`, no tab stop and suppressed click navigation. Primary buttons emit the reference `.qld__btn` class without a primary modifier; secondary and tertiary buttons add the matching QHDS modifier classes. Static server-rendered buttons and links must not receive synthetic event handlers; handlers are attached only when an interactive caller supplies `onClick` or `onNavigate`.
-
-## Header Contract
-
-`QhdsHeader` renders the single app banner landmark and keeps skip-link ownership in `QhdsLayout`. It uses QHDS/RBDM header hooks for the pre-header, base URL link, CTA wrapper, CTA links, CTA icon/text spans, main header and brand link, while defaulting to web-application width: full-width chrome with 32px desktop side padding, following RBDM and Services Australia rather than website-contained QHDS pages. A `width="contained"` mode remains available for future website-style uses. The pre-header base URL and CTA links are real anchors. The current prototype defaults to mocked account controls, showing `Avery Taylor` and `Logout` in the RBDM CTA pattern with QLD sprite icons for `profile` and `log-out`; pre-header CTA icons use the QHDS dark action secondary token (`#84d3ff` in the current QLD Health palette). The general `QLD-icons.svg` sprite and the QHDS `QLD-Health-icons.svg` extended sprite are both available through `@ssq/ui-assets` URL helpers. QHDS rewrites `extended_` icon ids at runtime, for example `extended_health_alert` becomes `QLD-Health-icons.svg#health_alert`. Callers can replace the account name and logout href or disable these controls when real auth owns the shell. Optional `onNavigate` handlers are attached only when supplied so static server-rendered app headers stay router-free.
-
-## Icon Contract
-
-`QhdsIcon` renders server-compatible QHDS sprite icons with the base `.qld__icon` class. It defaults to the general `QLD-icons.svg` sprite, supports explicit `sprite="qld-health"` and `sprite="utility"` modes, and maps QHDS `extended_` ids to the health sprite by stripping the prefix. It also emits QHDS size hooks such as `.qld__icon--sm` when callers pass `size`. Icons are decorative by default with `aria-hidden`; callers can provide `label` to render an accessible `role="img"` icon. The QHDS core, health and utility sprite URL helpers and required icon-name manifests live in `@ssq/ui-assets`; Next apps load these symbol sprites as static resources rather than image imports.
-
-## Left Nav Contract
-
-`QhdsSideNav` now renders the QHDS left-navigation shell from `inner-with-nav.html`, not the older `qld__side-nav` class family. The root emits `.qld__left-nav`, the inner `nav` defaults to `id="left-nav"` and `.qld__left-nav__content`, links use `.qld__left-nav__item-link`, labels use `.qld__left-nav__item-text`, icon links wrap QHDS sprite icons in `.qld__left-nav__item-icon`, and current pages render as `li.active[aria-current="page"]` with a non-link span. Branches emit QHDS accordion state hooks through `.qld__left-nav__item-toggle`, `aria-controls`, `aria-expanded`, `.qld__accordion--open` / `.qld__accordion--closed` and `.qld__accordion__body`; the adapter stays server-renderable and does not import upstream QHDS runtime JavaScript, so callers should set `expanded` for branches that must be visible in the current shell.
-
-`QhdsLayout` applies `vertical-nav` when `sideNav` is present outside focus mode, renders the nav before the content wrapper inside `main`, and wraps the content side with `.qld__body--left-nav` while preserving skip links and the stable `#content` target. The left nav pins its internal colours to the QHDS light left-nav palette so it remains accessible when the surrounding app is rendered in dark mode.
-
-## Select Contract
-
-`QhdsSelect` and its `QhdsSelectInput` alias render a native server-compatible `<select>` inside the QHDS-style `.qld__select` wrapper. The adapter supports options from data or children, placeholder empty options, disabled and multiple states, QHDS width class hooks, and `QhdsFormField` label, optional, required, hint and error wiring. It composes existing `aria-describedby` values with generated hint/error ids and applies invalid classes without importing upstream QHDS runtime JavaScript.
-
-## Checkbox Contract
-
-`QhdsCheckbox` renders a native checkbox with the QHDS control-input hooks while keeping the `input + label` adjacency required for the QHDS visual treatment. It supports required, optional, hint, error, disabled, controlled `checked` and uncontrolled `defaultChecked` states, composing hint/error ids into `aria-describedby`. `QhdsCheckboxGroup` provides the multi-option fieldset contract with `.qld__checkboxes`, legend, group hint/error text, option hints, disabled options, controlled `value` arrays and uncontrolled `defaultValue` or option-level checked defaults. Controlled read-only displays are marked `readOnly` when no change handler is supplied so React does not warn in client-rendered tests.
-
-## Radio Group Contract
-
-`QhdsRadioGroup` renders native radio inputs inside a QHDS-style fieldset with `.qld__radio-buttons`, `.qld__control-group`, `.qld__control-input`, `.qld__control-input__input` and `.qld__control-input__text` hooks. The adapter keeps one stable group `name`, labels the fieldset through `aria-labelledby`, composes external, hint and error ids into `aria-describedby`, and includes option hint ids on the relevant input. It supports controlled `value`, uncontrolled `defaultValue`, disabled groups and disabled options. Required state is expressed on the fieldset with `aria-required` and on the first enabled native radio only, so the group keeps native validation without repeating the requirement across every option. Controlled read-only displays are marked `readOnly` when no change handler is supplied.
-
-## Table Contract
-
-`QhdsTable` follows the restored QHDS-New static data-table reference. The outer wrapper emits `.qld__table__wrapper` plus the optional `.qld__table--contained` and `.qld__table--scroll` modifiers; the table itself emits `.qld__table`, `.qld__align-middle` and `.qld__table--striped` when requested. Captions support optional explanatory text through `.qld__caption`. The adapter intentionally remains static and does not reintroduce the old QHDS-Old DataTables runtime.
+```bash
+pnpm test:e2e:mock:dashboard
+pnpm test:e2e:mock
+pnpm test:visual:showcase
+```

@@ -1,62 +1,31 @@
 # Selection Criteria Map
 
-This map links the SSQ Next.js/Node prototype to the Digital Customer (SSQ) Principal Full-stack Developer role criteria. It is intended as a five-minute reviewer path, not a production readiness claim.
+This page maps the SSQ prototype to the Digital Customer Principal Full-stack Developer role. It is a quick evidence map, not a production readiness claim.
 
-The prototype is not an official Queensland Government, Smart Service Queensland, myQLD or Digital Transaction Platform system. DigitalOcean is used as review infrastructure only.
+## Review Path
 
-## Five-Minute Review Path
+1. Open the [live apps](live-review-links.md).
+2. Scan the [README screenshots](../README.md#screenshots).
+3. Review the evidence matrix below.
+4. Use [release-runbook.md](release-runbook.md) for local setup and quality gates.
 
-1. Open the public frontend apps:
-   - [Dashboard](https://ssq-dashboard-swgsm.ondigitalocean.app)
-   - [Seniors Card](https://ssq-seniors-card-lfzpt.ondigitalocean.app)
-   - [Rental Security Subsidy](https://ssq-rental-security-subsidy-kgbzf.ondigitalocean.app)
-2. Scan the screenshots in the [README](../README.md#screenshots) for the dashboard, transaction overview and apply flow.
-3. Review the criteria matrix below for direct links to code, docs and checks.
-4. Check the [operational reliability and support evidence](operational-reliability-support-evidence.md) for health, readiness, triage and production-next controls.
-5. Check the [AWS platform mapping](aws-platform-mapping.md) for AWS, Kubernetes, serverless and GitHub Actions promotion evidence.
-6. Use the [release handover runbook](release-runbook.md) to run the stack locally or review the quality gates.
+## Evidence Matrix
 
-## Criteria Matrix
-
-| Role criterion | Prototype evidence | Verification and caveats |
+| Role need | Prototype evidence | Verification |
 | --- | --- | --- |
-| Whole-of-government digital customer services and transaction platforms | Three separately deployable Next.js apps for dashboard, Seniors Card and Rental Security Subsidy; shared backend service request lifecycle; citizen and reviewer views. See [README](../README.md#what-is-real), [live links](live-review-links.md), [dashboard page](../frontend/apps/dashboard/src/app/page.tsx), [Seniors Card page](../frontend/apps/seniors-card/src/app/page.tsx) and [Rental Security Subsidy page](../frontend/apps/rental-security-subsidy/src/app/page.tsx). | Review the live apps or run the local review path in [release-runbook.md](release-runbook.md). The domain is prototype data only. |
-| React, Next.js and TypeScript | App Router apps under [frontend/apps](../frontend/apps), shared TypeScript packages under [frontend/packages](../frontend/packages), and production standalone Dockerfiles for each app. | `pnpm check` and `pnpm build`. |
-| SPA/SSR architecture, routing, state, feature flags, forms and validation | App routes stay thin, server-rendered pages read through [@ssq/services/server](../frontend/packages/services/src/server), transaction containers own workflow composition, and backend validation owns submit rules. See [frontend architecture](frontend-architecture.md), [Seniors Card apply container](../frontend/apps/seniors-card/src/containers/SeniorsCardApplyContainer.tsx), [Rental Security Subsidy apply container](../frontend/apps/rental-security-subsidy/src/containers/RentalSecuritySubsidyApplyContainer.tsx), [submission validation](../backend/src/services/submissionValidation.ts), and feature flag seed data in [002_transaction_catalogue_seed.sql](../backend/database/seeds/002_transaction_catalogue_seed.sql). | Frontend workflow tests live beside each app. Backend validation is covered through backend service tests. |
-| UI libraries, design systems, HTML5, CSS and responsive design | QHDS-style React adapter packages cover layout, header/footer, side navigation, form controls, cards, alerts, tables, tabs, progress, file upload, icons and tokens. See [accessibility and UI Library evidence](accessibility-and-ui-library-evidence.md), [design-system adapter](design-system-adapter.md), [frontend architecture](frontend-architecture.md), [ui-library components](../frontend/packages/ui-library/src/components), and [QHDS visual baselines](qhds-visual-baselines.md). | `pnpm test:e2e:mock:dashboard` and `pnpm test:e2e:mock` cover smoke accessibility and responsive layout. `pnpm test:visual` covers refreshed desktop/mobile baselines; see [QHDS visual baselines](qhds-visual-baselines.md#current-audit-status). |
-| REST or GraphQL API integration using TypeScript | Server-only frontend services integrate with the backend through [backendServices.ts](../frontend/packages/services/src/server/backendServices.ts) and [backendClient.ts](../frontend/packages/services/src/server/backendClient.ts). The backend exposes GraphQL contracts in [schema.ts](../backend/src/graphql/schema.ts) and REST routes for health, uploads, operations and summary downloads under [backend/src/routes](../backend/src/routes). See [API and security evidence](api-and-security-evidence.md). | `pnpm --filter @ssq/services test`, `pnpm --dir backend test`, and `pnpm test:full-stack-smoke`. |
-| Apollo GraphQL client patterns | The prototype intentionally uses a server-only GraphQL/BFF boundary instead of browser Apollo Client. This keeps backend origins and demo identity headers out of browser bundles while preserving GraphQL contract thinking and SSR-friendly workflows. See [API and security evidence](api-and-security-evidence.md#server-only-graphql-and-apollo-decision). | If SSQ required browser Apollo, the adoption path would be to introduce Apollo Client only behind authenticated public graph surfaces, keep internal backend URLs server-side, and preserve the existing service contracts. `pnpm guard:frontend-source` and `pnpm guard:browser-bundles` enforce the current boundary. |
-| Backend API development in Node.js | Node.js 22, Fastify 5, GraphQL Yoga, PostgreSQL, Zod and Pino power the backend. See [API and security evidence](api-and-security-evidence.md), [backend architecture](backend-architecture.md), [app.ts](../backend/src/app.ts), [GraphQL route](../backend/src/routes/graphql.ts), [supporting document route](../backend/src/routes/supportingDocuments.ts), [submission summary route](../backend/src/routes/submissionSummaries.ts), and services under [backend/src/services](../backend/src/services). | `pnpm --dir backend typecheck`, `pnpm --dir backend test`, and backend build in the CI workflow. |
-| Test automation: unit, integration and end-to-end | Vitest covers backend, shared packages and app containers; Playwright covers mock E2E, real backend E2E, accessibility QA and visual baselines; the full-stack smoke checks backend readiness, GraphQL reads and backend-rendered pages. See [package scripts](../package.json), [mock smoke tests](../tests/mock-smoke), [real E2E tests](../tests/e2e), [visual tests](../tests/visual), [accessibility evidence](accessibility-and-ui-library-evidence.md), and [full-stack smoke](../scripts/full-stack-smoke.mjs). | Main commands: `pnpm test`, `pnpm test:e2e:mock`, `pnpm test:e2e:real`, `pnpm test:full-stack-smoke`. Visual baselines are opt-in and currently require a reviewed refresh. |
-| Jira, Confluence and GitHub delivery habits | Public docs are shaped as reviewer-facing delivery artefacts: [release runbook](release-runbook.md), [backend architecture](backend-architecture.md), [frontend architecture](frontend-architecture.md), [deployment readiness](frontend-deployment-readiness.md), [production readiness](backend-production-readiness.md), and [GitHub Actions CI](../.github/workflows/ci.yml). | Real Jira/Confluence spaces are not included in the public repo; these docs provide equivalent handover, architecture, risk and quality-gate evidence. |
-| CI/CD automation through GitHub Actions | The [CI workflow](../.github/workflows/ci.yml) installs pinned Node/pnpm versions, lints, typechecks, tests, runs guards, builds packages/apps, checks browser bundles, validates Compose and builds Docker images. The [AWS platform mapping](aws-platform-mapping.md) adds the production deployment blueprint: ECR publishing, OIDC role assumption, environment promotion, approvals, rollback and smoke gates. | The committed workflow is a quality gate, not an active production deployment pipeline. Real AWS account values, roles, cluster names and environment URLs belong in private platform configuration. |
-| AWS, Kubernetes and serverless familiarity | The prototype has containerized apps, Docker Compose, app-local Dockerfiles and review deployment templates. The [AWS platform mapping](aws-platform-mapping.md) translates those boundaries to ECS/Fargate or EKS, RDS PostgreSQL, Secrets Manager/SSM, CloudWatch/OpenTelemetry, S3/KMS and SQS/EventBridge/Lambda. | AWS, EKS/Kubernetes and serverless components are not implemented in this review environment. The mapping shows the production path while preserving the DigitalOcean review-infrastructure caveat. |
-| Agile, DevSecOps and continuous improvement | The repository keeps implementation, docs, quality guards and production-next gaps together. Artefact guards block generated files and local env leakage; terminology guards keep Australian English in public prose; frontend-source and browser-bundle guards protect backend/internal URL boundaries. See [quality guards](../scripts/quality-guards.mjs), [release runbook](release-runbook.md), and [production readiness](backend-production-readiness.md). | The prototype shows the delivery discipline; formal team ceremonies, Jira boards and agency governance would sit outside this repo. |
-| High availability, reliability and high-security-assurance environments | Implemented review controls include health/live/ready endpoints, frontend `/status` routes, PostgreSQL readiness, correlation IDs, safe errors, redacted logs, CORS allow-listing, simple rate limiting, security headers and secret/artefact guards. See [operational reliability and support evidence](operational-reliability-support-evidence.md), [API and security evidence](api-and-security-evidence.md), [backend production readiness](backend-production-readiness.md) and [release runbook](release-runbook.md). | Production HA/security assurance remains explicit production-next work: real IAM/SSO, auditable authorisation, backups/PITR, alerting/tracing, threat modelling, privacy review, penetration testing, malware scanning and retention controls. |
-| Product-focused team collaboration | The prototype expresses citizen workflows, reviewer visibility, service request status/activity history and production-next trade-offs. It is documented for product managers, customer experience, service design, backend, infrastructure and stakeholder review rather than only code inspection. | The live apps and docs provide a concrete discussion artefact for iteration; real product priorities would come from SSQ service owners. |
-| Support and after-hours readiness | The release runbook documents live review links, status checks, local runtime, full-stack smoke and handover caveats. Backend readiness and frontend status endpoints support quick review checks. See [operational reliability and support evidence](operational-reliability-support-evidence.md). | This is reviewer support evidence, not a production on-call model. Production support would need alert routing, escalation paths, SLOs and operational ownership. |
+| Government transaction platform thinking | Dashboard, Seniors Card and Rental Security Subsidy apps share one service request lifecycle and reviewer view. | Live apps, [README](../README.md), [release-runbook.md](release-runbook.md). |
+| React, Next.js and TypeScript | App Router apps under [frontend/apps](../frontend/apps) and shared packages under [frontend/packages](../frontend/packages). | `pnpm check`, `pnpm build`. |
+| SPA/SSR workflow design | Routes stay thin; server-rendered pages call [server services](../frontend/packages/services/src/server); containers own workflow composition. | [frontend-architecture.md](frontend-architecture.md). |
+| Forms, validation and feature flags | Backend validation owns submit rules; transaction catalogue seeds define enabled services. | Backend tests, `pnpm test:full-stack-smoke`. |
+| UI library, HTML, CSS and responsive design | QHDS-style React adapters cover layout, forms, navigation, alerts, tables, upload and status components. | [accessibility-and-ui-library-evidence.md](accessibility-and-ui-library-evidence.md), `pnpm test:e2e:mock`, `pnpm test:visual`. |
+| REST and GraphQL integration | Fastify exposes GraphQL plus REST health, upload, operations and summary routes. Frontends call these through a server-only service layer. | [api-and-security-evidence.md](api-and-security-evidence.md), `pnpm --dir backend test`. |
+| Apollo/GraphQL judgement | The prototype keeps GraphQL calls server-side instead of adding browser Apollo Client, so backend origins and demo identity headers stay out of browser bundles. | `pnpm guard:frontend-source`, `pnpm guard:browser-bundles`. |
+| Node.js backend development | Node.js 22, Fastify, GraphQL Yoga, PostgreSQL, Zod, Pino and Vitest. | [backend-architecture.md](backend-architecture.md), backend tests. |
+| Test automation | Vitest, Playwright mock and real E2E, visual baselines, full-stack smoke and reviewer-evidence smoke. | `pnpm test`, `pnpm test:e2e:mock`, `pnpm test:e2e:real`, `pnpm test:reviewer-evidence`. |
+| GitHub and delivery discipline | CI workflow, release runbook, architecture notes, quality guards and production-next gaps are kept with the code. | [release-runbook.md](release-runbook.md), [.github/workflows/ci.yml](../.github/workflows/ci.yml). |
+| AWS, Kubernetes and serverless awareness | Container boundaries are mapped to ECS/Fargate or EKS, RDS, Secrets Manager/SSM, CloudWatch, S3/KMS and SQS/EventBridge/Lambda. | [aws-platform-mapping.md](aws-platform-mapping.md). |
+| Reliability, support and high-assurance awareness | Health/readiness, frontend status routes, correlation IDs, safe errors, CORS, rate limiting, security headers and documented gaps. | [operational-reliability-support-evidence.md](operational-reliability-support-evidence.md). |
 
-## GraphQL And Apollo Decision
+## Honest Gaps
 
-The role description names Apollo GraphQL client patterns. This prototype proves GraphQL integration, but intentionally keeps GraphQL calls inside the server-only frontend service layer instead of adding browser Apollo Client.
-
-That choice is deliberate for this public review prototype:
-
-- backend/internal origins stay out of browser JavaScript;
-- demo identity headers are not pushed into client components;
-- Next.js SSR can render customer workflows from the same service contracts used by local and review runtimes;
-- browser bundles can be scanned for backend URL leaks.
-
-If a future SSQ surface needs Apollo Client, the recommended path is to add Apollo behind authenticated public GraphQL boundaries while keeping internal service URLs, privileged headers and operational endpoints server-side.
-
-## Delivery Artefacts
-
-- Executive review: [README](../README.md) and [live review links](live-review-links.md).
-- Handover/runbook: [release-runbook.md](release-runbook.md).
-- Architecture notes: [frontend-architecture.md](frontend-architecture.md), [backend-architecture.md](backend-architecture.md), [design-system-adapter.md](design-system-adapter.md).
-- Accessibility and UI evidence: [accessibility-and-ui-library-evidence.md](accessibility-and-ui-library-evidence.md), [qhds-visual-baselines.md](qhds-visual-baselines.md).
-- API and security evidence: [api-and-security-evidence.md](api-and-security-evidence.md), [backend-production-readiness.md](backend-production-readiness.md).
-- Reliability and support evidence: [operational-reliability-support-evidence.md](operational-reliability-support-evidence.md), [release-runbook.md](release-runbook.md).
-- Deployment and platform evidence: [aws-platform-mapping.md](aws-platform-mapping.md), [frontend-deployment-readiness.md](frontend-deployment-readiness.md), [digitalocean-deployment.md](digitalocean-deployment.md), [CI workflow](../.github/workflows/ci.yml).
-- Production-next backlog/risk register: [backend-production-readiness.md](backend-production-readiness.md) and [README production next steps](../README.md#production-next-steps).
-- Verification commands: [package.json scripts](../package.json) and [release quality checks](release-runbook.md#release-quality-checks).
+The review environment does not implement production AWS deployment, real identity, real document storage, production authorisation, high availability, alerting or full security/privacy assurance. Those are mapped as production-next work in the evidence docs and README.
