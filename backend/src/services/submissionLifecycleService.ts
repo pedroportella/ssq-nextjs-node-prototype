@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 
+import { createLocalIntegrationGateways } from "../gateways/localIntegrationGateways.js";
 import { OutboxEventService } from "./outboxEventService.js";
 import { validatePayloadAgainstSchema } from "./submissionValidation.js";
 import { SubmissionSummaryService } from "./submissionSummaryService.js";
 
 import type { PrototypeRepository, ServiceRequestRecord } from "../repositories/prototypeRepository.js";
+import type { IntegrationGatewayRegistry } from "../gateways/localIntegrationGateways.js";
 import type { FieldValidationError } from "./submissionValidation.js";
 import type { TransactionCatalogueService } from "./transactionCatalogueService.js";
 
@@ -31,7 +33,8 @@ export class SubmissionLifecycleService {
   constructor(
     private readonly repository: PrototypeRepository,
     private readonly transactionCatalogue: TransactionCatalogueService,
-    private readonly referenceGenerator: () => string = generateReferenceNumber
+    private readonly referenceGenerator: () => string = generateReferenceNumber,
+    private readonly gateways: IntegrationGatewayRegistry = createLocalIntegrationGateways()
   ) {}
 
   async submitDraft(input: {
@@ -124,7 +127,7 @@ export class SubmissionLifecycleService {
         transactionKey: transaction.transaction.transactionKey
       }
     });
-    await new OutboxEventService(this.repository).createSubmissionEvents({
+    await new OutboxEventService(this.repository, this.gateways).createSubmissionEvents({
       serviceRequest: enrichedServiceRequest,
       summary,
       correlationId: input.correlationId,
@@ -153,25 +156,19 @@ export class SubmissionLifecycleService {
     });
 
     return Promise.all(attributes.map((attribute) => {
-      const verified = attribute.attributeValue.verified === true;
+      const evidence = this.gateways.customerProfileEvidence.createEvidence({
+        attribute,
+        transactionKey: input.transactionKey,
+        transactionSchemaVersion: input.transactionSchemaVersion
+      });
 
       return this.repository.createCustomerProfileEvidence({
         serviceRequestId: input.serviceRequestId,
         customerProfileAttributeId: attribute.id,
         attributeKey: attribute.attributeKey,
-        attributeValue: attribute.attributeValue,
-        verificationStatus: verified ? "SIMULATED_VERIFIED" : "SIMULATED_UNVERIFIED",
-        evidenceMetadata: {
-          integrationClaim: "none",
-          source: "prototype-customer-profile",
-          transactionKey: input.transactionKey,
-          transactionSchemaVersion: input.transactionSchemaVersion,
-          productionNext: [
-            "digital-identity-verification",
-            "authoritative-source-check",
-            "privacy-impact-review"
-          ]
-        }
+        attributeValue: evidence.attributeValue,
+        verificationStatus: evidence.verificationStatus,
+        evidenceMetadata: evidence.evidenceMetadata
       });
     }));
   }

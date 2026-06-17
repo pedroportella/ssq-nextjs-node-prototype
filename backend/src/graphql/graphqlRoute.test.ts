@@ -1211,7 +1211,10 @@ describe("GraphQL route", () => {
             evidenceSource: "SIMULATED_PROFILE",
             verificationStatus: "SIMULATED_VERIFIED",
             evidenceMetadata: {
-              integrationClaim: "none",
+              availability: "AVAILABLE_LOCAL",
+              gateway: "local-customer-profile-evidence-gateway",
+              gatewayMode: "LOCAL_ADAPTER",
+              integrationClaim: "local-adapter-only",
               source: "prototype-customer-profile"
             }
           },
@@ -1220,7 +1223,10 @@ describe("GraphQL route", () => {
             evidenceSource: "SIMULATED_PROFILE",
             verificationStatus: "SIMULATED_UNVERIFIED",
             evidenceMetadata: {
-              integrationClaim: "none",
+              availability: "AVAILABLE_LOCAL",
+              gateway: "local-customer-profile-evidence-gateway",
+              gatewayMode: "LOCAL_ADAPTER",
+              integrationClaim: "local-adapter-only",
               source: "prototype-customer-profile"
             }
           }

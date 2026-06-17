@@ -89,6 +89,14 @@ Draft submission also generates a text submission summary for the submitted requ
 
 Successful submission records pending outbox events for submitted request, summary-created, notification-requested and agency-review-requested integration seams. The outbox demonstrates persisted event-driven handoff points for review; it does not publish to a production queue.
 
+Integration seams are expressed through backend gateway contracts with deterministic local adapters:
+
+- customer profile evidence uses `local-customer-profile-evidence-gateway`;
+- submission notifications use `local-notification-gateway`;
+- agency review handoff uses `local-agency-review-gateway`.
+
+Gateway payloads include `gateway`, `gatewayMode`, `availability` and production-next notes. Local adapters can emit explicit unavailable states for deterministic failure tests; they do not claim real upstream access.
+
 ## REST
 
 Current REST surface:

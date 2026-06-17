@@ -1,4 +1,7 @@
+import { createLocalIntegrationGateways } from "../gateways/localIntegrationGateways.js";
+
 import type { OutboxEventRecord, OutboxEventSummaryRecord, PrototypeRepository, ServiceRequestRecord, SubmissionSummaryRecord } from "../repositories/prototypeRepository.js";
+import type { IntegrationGatewayRegistry } from "../gateways/localIntegrationGateways.js";
 
 export interface OperationsOutboxSummary {
   totals: {
@@ -16,7 +19,10 @@ export interface OperationsOutboxSummary {
 }
 
 export class OutboxEventService {
-  constructor(private readonly repository: PrototypeRepository) {}
+  constructor(
+    private readonly repository: PrototypeRepository,
+    private readonly gateways: IntegrationGatewayRegistry = createLocalIntegrationGateways()
+  ) {}
 
   async createSubmissionEvents(input: {
     serviceRequest: ServiceRequestRecord;
@@ -32,6 +38,13 @@ export class OutboxEventService {
       transactionKey: input.transactionKey,
       transactionLabel: input.transactionLabel
     };
+
+    const notificationRequest = this.gateways.notification.requestSubmissionConfirmation(commonPayload);
+    const agencyReviewRequest = this.gateways.agencyReview.requestReview({
+      ...commonPayload,
+      serviceRequest: input.serviceRequest,
+      summary: input.summary
+    });
 
     return Promise.all([
       this.repository.createOutboxEvent({
@@ -60,8 +73,7 @@ export class OutboxEventService {
         aggregateId: input.serviceRequest.id,
         eventPayload: {
           ...commonPayload,
-          notificationType: "submission-confirmation",
-          channel: "prototype-email"
+          ...notificationRequest
         }
       }),
       this.repository.createOutboxEvent({
@@ -70,7 +82,7 @@ export class OutboxEventService {
         aggregateId: input.serviceRequest.id,
         eventPayload: {
           ...commonPayload,
-          reviewQueue: "prototype-agency-review"
+          ...agencyReviewRequest
         }
       })
     ]);

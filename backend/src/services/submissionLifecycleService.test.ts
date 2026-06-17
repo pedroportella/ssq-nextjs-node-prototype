@@ -303,6 +303,24 @@ describe("SubmissionLifecycleService", () => {
         transactionKey: "seniors-card"
       }
     });
+    expect(createdOutboxEvents.find((event) => event.eventType === "NotificationRequested")).toMatchObject({
+      eventPayload: {
+        availability: "AVAILABLE_LOCAL",
+        deliveryStatus: "REQUESTED_LOCAL",
+        gateway: "local-notification-gateway",
+        gatewayMode: "LOCAL_ADAPTER",
+        notificationType: "submission-confirmation"
+      }
+    });
+    expect(createdOutboxEvents.find((event) => event.eventType === "AgencyReviewRequested")).toMatchObject({
+      eventPayload: {
+        availability: "AVAILABLE_LOCAL",
+        gateway: "local-agency-review-gateway",
+        gatewayMode: "LOCAL_ADAPTER",
+        handoffStatus: "QUEUED_LOCAL",
+        reviewQueue: "prototype-agency-review"
+      }
+    });
   });
 
   it("captures simulated profile evidence declared by the transaction schema", async () => {
@@ -375,11 +393,14 @@ describe("SubmissionLifecycleService", () => {
       "SIMULATED_UNVERIFIED"
     ]);
     expect(capturedEvidence[0]?.evidenceMetadata).toMatchObject({
-      integrationClaim: "none",
+      availability: "AVAILABLE_LOCAL",
+      gateway: "local-customer-profile-evidence-gateway",
+      gatewayMode: "LOCAL_ADAPTER",
+      integrationClaim: "local-adapter-only",
       source: "prototype-customer-profile",
       productionNext: [
+        "replace-local-profile-adapter-with-authoritative-source",
         "digital-identity-verification",
-        "authoritative-source-check",
         "privacy-impact-review"
       ]
     });
