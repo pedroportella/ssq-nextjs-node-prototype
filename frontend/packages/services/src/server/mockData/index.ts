@@ -5,6 +5,8 @@ import type {
   PrototypeAppKey,
   PrototypeDashboardSummaryData,
   PrototypeDraftSummary,
+  PrototypeOperationsPosture,
+  PrototypeOperationsPostureResult,
   PrototypeProfileSummary,
   PrototypeReviewerActivityEntry,
   PrototypeReviewerAssignInput,
@@ -64,6 +66,110 @@ export function createMockSessionSummary(env: NodeJS.ProcessEnv = process.env): 
     signedIn: true,
     source: "MOCK",
     subject
+  };
+}
+
+export function createMockOperationsPostureResult(env: NodeJS.ProcessEnv = process.env): PrototypeOperationsPostureResult {
+  const session = createMockSessionSummary(env);
+
+  if (!session.capabilities.canReadOperations) {
+    return {
+      error: {
+        code: "FORBIDDEN",
+        message: "Role cannot read operations."
+      },
+      ok: false
+    };
+  }
+
+  const posture: PrototypeOperationsPosture = {
+    generatedAt: "2026-06-17T00:00:00.000Z",
+    nextActions: [
+      {
+        code: "OUTBOX_PENDING",
+        message: "Process or review pending outbox handoff events.",
+        severity: "WARN"
+      },
+      {
+        code: "FEATURES_DISABLED",
+        message: "Review disabled transaction feature flags before a broad demo.",
+        severity: "WARN"
+      }
+    ],
+    service: {
+      environment: "development",
+      name: "ssq-node-api",
+      version: "0.0.0"
+    },
+    signals: {
+      database: {
+        status: "OK"
+      },
+      featureFlags: {
+        disabled: 1,
+        enabled: 1,
+        flags: [
+          {
+            enabled: true,
+            key: "transaction.seniors-card.enabled"
+          },
+          {
+            enabled: false,
+            key: "transaction.rental-security-subsidy.enabled"
+          }
+        ],
+        status: "WARN"
+      },
+      hardening: {
+        corsAllowedOrigins: 1,
+        debugRoutesEnabled: false,
+        hstsEnabled: false,
+        rateLimitEnabled: true,
+        rateLimitMax: 120,
+        rateLimitWindowMs: 60_000,
+        status: "OK"
+      },
+      migrations: {
+        appliedCount: 9,
+        availableCount: 9,
+        latestApplied: "009_service_request_queue_assignment.sql",
+        latestAvailable: "009_service_request_queue_assignment.sql",
+        status: "OK"
+      },
+      outbox: {
+        status: "WARN",
+        summary: {
+          byEventType: [
+            {
+              eventType: "SERVICE_REQUEST_SUBMITTED",
+              statuses: {
+                PENDING: 2,
+                PROCESSED: 1
+              }
+            }
+          ],
+          totals: {
+            failed: 0,
+            pending: 2,
+            processed: 1
+          }
+        }
+      },
+      runtime: {
+        status: "OK"
+      },
+      seededData: {
+        latestAvailableSeed: "001_demo_customer.sql",
+        seedFileCount: 1,
+        status: "OK"
+      }
+    },
+    status: "DEGRADED"
+  };
+
+  return {
+    ok: true,
+    posture
   };
 }
 

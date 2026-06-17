@@ -6,6 +6,7 @@ import {
   createTransactionDraft,
   getDashboardShellData,
   getDashboardSummaryData,
+  getOperationsPosture,
   getReviewerQueueData,
   getReviewerRequestDetailData,
   getSubmissionSummaryDownload,
@@ -226,6 +227,40 @@ describe("server app services", () => {
           ])
         })
       ])
+    });
+  });
+
+  it("returns mock operations posture only for admin sessions", async () => {
+    await expect(getOperationsPosture({ dataSource: "mock" })).resolves.toMatchObject({
+      error: {
+        code: "FORBIDDEN"
+      },
+      ok: false
+    });
+
+    vi.stubEnv("SSQ_FRONTEND_DEMO_ROLE", "Admin");
+    vi.stubEnv("SSQ_FRONTEND_DEMO_SUBJECT", "admin@example.test");
+
+    await expect(getOperationsPosture({ dataSource: "mock" })).resolves.toMatchObject({
+      ok: true,
+      posture: {
+        nextActions: expect.arrayContaining([
+          expect.objectContaining({
+            code: "OUTBOX_PENDING",
+            severity: "WARN"
+          })
+        ]),
+        signals: {
+          outbox: {
+            summary: {
+              totals: {
+                pending: 2
+              }
+            }
+          }
+        },
+        status: "DEGRADED"
+      }
     });
   });
 
@@ -468,6 +503,114 @@ describe("server app services", () => {
           status: "IN_REVIEW"
         }
       ]
+    });
+  });
+
+  it("reads backend operations posture through frontend session headers", async () => {
+    vi.stubEnv("SSQ_FRONTEND_DEMO_ROLE", "Admin");
+    vi.stubEnv("SSQ_FRONTEND_DEMO_SUBJECT", "admin@example.test");
+    mockBackendFetch(({ body, init, url }) => {
+      expect(body).toBeUndefined();
+      expect(url).toBe("http://backend:7001/operations/posture");
+      expect((init?.headers as Headers).get("x-ssq-demo-role")).toBe("Admin");
+      expect((init?.headers as Headers).get("x-ssq-demo-subject")).toBe("admin@example.test");
+
+      return Response.json({
+        ok: true,
+        posture: {
+          generatedAt: "2026-06-17T00:00:00.000Z",
+          nextActions: [
+            {
+              code: "OUTBOX_PENDING",
+              message: "Process or review pending outbox handoff events.",
+              severity: "WARN"
+            }
+          ],
+          service: {
+            environment: "development",
+            name: "ssq-node-api",
+            version: "0.0.0"
+          },
+          signals: {
+            database: {
+              status: "OK"
+            },
+            featureFlags: {
+              disabled: 1,
+              enabled: 1,
+              flags: [
+                {
+                  enabled: true,
+                  key: "transaction.seniors-card.enabled"
+                }
+              ],
+              status: "WARN"
+            },
+            hardening: {
+              corsAllowedOrigins: 1,
+              debugRoutesEnabled: false,
+              hstsEnabled: false,
+              rateLimitEnabled: true,
+              rateLimitMax: 120,
+              rateLimitWindowMs: 60_000,
+              status: "OK"
+            },
+            migrations: {
+              appliedCount: 9,
+              availableCount: 9,
+              latestApplied: "009_service_request_queue_assignment.sql",
+              latestAvailable: "009_service_request_queue_assignment.sql",
+              status: "OK"
+            },
+            outbox: {
+              status: "WARN",
+              summary: {
+                byEventType: [
+                  {
+                    eventType: "SERVICE_REQUEST_SUBMITTED",
+                    statuses: {
+                      PENDING: 2
+                    }
+                  }
+                ],
+                totals: {
+                  failed: 0,
+                  pending: 2,
+                  processed: 1
+                }
+              }
+            },
+            runtime: {
+              status: "OK"
+            },
+            seededData: {
+              latestAvailableSeed: "001_demo_customer.sql",
+              seedFileCount: 1,
+              status: "OK"
+            }
+          },
+          status: "DEGRADED"
+        }
+      });
+    });
+
+    await expect(getOperationsPosture(backendConfig)).resolves.toMatchObject({
+      ok: true,
+      posture: {
+        service: {
+          name: "ssq-node-api"
+        },
+        signals: {
+          outbox: {
+            summary: {
+              totals: {
+                pending: 2
+              }
+            }
+          }
+        },
+        status: "DEGRADED"
+      }
     });
   });
 

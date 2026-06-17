@@ -102,6 +102,15 @@ function ReviewerSideNav({
         }
       ]
     : [];
+  const adminItems = session.capabilities.canReadOperations
+    ? [
+        {
+          href: "/operations",
+          icon: <QhdsIcon size="md" symbol="document" />,
+          label: "Operations"
+        }
+      ]
+    : [];
 
   return (
     <QhdsSideNav
@@ -116,7 +125,8 @@ function ReviewerSideNav({
           icon: <QhdsIcon size="md" symbol="document" />,
           label: "Customer dashboard"
         },
-        ...staffItems
+        ...staffItems,
+        ...adminItems
       ]}
     />
   );

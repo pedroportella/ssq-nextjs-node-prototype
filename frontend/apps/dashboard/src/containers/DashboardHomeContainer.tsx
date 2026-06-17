@@ -167,6 +167,13 @@ function DashboardSideNav({
           label: "Staff review"
         }
       : undefined,
+    session.capabilities.canReadOperations
+      ? {
+          href: "/operations",
+          icon: <QhdsIcon size="md" symbol="document" />,
+          label: "Operations"
+        }
+      : undefined,
     {
       href: "#recent-activity",
       icon: <QhdsIcon size="md" symbol="clock" />,

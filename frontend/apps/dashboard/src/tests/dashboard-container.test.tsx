@@ -8,10 +8,12 @@ import {
   ReviewerQueueContent,
   ReviewerRequestDetailContent
 } from "../containers/ReviewerQueueContainer";
+import { OperationsPanelContent } from "../containers/OperationsPanelContainer";
 
 import type { AppShellData } from "@ssq/services/server";
 import type {
   PrototypeDashboardSummaryData,
+  PrototypeOperationsPostureResult,
   PrototypeReviewerQueueData,
   PrototypeReviewerRequestDetailData
 } from "@ssq/services";
@@ -49,6 +51,23 @@ const staffShell: AppShellData = {
     signedIn: true,
     source: "MOCK",
     subject: "officer@example.test"
+  }
+};
+
+const adminShell: AppShellData = {
+  ...shell,
+  session: {
+    capabilities: {
+      canAccessCitizenServices: false,
+      canReadOperations: true,
+      canReviewSubmittedRequests: true
+    },
+    displayName: "Admin admin@example.test",
+    identityStrength: "basic",
+    roles: ["Admin"],
+    signedIn: true,
+    source: "MOCK",
+    subject: "admin@example.test"
   }
 };
 
@@ -142,6 +161,89 @@ const summary: PrototypeDashboardSummaryData = {
   ]
 };
 
+const operationsResult: PrototypeOperationsPostureResult = {
+  ok: true,
+  posture: {
+    generatedAt: "2026-06-17T00:00:00.000Z",
+    nextActions: [
+      {
+        code: "OUTBOX_PENDING",
+        message: "Process or review pending outbox handoff events.",
+        severity: "WARN"
+      }
+    ],
+    service: {
+      environment: "development",
+      name: "ssq-node-api",
+      version: "0.0.0"
+    },
+    signals: {
+      database: {
+        status: "OK"
+      },
+      featureFlags: {
+        disabled: 1,
+        enabled: 1,
+        flags: [
+          {
+            enabled: true,
+            key: "transaction.seniors-card.enabled"
+          },
+          {
+            enabled: false,
+            key: "transaction.rental-security-subsidy.enabled"
+          }
+        ],
+        status: "WARN"
+      },
+      hardening: {
+        corsAllowedOrigins: 1,
+        debugRoutesEnabled: false,
+        hstsEnabled: false,
+        rateLimitEnabled: true,
+        rateLimitMax: 120,
+        rateLimitWindowMs: 60_000,
+        status: "OK"
+      },
+      migrations: {
+        appliedCount: 9,
+        availableCount: 9,
+        latestApplied: "009_service_request_queue_assignment.sql",
+        latestAvailable: "009_service_request_queue_assignment.sql",
+        status: "OK"
+      },
+      outbox: {
+        status: "WARN",
+        summary: {
+          byEventType: [
+            {
+              eventType: "SERVICE_REQUEST_SUBMITTED",
+              statuses: {
+                PENDING: 2,
+                PROCESSED: 1
+              }
+            }
+          ],
+          totals: {
+            failed: 0,
+            pending: 2,
+            processed: 1
+          }
+        }
+      },
+      runtime: {
+        status: "OK"
+      },
+      seededData: {
+        latestAvailableSeed: "001_demo_customer.sql",
+        seedFileCount: 1,
+        status: "OK"
+      }
+    },
+    status: "DEGRADED"
+  }
+};
+
 describe("DashboardContent", () => {
   it("renders mock-seeded dashboard services and configured links", () => {
     const html = renderToStaticMarkup(<DashboardContent shell={shell} summary={summary} />);
@@ -164,6 +266,7 @@ describe("DashboardContent", () => {
     expect(html).toContain('href="#current-records"');
     expect(html).toContain('href="#recent-activity"');
     expect(html).not.toContain("Staff review");
+    expect(html).not.toContain("Operations");
     expect(html).toContain("ssq-layout__content--full");
     expect(html).toContain('aria-labelledby="page-title"');
     expect(html).toContain("row");
@@ -204,6 +307,15 @@ describe("DashboardContent", () => {
     expect(html).toContain("No services are available right now.");
   });
 
+  it("renders operations navigation for admin sessions", () => {
+    const html = renderToStaticMarkup(<DashboardContent shell={adminShell} summary={summary} />);
+
+    expect(html).toContain("Staff review");
+    expect(html).toContain("Operations");
+    expect(html).toContain('href="/operations"');
+    expect(html).toContain("Admin admin@example.test");
+  });
+
   it("renders safe empty states when dashboard data is missing", () => {
     const html = renderToStaticMarkup(
       <DashboardContent
@@ -222,6 +334,51 @@ describe("DashboardContent", () => {
     expect(html).toContain("No saved drafts.");
     expect(html).toContain("No submitted requests.");
     expect(html).toContain("No recent activity to show.");
+  });
+});
+
+describe("OperationsPanelContent", () => {
+  it("renders operations posture for admin sessions", () => {
+    const html = renderToStaticMarkup(<OperationsPanelContent result={operationsResult} shell={adminShell} />);
+
+    expect(html).toContain("Operations Degraded");
+    expect(html).toContain("Operations summary");
+    expect(html).toContain("ssq-node-api");
+    expect(html).toContain("System signals");
+    expect(html).toContain("Outbox");
+    expect(html).toContain("Pending");
+    expect(html).toContain("SERVICE_REQUEST_SUBMITTED");
+    expect(html).toContain("Feature flags");
+    expect(html).toContain("transaction.rental-security-subsidy.enabled");
+    expect(html).toContain("Next actions");
+    expect(html).toContain("OUTBOX_PENDING");
+  });
+
+  it("renders admin-required state for non-admin sessions", () => {
+    const html = renderToStaticMarkup(<OperationsPanelContent shell={shell} />);
+
+    expect(html).toContain("Admin access required");
+    expect(html).not.toContain("Operations summary");
+    expect(html).not.toContain("System signals");
+  });
+
+  it("renders unavailable posture for admin sessions", () => {
+    const html = renderToStaticMarkup(
+      <OperationsPanelContent
+        result={{
+          error: {
+            code: "OPERATIONS_UNAVAILABLE",
+            message: "Posture endpoint is unavailable."
+          },
+          ok: false
+        }}
+        shell={adminShell}
+      />
+    );
+
+    expect(html).toContain("Operations posture unavailable");
+    expect(html).toContain("Posture endpoint is unavailable.");
+    expect(html).toContain("OPERATIONS_UNAVAILABLE");
   });
 });
 

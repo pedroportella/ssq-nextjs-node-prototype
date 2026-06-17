@@ -6,6 +6,7 @@ import {
   createBackendAppShellData,
   createBackendTransactionDraft,
   getBackendDashboardSummaryData,
+  getBackendOperationsPosture,
   getBackendReviewerQueueData,
   getBackendReviewerRequestDetailData,
   getBackendSubmissionSummaryDownload,
@@ -23,6 +24,7 @@ import {
   createMockAppShellData,
   createMockDraft,
   getMockDashboardSummaryData,
+  getMockOperationsPosture,
   getMockReviewerQueueData,
   getMockReviewerRequestDetailData,
   getMockSubmissionSummaryDownload,
@@ -42,6 +44,7 @@ import type {
   PrototypeAppSummary,
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
+  PrototypeOperationsPostureResult,
   PrototypeReviewerAssignInput,
   PrototypeReviewerAssignResult,
   PrototypeReviewerBatchStatusInput,
@@ -102,6 +105,16 @@ export async function getDashboardSummaryData(config?: FrontendRuntimeConfig): P
   }
 
   return getMockDashboardSummaryData();
+}
+
+export async function getOperationsPosture(config?: FrontendRuntimeConfig): Promise<PrototypeOperationsPostureResult> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    return getBackendOperationsPosture(runtimeConfig);
+  }
+
+  return getMockOperationsPosture();
 }
 
 export async function getSeniorsCardWorkflowData(config?: FrontendRuntimeConfig): Promise<PrototypeWorkflowData> {

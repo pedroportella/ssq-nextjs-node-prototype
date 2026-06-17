@@ -11,6 +11,8 @@ import type {
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
   PrototypeDraftSummary,
+  PrototypeOperationsPosture,
+  PrototypeOperationsPostureResult,
   PrototypeProfileSummary,
   PrototypeReviewerActivityEntry,
   PrototypeReviewerAssignInput,
@@ -191,6 +193,12 @@ interface BackendBatchStatusMutationResponse {
     referenceNumber: string;
     serviceRequest: BackendServiceRequest | null;
   }>;
+}
+
+interface BackendOperationsPostureResponse {
+  error?: BackendMutationError;
+  ok: boolean;
+  posture?: PrototypeOperationsPosture;
 }
 
 interface BackendMutationError {
@@ -559,6 +567,39 @@ export async function getBackendDashboardSummaryData(
   return {
     ...summary,
     submittedRequests
+  };
+}
+
+export async function getBackendOperationsPosture(
+  config: FrontendRuntimeConfig
+): Promise<PrototypeOperationsPostureResult> {
+  const backendConfig = toBackendClientConfig(config);
+  const correlationId = createCorrelationId();
+  const headers = createBackendHeaders(correlationId);
+
+  new Headers(createFrontendSessionHeaders()).forEach((value, key) => {
+    headers.set(key, value);
+  });
+
+  const response = await fetch(`${backendConfig.backendUrl}/operations/posture`, {
+    cache: "no-store",
+    headers
+  });
+  const payload = await response.json() as BackendOperationsPostureResponse;
+
+  if (!response.ok || !payload.ok || !payload.posture) {
+    return {
+      error: payload.error ?? {
+        code: response.status === 403 ? "FORBIDDEN" : "OPERATIONS_UNAVAILABLE",
+        message: "Operations posture could not be loaded."
+      },
+      ok: false
+    };
+  }
+
+  return {
+    ok: true,
+    posture: payload.posture
   };
 }
 

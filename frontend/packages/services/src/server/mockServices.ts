@@ -5,6 +5,7 @@ import {
   createMockActivity,
   createMockDashboardSummaryData,
   createMockDraftSummary,
+  createMockOperationsPostureResult,
   createMockSessionSummary,
   createMockReviewerAssignResult,
   createMockReviewerBatchStatusResult,
@@ -25,6 +26,7 @@ import type {
   PrototypeAppKey,
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
+  PrototypeOperationsPostureResult,
   PrototypeReviewerAssignInput,
   PrototypeReviewerAssignResult,
   PrototypeReviewerBatchStatusInput,
@@ -54,6 +56,10 @@ export function createMockAppShellData(key: PrototypeAppKey): AppShellData {
 
 export async function getMockDashboardSummaryData(): Promise<PrototypeDashboardSummaryData> {
   return createMockDashboardSummaryData(resolveFrontendPublicUrlConfig());
+}
+
+export async function getMockOperationsPosture(): Promise<PrototypeOperationsPostureResult> {
+  return createMockOperationsPostureResult();
 }
 
 export async function getMockSeniorsCardWorkflowData(): Promise<PrototypeWorkflowData> {

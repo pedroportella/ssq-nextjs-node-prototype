@@ -11,6 +11,7 @@ export {
   createTransactionDraft,
   getDashboardSummaryData,
   getDashboardShellData,
+  getOperationsPosture,
   getReviewerQueueData,
   getReviewerRequestDetailData,
   getSubmissionSummaryDownload,

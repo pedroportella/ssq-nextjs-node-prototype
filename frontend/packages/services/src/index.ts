@@ -204,6 +204,91 @@ export interface PrototypeReviewerAssignResult {
   request?: PrototypeReviewerRequestSummary;
 }
 
+export type PrototypeOperationsPostureStatus = "READY" | "DEGRADED" | "DOWN";
+export type PrototypeOperationsSignalStatus = "OK" | "WARN" | "FAIL";
+
+export interface PrototypeOperationsOutboxSummary {
+  byEventType: Array<{
+    eventType: string;
+    statuses: Record<string, number>;
+  }>;
+  totals: {
+    failed: number;
+    pending: number;
+    processed: number;
+  };
+}
+
+export interface PrototypeOperationsPosture {
+  generatedAt: string;
+  nextActions: Array<{
+    code: string;
+    message: string;
+    severity: "INFO" | "WARN" | "CRITICAL";
+  }>;
+  service: {
+    environment: string;
+    name: string;
+    version: string;
+  };
+  signals: {
+    database: {
+      status: PrototypeOperationsSignalStatus;
+    };
+    featureFlags: {
+      disabled: number;
+      enabled: number;
+      error?: string;
+      flags: Array<{
+        enabled: boolean;
+        key: string;
+      }>;
+      status: PrototypeOperationsSignalStatus;
+    };
+    hardening: {
+      corsAllowedOrigins: number;
+      debugRoutesEnabled: boolean;
+      hstsEnabled: boolean;
+      rateLimitEnabled: boolean;
+      rateLimitMax: number;
+      rateLimitWindowMs: number;
+      status: PrototypeOperationsSignalStatus;
+    };
+    migrations: {
+      appliedCount?: number;
+      availableCount?: number;
+      error?: string;
+      latestApplied?: string;
+      latestAvailable?: string;
+      status: PrototypeOperationsSignalStatus;
+    };
+    outbox: {
+      error?: string;
+      status: PrototypeOperationsSignalStatus;
+      summary?: PrototypeOperationsOutboxSummary;
+    };
+    runtime: {
+      status: "OK";
+    };
+    seededData: {
+      error?: string;
+      latestAvailableSeed?: string;
+      seedFileCount?: number;
+      status: PrototypeOperationsSignalStatus;
+    };
+  };
+  status: PrototypeOperationsPostureStatus;
+}
+
+export interface PrototypeOperationsPostureResult {
+  error?: {
+    code: string;
+    message: string;
+  };
+  ok: boolean;
+  posture?: PrototypeOperationsPosture;
+}
+
 export type PrototypeSupportingDocumentTarget =
   | {
       draftId: string;

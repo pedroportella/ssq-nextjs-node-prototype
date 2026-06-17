@@ -59,3 +59,27 @@
 .fileListItem {
   margin: 0;
 }
+
+.statusPill {
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: var(--ssq-space-1) var(--ssq-space-2);
+}
+
+.statusPillOk {
+  background: #eaf6ed;
+  color: #0b5f2a;
+}
+
+.statusPillWarn {
+  background: #fff4d6;
+  color: #7a4d00;
+}
+
+.statusPillFail {
+  background: #fde7e7;
+  color: #8a1f1f;
+}
