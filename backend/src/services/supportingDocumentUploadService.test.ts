@@ -13,7 +13,10 @@ function createRepository(options: {
     uploadStatus?: string;
   }>;
   requestOwner?: boolean;
+  transactionKey?: string;
 } = {}): PrototypeRepository {
+  const transactionKey = options.transactionKey ?? "seniors-card";
+
   return {
     async getServiceRequestDraftForCustomer() {
       return options.draftOwner === false
@@ -22,6 +25,7 @@ function createRepository(options: {
             id: "70000000-0000-4000-8000-000000000001",
             customerId: "10000000-0000-4000-8000-000000000001",
             transactionDefinitionId: "20000000-0000-4000-8000-000000000002",
+            transactionKey,
             currentStep: "documents",
             payload: {},
             createdAt: "2026-06-10T00:00:00.000Z",
@@ -36,7 +40,8 @@ function createRepository(options: {
             transactionDefinitionId: "20000000-0000-4000-8000-000000000002",
             referenceNumber: "SSQ-DEMO-0001",
             status: "SUBMITTED",
-            payload: {}
+            payload: {},
+            transactionKey
           }
         : undefined;
     },
@@ -125,9 +130,12 @@ describe("SupportingDocumentUploadService", () => {
         metadata: {
           personKey: "applicant",
           policy: {
+            allowedCategories: ["identity", "residency", "concession", "supporting-evidence"],
+            allowedPersonKeys: ["applicant"],
             maxFilesPerPerson: 5,
             maxSizeBytes: 5242880,
-            maxTotalSizeBytesPerPerson: 10485760
+            maxTotalSizeBytesPerPerson: 10485760,
+            transactionKey: "seniors-card"
           },
           localStorageMode: "metadata-only",
           productionNext: {
@@ -200,7 +208,128 @@ describe("SupportingDocumentUploadService", () => {
       }
     })).resolves.toMatchObject({
       ok: false,
-      code: "INVALID_UPLOAD"
+      code: "UNSUPPORTED_FILE_TYPE",
+      fieldErrors: [
+        {
+          field: "mimeType"
+        }
+      ]
+    });
+  });
+
+  it("applies transaction-specific category and person-key policy", async () => {
+    const seniorsCardService = new SupportingDocumentUploadService(createRepository({
+      transactionKey: "seniors-card"
+    }));
+
+    await expect(seniorsCardService.recordUpload({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      upload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "income",
+        fileName: "income.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 2048
+      }
+    })).resolves.toMatchObject({
+      ok: false,
+      code: "UNSUPPORTED_CATEGORY",
+      fieldErrors: [
+        {
+          field: "category",
+          message: "Allowed categories: identity, residency, concession, supporting-evidence."
+        }
+      ],
+      policy: {
+        allowedCategories: ["identity", "residency", "concession", "supporting-evidence"],
+        allowedPersonKeys: ["applicant"]
+      }
+    });
+
+    const rentalSecuritySubsidyService = new SupportingDocumentUploadService(createRepository({
+      transactionKey: "rental-security-subsidy"
+    }));
+
+    await expect(rentalSecuritySubsidyService.recordUpload({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      upload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "income",
+        fileName: "household-income.pdf",
+        mimeType: "application/pdf",
+        personKey: "household-member",
+        sizeBytes: 2048
+      }
+    })).resolves.toMatchObject({
+      ok: true,
+      document: {
+        category: "income",
+        metadata: {
+          personKey: "household-member",
+          policy: {
+            allowedCategories: ["identity", "residency", "income", "supporting-evidence"],
+            allowedPersonKeys: ["applicant", "household-member"],
+            transactionKey: "rental-security-subsidy"
+          }
+        }
+      },
+      policy: {
+        allowedCategories: ["identity", "residency", "income", "supporting-evidence"],
+        allowedPersonKeys: ["applicant", "household-member"]
+      }
+    });
+
+    await expect(rentalSecuritySubsidyService.recordUpload({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      upload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "concession",
+        fileName: "concession.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 2048
+      }
+    })).resolves.toMatchObject({
+      ok: false,
+      code: "UNSUPPORTED_CATEGORY",
+      fieldErrors: [
+        {
+          field: "category",
+          message: "Allowed categories: identity, residency, income, supporting-evidence."
+        }
+      ]
+    });
+
+    await expect(rentalSecuritySubsidyService.recordUpload({
+      customerId: "10000000-0000-4000-8000-000000000001",
+      upload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "income",
+        fileName: "household-income.pdf",
+        mimeType: "application/pdf",
+        personKey: "partner",
+        sizeBytes: 2048
+      }
+    })).resolves.toMatchObject({
+      ok: false,
+      code: "UNSUPPORTED_PERSON_KEY",
+      fieldErrors: [
+        {
+          field: "personKey",
+          message: "Allowed person keys: applicant, household-member."
+        }
+      ]
     });
   });
 
@@ -214,7 +343,7 @@ describe("SupportingDocumentUploadService", () => {
           type: "DRAFT",
           draftId: "70000000-0000-4000-8000-000000000001"
         },
-        category: "income",
+        category: "identity",
         fileName: "income.pdf",
         mimeType: "application/pdf",
         sizeBytes: 5 * 1024 * 1024 + 1
@@ -229,7 +358,7 @@ describe("SupportingDocumentUploadService", () => {
     const countLimitedService = new SupportingDocumentUploadService(createRepository({
       existingDocuments: Array.from({ length: 5 }, () => ({
         metadata: {
-          personKey: "partner"
+          personKey: "applicant"
         },
         sizeBytes: 1024
       }))
@@ -243,9 +372,8 @@ describe("SupportingDocumentUploadService", () => {
           draftId: "70000000-0000-4000-8000-000000000001"
         },
         category: "identity",
-        fileName: "partner-extra.pdf",
+        fileName: "applicant-extra.pdf",
         mimeType: "application/pdf",
-        personKey: "partner",
         sizeBytes: 1024
       }
     })).resolves.toMatchObject({

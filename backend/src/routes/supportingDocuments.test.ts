@@ -6,8 +6,9 @@ import { loadConfig } from "../config.js";
 import type { DatabaseClient } from "../database/client.js";
 import type { QueryResult, QueryResultRow } from "pg";
 
-function createUploadTestDatabase(): DatabaseClient {
+function createUploadTestDatabase(options: { transactionKey?: string } = {}): DatabaseClient {
   const supportingDocuments: QueryResultRow[] = [];
+  const transactionKey = options.transactionKey ?? "seniors-card";
 
   return {
     queryable: {
@@ -42,7 +43,7 @@ function createUploadTestDatabase(): DatabaseClient {
               id: values[0],
               customer_id: values[1],
               transaction_definition_id: "20000000-0000-4000-8000-000000000002",
-              transaction_key: "seniors-card",
+              transaction_key: transactionKey,
               current_step: "documents",
               payload: {},
               created_at: "2026-06-10T00:00:00.000Z",
@@ -155,6 +156,7 @@ describe("supporting document upload route", () => {
       },
       policy: {
         allowedCategories: expect.arrayContaining(["identity", "concession", "supporting-evidence"]),
+        allowedPersonKeys: ["applicant"],
         defaultPersonKey: "applicant",
         maxFilesPerPerson: 5,
         maxSizeBytes: 5242880,
@@ -163,6 +165,136 @@ describe("supporting document upload route", () => {
     });
 
     await app.close();
+  });
+
+  it("returns the transaction-specific upload policy and rejects categories outside it", async () => {
+    const seniorsCardApp = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createUploadTestDatabase({
+        transactionKey: "seniors-card"
+      })
+    });
+
+    const seniorsCardResponse = await seniorsCardApp.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "income",
+        fileName: "income.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 2048
+      },
+      url: "/uploads/supporting-documents"
+    });
+
+    expect(seniorsCardResponse.statusCode).toBe(400);
+    expect(seniorsCardResponse.json()).toMatchObject({
+      ok: false,
+      error: {
+        code: "UNSUPPORTED_CATEGORY"
+      },
+      fieldErrors: [
+        {
+          field: "category"
+        }
+      ],
+      policy: {
+        allowedCategories: ["identity", "residency", "concession", "supporting-evidence"],
+        allowedPersonKeys: ["applicant"]
+      }
+    });
+
+    await seniorsCardApp.close();
+
+    const rentalSecuritySubsidyApp = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createUploadTestDatabase({
+        transactionKey: "rental-security-subsidy"
+      })
+    });
+
+    const rentalSecuritySubsidyResponse = await rentalSecuritySubsidyApp.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "income",
+        fileName: "household-income.pdf",
+        mimeType: "application/pdf",
+        personKey: "household-member",
+        sizeBytes: 2048
+      },
+      url: "/uploads/supporting-documents"
+    });
+
+    expect(rentalSecuritySubsidyResponse.statusCode).toBe(201);
+    expect(rentalSecuritySubsidyResponse.json()).toMatchObject({
+      ok: true,
+      document: {
+        category: "income",
+        metadata: {
+          personKey: "household-member",
+          policy: {
+            transactionKey: "rental-security-subsidy"
+          }
+        }
+      },
+      policy: {
+        allowedCategories: ["identity", "residency", "income", "supporting-evidence"],
+        allowedPersonKeys: ["applicant", "household-member"]
+      }
+    });
+
+    const unsupportedPersonResponse = await rentalSecuritySubsidyApp.inject({
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST",
+      payload: {
+        target: {
+          type: "DRAFT",
+          draftId: "70000000-0000-4000-8000-000000000001"
+        },
+        category: "income",
+        fileName: "partner-income.pdf",
+        mimeType: "application/pdf",
+        personKey: "partner",
+        sizeBytes: 2048
+      },
+      url: "/uploads/supporting-documents"
+    });
+
+    expect(unsupportedPersonResponse.statusCode).toBe(400);
+    expect(unsupportedPersonResponse.json()).toMatchObject({
+      ok: false,
+      error: {
+        code: "UNSUPPORTED_PERSON_KEY"
+      },
+      fieldErrors: [
+        {
+          field: "personKey"
+        }
+      ]
+    });
+
+    await rentalSecuritySubsidyApp.close();
   });
 
   it("rejects unsupported file metadata", async () => {

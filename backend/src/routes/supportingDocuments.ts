@@ -63,7 +63,7 @@ export async function registerSupportingDocumentRoutes(app: FastifyInstance, que
           message: result.message
         },
         fieldErrors: result.fieldErrors,
-        policy: supportingDocumentUploadPolicy
+        policy: result.policy
       };
     }
 
@@ -72,7 +72,7 @@ export async function registerSupportingDocumentRoutes(app: FastifyInstance, que
     return {
       ok: true,
       document: result.document,
-      policy: supportingDocumentUploadPolicy,
+      policy: result.policy,
       correlationId: request.headers["x-correlation-id"] ?? randomUUID()
     };
   });

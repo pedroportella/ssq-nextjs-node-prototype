@@ -79,7 +79,7 @@ Draft submission validates the stored payload against the seeded transaction sch
 
 Submitted requests capture simulated profile evidence for transaction-declared prefill attributes. This evidence is marked `SIMULATED_PROFILE` and includes production-next metadata rather than claiming real Digital Identity integration.
 
-Supporting document uploads are currently metadata-only for local review. The backend validates category, file extension, MIME type, size and target ownership, then records production-next scanning, private storage and retention fields.
+Supporting document uploads are currently metadata-only for local review. The backend validates target ownership, transaction-specific category/person-bucket policy, file extension, MIME type, per-file size and per-person count/total-size limits, then records production-next scanning, private storage and retention fields.
 
 Service request status changes are backend-owned. The current lifecycle supports `SUBMITTED -> UNDER_REVIEW`, `SUBMITTED -> WITHDRAWN`, `UNDER_REVIEW -> ACTION_REQUIRED`, `UNDER_REVIEW -> COMPLETED`, and `ACTION_REQUIRED -> UNDER_REVIEW` or `WITHDRAWN`, with each accepted transition recorded as an activity event.
 
