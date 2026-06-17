@@ -1,12 +1,11 @@
-import { defineConfig, devices } from "@playwright/test";
-import { selectedMockSmokeAppNames } from "./tests/mock-smoke/app-selection";
+import type { MockSmokeAppName } from "../mock-smoke/app-selection";
 
 const mockEnv = {
   NEXT_TELEMETRY_DISABLED: "1",
   SSQ_FRONTEND_DATA_SOURCE: "mock"
 };
 
-const webServers = {
+export const mockWebServersByApp = {
   dashboard: {
     command: "pnpm --filter @ssq/dashboard dev",
     env: mockEnv,
@@ -28,23 +27,16 @@ const webServers = {
     timeout: 120_000,
     url: "http://localhost:3001"
   }
-} as const;
+} as const satisfies Record<MockSmokeAppName, {
+  command: string;
+  env: typeof mockEnv;
+  reuseExistingServer: boolean;
+  timeout: number;
+  url: string;
+}>;
 
-export default defineConfig({
-  expect: {
-    timeout: 10_000
-  },
-  projects: [
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] }
-    }
-  ],
-  testDir: "tests/mock-smoke",
-  timeout: 30_000,
-  use: {
-    trace: "retain-on-failure"
-  },
-  webServer: selectedMockSmokeAppNames.map((appName) => webServers[appName]),
-  workers: 1
-});
+export const allMockWebServers = [
+  mockWebServersByApp.dashboard,
+  mockWebServersByApp["seniors-card"],
+  mockWebServersByApp["rental-security-subsidy"]
+];
