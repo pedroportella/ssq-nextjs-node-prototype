@@ -31,6 +31,8 @@
     "test:full-stack-smoke": "node scripts/full-stack-smoke.mjs",
     "test:reviewer-evidence": "node scripts/reviewer-evidence-smoke.mjs",
     "test:visual": "playwright test -c tests/playwright/visual.config.ts",
+    "test:visual:showcase": "SSQ_VISUAL_APP=dashboard playwright test -c tests/playwright/visual.config.ts tests/visual/ui-library-showcase-baselines.spec.ts",
+    "test:visual:showcase:update": "SSQ_VISUAL_APP=dashboard playwright test -c tests/playwright/visual.config.ts tests/visual/ui-library-showcase-baselines.spec.ts --update-snapshots",
     "test:visual:update": "playwright test -c tests/playwright/visual.config.ts --update-snapshots",
     "guard:artifacts": "node scripts/quality-guards.mjs artifacts",
     "guard:frontend-source": "node scripts/quality-guards.mjs frontend-source",

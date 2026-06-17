@@ -170,6 +170,13 @@ pnpm test:visual
 pnpm test:visual:update
 ```
 
+Run only the Dashboard UI Library showcase visual baselines:
+
+```bash
+pnpm test:visual:showcase
+pnpm test:visual:showcase:update
+```
+
 See `docs/qhds-visual-baselines.md` for the captured page list and screenshot update workflow.
 
 ## Test Command Audit
@@ -181,7 +188,7 @@ Verified locally on 2026-06-17:
 | `pnpm test` | Passed | Workspace Vitest suite passed; Dart Sass legacy JS API deprecation warnings are existing noise. |
 | `pnpm test:e2e` | Passed | Alias for `pnpm test:e2e:mock`; 42 Chromium mock tests. |
 | `pnpm test:e2e:mock` | Passed | Full frontend-only mock Playwright suite; 42 Chromium tests. |
-| `pnpm test:e2e:mock:dashboard` | Passed | Dashboard-focused mock suite; 5 Chromium tests. |
+| `pnpm test:e2e:mock:dashboard` | Passed | Dashboard-focused mock suite; 9 Chromium tests including the `/ui-library` showcase. |
 | `pnpm test:e2e:mock:seniors-card` | Passed | Seniors Card-focused mock suite; 18 Chromium tests. |
 | `pnpm test:e2e:mock:rental-security-subsidy` | Passed | Rental Security Subsidy-focused mock suite; 18 Chromium tests. |
 | `pnpm test:e2e:mock:headed` | Passed | Full visible-browser mock suite; 42 Chromium tests. |
@@ -192,12 +199,13 @@ Verified locally on 2026-06-17:
 | `pnpm test:e2e:real:rss-dashboard:headed` | Passed | Focused visible real backend RSS submission flow; 1 Chromium test. |
 | `pnpm test:full-stack-smoke` | Passed | Verifies readiness, frontend status, GraphQL profile/catalogue reads and backend-rendered pages. |
 | `pnpm test:reviewer-evidence` | Passed | Verifies public handover docs, screenshots, Markdown links, live frontend links/status URLs and leakage safeguards. |
-| `pnpm test:visual` | Runs, currently fails | All 14 screenshot comparisons fail against stale approved baselines; review and refresh before treating this as a green gate. |
+| `pnpm test:visual` | Runs, currently fails | All 14 full app-page screenshot comparisons fail against stale approved baselines; review and refresh before treating this as a green gate. |
+| `pnpm test:visual:showcase` | Passed | Dashboard `/ui-library` desktop and mobile UI Library state baselines. |
 
 Helper scripts:
 
 - `pnpm test:e2e:report` opens the Playwright HTML report and is not a pass/fail test command.
-- `pnpm test:visual:update` intentionally rewrites approved screenshots; run it only after reviewing and accepting visual changes.
+- `pnpm test:visual:update` and `pnpm test:visual:showcase:update` intentionally rewrite approved screenshots; run them only after reviewing and accepting visual changes.
 
 Use backend mode only for explicit integration checks:
 

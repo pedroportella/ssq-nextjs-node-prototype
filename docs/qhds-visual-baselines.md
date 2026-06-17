@@ -18,11 +18,27 @@ pnpm test:visual:update
 
 Both commands run the dashboard, Seniors Card and Rental Security Subsidy apps locally in mock mode. Docker, PostgreSQL and the backend API are not required.
 
+Run only the Dashboard UI Library showcase baselines:
+
+```bash
+pnpm test:visual:showcase
+```
+
+Refresh only the UI Library showcase baselines:
+
+```bash
+pnpm test:visual:showcase:update
+```
+
+The focused showcase commands start only the dashboard app and snapshot `/ui-library` desktop and mobile component states.
+
 ## Current Audit Status
 
 On 2026-06-17, `pnpm test:visual` ran successfully but failed all 14 screenshot comparisons because the current rendered full-page screenshots no longer match the approved PNG baselines. Treat the visual suite as a pending baseline review/refresh before using it as a green quality gate.
 
 `pnpm test:visual:update` was not run during that audit because it intentionally overwrites approved screenshots. Run it only after inspecting the current diffs and accepting the visual changes.
+
+On 2026-06-17, `pnpm test:visual:showcase:update` created the initial Dashboard UI Library showcase desktop and mobile baselines, and `pnpm test:visual:showcase` passed.
 
 ## Captured Pages
 
@@ -31,6 +47,7 @@ Baselines are stored in `tests/visual/__screenshots__/` and cover desktop `1440x
 | App | Route | Reference intent |
 | --- | --- | --- |
 | Dashboard | `/` | QHDS application content page with page header, status alert, summary list, service cards and data tables. |
+| Dashboard | `/ui-library` | QHDS-style UI Library state showcase covering alerts, actions, forms, uploads, navigation, data display and workflow states. |
 | Seniors Card | `/` | QHDS transaction overview page with page header, applicant summary, status alert and action cards. |
 | Seniors Card | `/apply` | QHDS workflow form page with progress indicator, direction link, alert, validation summary and form controls. |
 | Seniors Card | `/application-status` | QHDS service request status page with request summary, alert, upload control and activity table. |

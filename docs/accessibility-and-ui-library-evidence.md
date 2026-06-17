@@ -1,16 +1,17 @@
-# Accessibility And Design-System Evidence
+# Accessibility And UI Library Evidence
 
-This note summarises the SSQ prototype evidence for UI-library, design-system, responsive and accessibility criteria.
+This note summarises the SSQ prototype evidence for UI-library, QHDS alignment, responsive and accessibility criteria.
 
 It is evidence for a review prototype, not a formal WCAG audit or Queensland Government production accessibility sign-off.
 
-## Implemented Design-System Surfaces
+## Implemented UI Library Surfaces
 
-The prototype uses `@ssq/ui-library` as a React adapter for QHDS-style application UI. The adapter keeps application pages on stable React APIs while preserving QHDS-compatible class hooks, tokens and semantic structure.
+The prototype uses `@ssq/ui-library` as a React adapter for QHDS-style application UI. The UI library keeps application pages on stable React APIs while preserving QHDS-compatible class hooks, tokens and semantic structure.
 
 | Surface | Evidence |
 | --- | --- |
 | Page shell and landmarks | [QhdsLayout](../frontend/packages/ui-library/src/components/QhdsLayout), [QhdsHeader](../frontend/packages/ui-library/src/components/QhdsHeader), [QhdsFooter](../frontend/packages/ui-library/src/components/QhdsFooter), [frontend architecture](frontend-architecture.md). |
+| UI Library showcase | Dashboard route `/ui-library`, [UILibraryShowcaseContainer](../frontend/apps/dashboard/src/containers/UILibraryShowcaseContainer.tsx), and focused visual baselines for component states that are hard to reach through app journeys. |
 | Left navigation | [QhdsSideNav](../frontend/packages/ui-library/src/components/QhdsSideNav) implements QHDS `qld__left-nav` hooks, current-page state and server-renderable branch state. |
 | Workflow pages | [QhdsWorkflowLayout](../frontend/packages/ui-library/src/components/QhdsWorkflowLayout), [Seniors Card apply](../frontend/apps/seniors-card/src/containers/SeniorsCardApplyContainer.tsx), [Rental Security Subsidy apply](../frontend/apps/rental-security-subsidy/src/containers/RentalSecuritySubsidyApplyContainer.tsx). |
 | Forms and validation | [QhdsTextInput](../frontend/packages/ui-library/src/components/forms/QhdsTextInput), [QhdsSelect](../frontend/packages/ui-library/src/components/forms/QhdsSelect), [QhdsRadioGroup](../frontend/packages/ui-library/src/components/forms/QhdsRadioGroup), [QhdsCheckbox](../frontend/packages/ui-library/src/components/forms/QhdsCheckbox), [QhdsTextarea](../frontend/packages/ui-library/src/components/forms/QhdsTextarea), and validation assertions in [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
@@ -24,13 +25,14 @@ The prototype uses `@ssq/ui-library` as a React adapter for QHDS-style applicati
 | Accessibility concern | Implemented evidence | Check |
 | --- | --- | --- |
 | Landmarks and headings | Each covered page is expected to render a visible `main` landmark and one visible `h1`. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
+| Component state coverage | The Dashboard `/ui-library` showcase renders alert, action, form, upload, navigation, data-display and workflow states, including disabled, invalid, empty, loading, uploaded and rejected examples. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts), [ui-library-showcase-baselines.spec.ts](../tests/visual/ui-library-showcase-baselines.spec.ts). |
 | Keyboard focus | The smoke suite tabs into each page and verifies the focused element has a visible outline or focus treatment. It also focuses invalid controls directly. | `pnpm test:e2e:mock:dashboard` for dashboard, `pnpm test:e2e:mock` for all apps. |
 | Form labels and validation association | Invalid fields expose `aria-invalid="true"` and connect hint/error text through `aria-describedby`; form controls are native inputs, selects, radios, checkboxes and textareas. | Seniors Card date-of-birth and Rental Security Subsidy weekly-rent assertions in [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Upload and download accessible names | Status pages expose upload controls with the shared accessible file-input label and summary download links with expected accessible names. | Status-page assertions in [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Responsive layout and no horizontal overflow | Desktop `1440x900` and mobile `390x844` sweeps check each app route for visible content and no incoherent horizontal overflow. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Colour contrast | Browser-computed contrast assertions cover body text, headings, links, visited links, action colours, focus indicators, errors and feedback surfaces across light, alt, dark and dark-alt QHDS surfaces. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Browser-only backend leakage | Mock smoke and visual checks block browser requests to local backend origins and `/graphql`, reinforcing the server-only service boundary. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts), [qhds-visual-baselines.spec.ts](../tests/visual/qhds-visual-baselines.spec.ts). |
-| Visual regression | Desktop and mobile screenshot baselines cover dashboard, overview, apply and status pages for both transaction apps, but the current screenshots need a baseline review/refresh. | `pnpm test:visual`; baselines in [tests/visual/\_\_screenshots\_\_](../tests/visual/__screenshots__). See [QHDS visual baselines](qhds-visual-baselines.md#current-audit-status). |
+| Visual regression | Desktop and mobile screenshot baselines cover dashboard, overview, apply and status pages for both transaction apps, but the current full-page screenshots need a baseline review/refresh. The UI Library showcase has a focused passing visual command. | `pnpm test:visual`, `pnpm test:visual:showcase`; baselines in [tests/visual/\_\_screenshots\_\_](../tests/visual/__screenshots__). See [QHDS visual baselines](qhds-visual-baselines.md#current-audit-status). |
 
 ## Responsive And Visual Evidence
 
@@ -45,6 +47,8 @@ Visual baseline screenshots:
 
 - [Dashboard desktop](../tests/visual/__screenshots__/dashboard-home-desktop.png)
 - [Dashboard mobile](../tests/visual/__screenshots__/dashboard-home-mobile.png)
+- [UI Library showcase desktop](../tests/visual/__screenshots__/ui-library-showcase-desktop.png)
+- [UI Library showcase mobile](../tests/visual/__screenshots__/ui-library-showcase-mobile.png)
 - [Seniors Card apply desktop](../tests/visual/__screenshots__/seniors-card-apply-desktop.png)
 - [Seniors Card apply mobile](../tests/visual/__screenshots__/seniors-card-apply-mobile.png)
 - [Rental Security Subsidy apply desktop](../tests/visual/__screenshots__/rental-security-subsidy-apply-desktop.png)
@@ -73,6 +77,15 @@ pnpm test:visual
 ```
 
 The 2026-06-17 command audit found the visual suite runs but currently fails all 14 screenshot comparisons against stale approved baselines. Review the diffs and refresh intentionally before using visual regression as a green release gate.
+
+Focused UI Library showcase baselines:
+
+```bash
+pnpm test:visual:showcase
+pnpm test:visual:showcase:update
+```
+
+Use the focused showcase command when changing `@ssq/ui-library` component states without refreshing the broader stale app-page baseline set.
 
 Component and package checks:
 

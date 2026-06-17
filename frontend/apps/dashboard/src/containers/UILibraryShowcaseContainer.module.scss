@@ -1,0 +1,110 @@
+.showcaseGrid {
+  display: grid;
+  gap: var(--ssq-space-6);
+  min-width: 0;
+}
+
+.componentGrid {
+  display: grid;
+  gap: var(--ssq-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  min-width: 0;
+}
+
+.componentStack {
+  display: grid;
+  gap: var(--ssq-space-4);
+  min-width: 0;
+}
+
+.componentPanel {
+  border: 1px solid var(--ssq-color-border);
+  border-radius: 8px;
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ssq-space-3);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: var(--ssq-space-4);
+}
+
+.componentPanel :global(.ssq-page-alert) {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.componentPanel :global(.ssq-page-alert__wrapper) {
+  min-width: 0;
+}
+
+.panelHeading {
+  font-size: 1rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.panelActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ssq-space-3);
+  min-width: 0;
+}
+
+.panelActions :global(.ssq-button) {
+  max-width: 100%;
+}
+
+.buttonIcon {
+  display: block;
+  flex: 0 0 1rem;
+  height: 1rem;
+  width: 1rem;
+}
+
+.muted {
+  color: var(--ssq-color-muted);
+  margin: 0;
+}
+
+.loadingRegion {
+  align-items: center;
+  border: 1px dashed var(--ssq-color-border);
+  border-radius: 8px;
+  display: flex;
+  gap: var(--ssq-space-3);
+  min-height: 4rem;
+  padding: var(--ssq-space-4);
+}
+
+.loadingDot {
+  animation: showcase-pulse 1.4s ease-in-out infinite;
+  background: var(--ssq-color-brand);
+  border-radius: 999px;
+  display: inline-block;
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+@keyframes showcase-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (width <= 40rem) {
+  .panelActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .panelActions :global(.ssq-button) {
+    justify-content: center;
+    width: 100%;
+  }
+}

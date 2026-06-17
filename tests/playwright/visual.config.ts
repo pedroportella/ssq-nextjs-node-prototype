@@ -1,5 +1,9 @@
 import { defineConfig } from "@playwright/test";
-import { allMockWebServers } from "./mockWebServers";
+import { allMockWebServers, mockWebServersByApp } from "./mockWebServers";
+
+const webServers = process.env.SSQ_VISUAL_APP === "dashboard"
+  ? [mockWebServersByApp.dashboard]
+  : allMockWebServers;
 
 export default defineConfig({
   expect: {
@@ -11,6 +15,6 @@ export default defineConfig({
   use: {
     trace: "retain-on-failure"
   },
-  webServer: allMockWebServers,
+  webServer: webServers,
   workers: 1
 });

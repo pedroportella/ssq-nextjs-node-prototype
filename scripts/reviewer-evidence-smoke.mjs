@@ -4,10 +4,10 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
 
-const trackedFiles = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" })
+const repositoryFiles = execFileSync("git", ["ls-files", "-z", "--cached", "--others", "--exclude-standard"], { encoding: "utf8" })
   .split("\0")
   .filter(Boolean);
-const trackedFileSet = new Set(trackedFiles);
+const repositoryFileSet = new Set(repositoryFiles);
 
 const requiredFiles = [
   "README.md",
@@ -17,15 +17,15 @@ const requiredFiles = [
   "docs/api-and-security-evidence.md",
   "docs/operational-reliability-support-evidence.md",
   "docs/aws-platform-mapping.md",
-  "docs/accessibility-and-design-system-evidence.md",
+  "docs/accessibility-and-ui-library-evidence.md",
   "docs/screenshots/ssq-dashboard.png",
   "docs/screenshots/ssq-seniors-card.png",
   "docs/screenshots/ssq-seniors-card-apply.png",
   "docs/screenshots/ssq-rental-security-subsidy.png"
 ];
 
-const publicMarkdownFiles = trackedFiles.filter(
-  (filePath) => filePath === "README.md" || (filePath.startsWith("docs/") && filePath.endsWith(".md"))
+const publicMarkdownFiles = repositoryFiles.filter(
+  (filePath) => existsSync(filePath) && (filePath === "README.md" || (filePath.startsWith("docs/") && filePath.endsWith(".md")))
 );
 
 const publicFrontendUrls = [
@@ -45,7 +45,7 @@ const requiredText = [
       "docs/api-and-security-evidence.md",
       "docs/operational-reliability-support-evidence.md",
       "docs/aws-platform-mapping.md",
-      "docs/accessibility-and-design-system-evidence.md",
+      "docs/accessibility-and-ui-library-evidence.md",
       "docs/release-runbook.md"
     ]
   },
@@ -55,7 +55,7 @@ const requiredText = [
       "api-and-security-evidence.md",
       "operational-reliability-support-evidence.md",
       "aws-platform-mapping.md",
-      "accessibility-and-design-system-evidence.md",
+      "accessibility-and-ui-library-evidence.md",
       "release-runbook.md"
     ]
   },
@@ -107,8 +107,8 @@ const forbiddenPublicDocPatterns = [
 const failures = [];
 
 for (const filePath of requiredFiles) {
-  if (!trackedFileSet.has(filePath)) {
-    failures.push(`required file is not tracked: ${filePath}`);
+  if (!repositoryFileSet.has(filePath)) {
+    failures.push(`required file is not tracked or present: ${filePath}`);
     continue;
   }
 

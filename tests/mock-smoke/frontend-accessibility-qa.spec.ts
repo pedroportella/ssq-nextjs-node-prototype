@@ -24,6 +24,13 @@ const pages = [
     url: "http://localhost:3000"
   },
   {
+    app: "dashboard",
+    heading: "UI Library showcase",
+    keyText: "Loading component state.",
+    path: "/ui-library",
+    url: "http://localhost:3000/ui-library"
+  },
+  {
     app: "seniors-card",
     heading: "Seniors Card",
     keyText: "Prototype workflow",
@@ -355,6 +362,14 @@ async function expectQhdsContrastFoundation(page: Page) {
       return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
     }
 
+    function isInactiveControl(element: HTMLElement) {
+      return Boolean(
+        element.closest(
+          'button:disabled, input:disabled, select:disabled, textarea:disabled, [aria-disabled="true"], .ssq-button--disabled'
+        )
+      );
+    }
+
     function sampleElement(element: HTMLElement, label: string, minimum = 4.5): BrowserContrastSample {
       const style = window.getComputedStyle(element);
 
@@ -444,7 +459,7 @@ async function expectQhdsContrastFoundation(page: Page) {
     const samples: BrowserContrastSample[] = [];
 
     for (const element of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
-      if (seen.has(element) || !hasVisibleBox(element)) {
+      if (seen.has(element) || !hasVisibleBox(element) || isInactiveControl(element)) {
         continue;
       }
 

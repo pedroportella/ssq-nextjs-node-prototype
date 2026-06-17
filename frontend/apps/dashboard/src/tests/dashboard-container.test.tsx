@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { DashboardContent } from "../containers/DashboardHomeContainer";
+import { UILibraryShowcaseContent } from "../containers/UILibraryShowcaseContainer";
 import {
   parseReviewerQueueFilters,
   ReviewerQueueContent,
@@ -334,6 +335,26 @@ describe("DashboardContent", () => {
     expect(html).toContain("No saved drafts.");
     expect(html).toContain("No submitted requests.");
     expect(html).toContain("No recent activity to show.");
+  });
+});
+
+describe("UILibraryShowcaseContent", () => {
+  it("renders component states for design review", () => {
+    const html = renderToStaticMarkup(<UILibraryShowcaseContent />);
+
+    expect(html).toContain("UI Library showcase");
+    expect(html).toContain("Alerts and actions");
+    expect(html).toContain("Form states");
+    expect(html).toContain("Upload states");
+    expect(html).toContain("Navigation and disclosure");
+    expect(html).toContain("Data display");
+    expect(html).toContain("Workflow states");
+    expect(html).toContain("Disabled action");
+    expect(html).toContain("Enter a date in YYYY-MM-DD format.");
+    expect(html).toContain("oversized-income-evidence.pdf");
+    expect(html).toContain("income-evidence.zip");
+    expect(html).toContain("No submitted requests found.");
+    expect(html).toContain('aria-busy="true"');
   });
 });
 
