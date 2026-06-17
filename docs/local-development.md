@@ -185,7 +185,7 @@ Verified locally on 2026-06-17:
 
 | Command | Result | Notes |
 | --- | --- | --- |
-| `pnpm test` | Passed | Workspace Vitest suite passed; Dart Sass legacy JS API deprecation warnings are existing noise. |
+| `pnpm test` | Passed | Workspace Vitest suite passed after configuring Vitest SCSS transforms for the modern Dart Sass API. |
 | `pnpm test:e2e` | Passed | Alias for `pnpm test:e2e:mock`; 46 Chromium mock tests. |
 | `pnpm test:e2e:mock` | Passed | Full frontend-only mock Playwright suite; 46 Chromium tests. |
 | `pnpm test:e2e:mock:dashboard` | Passed | Dashboard-focused mock suite; 9 Chromium tests including the `/ui-library` showcase. |
