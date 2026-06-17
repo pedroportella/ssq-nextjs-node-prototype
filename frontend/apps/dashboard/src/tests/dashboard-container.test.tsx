@@ -3,9 +3,18 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { DashboardContent } from "../containers/DashboardHomeContainer";
+import {
+  parseReviewerQueueFilters,
+  ReviewerQueueContent,
+  ReviewerRequestDetailContent
+} from "../containers/ReviewerQueueContainer";
 
 import type { AppShellData } from "@ssq/services/server";
-import type { PrototypeDashboardSummaryData } from "@ssq/services";
+import type {
+  PrototypeDashboardSummaryData,
+  PrototypeReviewerQueueData,
+  PrototypeReviewerRequestDetailData
+} from "@ssq/services";
 
 const shell: AppShellData = {
   app: createPrototypeAppSummary("dashboard"),
@@ -173,5 +182,112 @@ describe("DashboardContent", () => {
     expect(html).toContain("No saved drafts.");
     expect(html).toContain("No submitted requests.");
     expect(html).toContain("No recent activity to show.");
+  });
+});
+
+const reviewerQueue: PrototypeReviewerQueueData = {
+  canReview: true,
+  filters: {
+    page: 1,
+    status: "SUBMITTED"
+  },
+  pageInfo: {
+    page: 1,
+    pageSize: 20,
+    totalItems: 1,
+    totalPages: 1
+  },
+  requests: [
+    {
+      appKey: "seniors-card",
+      assignedTeam: "Seniors Card",
+      id: "30000000-0000-4000-8000-000000000001",
+      referenceNumber: "SC-2026-0001",
+      status: "SUBMITTED",
+      submittedAt: "2026-06-12T02:15:00.000Z",
+      title: "Seniors Card"
+    }
+  ],
+  reviewerRole: "ServiceOfficer",
+  reviewerSubject: "officer@example.test",
+  statusCounts: [
+    {
+      count: 1,
+      status: "SUBMITTED"
+    }
+  ]
+};
+
+const reviewerDetail: PrototypeReviewerRequestDetailData = {
+  activity: [
+    {
+      at: "2026-06-12T02:15:00.000Z",
+      description: "SC-2026-0001 submitted"
+    }
+  ],
+  canReview: true,
+  payloadItems: [
+    {
+      label: "Date Of Birth",
+      value: "1960-01-01"
+    }
+  ],
+  request: reviewerQueue.requests[0],
+  reviewerRole: "ServiceOfficer",
+  reviewerSubject: "officer@example.test",
+  supportingDocuments: [
+    {
+      category: "Identity evidence",
+      downloadHref: "/service-requests/SC-2026-0001/supporting-documents/mock-sc-identity-evidence/download",
+      fileName: "identity-evidence.pdf",
+      id: "mock-sc-identity-evidence",
+      sizeBytes: 512_000,
+      status: "uploaded"
+    }
+  ]
+};
+
+describe("Reviewer queue containers", () => {
+  it("parses reviewer queue filters from search params", () => {
+    expect(parseReviewerQueueFilters({
+      page: "2",
+      search: " SC ",
+      status: "SUBMITTED"
+    })).toEqual({
+      page: 2,
+      search: "SC",
+      sortBy: "createdAt",
+      sortDirection: "DESC",
+      status: "SUBMITTED"
+    });
+  });
+
+  it("renders the reviewer queue with filters, selection and batch action controls", () => {
+    const html = renderToStaticMarkup(<ReviewerQueueContent queue={reviewerQueue} shell={shell} />);
+
+    expect(html).toContain("Reviewer queue");
+    expect(html).toContain("Search queue");
+    expect(html).toContain("Submitted request queue");
+    expect(html).toContain('href="/reviewer/SC-2026-0001"');
+    expect(html).toContain('aria-label="Select SC-2026-0001"');
+    expect(html).toContain('form="reviewer-batch-form"');
+    expect(html).toContain('action="/reviewer/actions/batch-status"');
+    expect(html).toContain("Batch transition");
+    expect(html).toContain("Reason");
+  });
+
+  it("renders reviewer detail with payload, documents, assignment and activity", () => {
+    const html = renderToStaticMarkup(<ReviewerRequestDetailContent detail={reviewerDetail} shell={shell} />);
+
+    expect(html).toContain("Review submitted request details and supporting evidence.");
+    expect(html).toContain("SC-2026-0001");
+    expect(html).toContain("Payload summary");
+    expect(html).toContain("Date Of Birth");
+    expect(html).toContain("identity-evidence.pdf");
+    expect(html).toContain(
+      'href="http://localhost:3001/service-requests/SC-2026-0001/supporting-documents/mock-sc-identity-evidence/download"'
+    );
+    expect(html).toContain('action="/reviewer/actions/assign"');
+    expect(html).toContain("Activity history");
   });
 });

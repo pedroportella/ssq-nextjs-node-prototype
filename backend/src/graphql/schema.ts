@@ -533,31 +533,42 @@ export const schema = createSchema<GraphqlContext>({
         args: { referenceNumber?: string | null; draftId?: string | null },
         context: GraphqlContext
       ) {
-        if (!context.authorization.can(context.demoIdentity, "citizen.supportingDocuments.read")) {
-          return [];
-        }
+        const canReadCitizenDocuments = context.authorization.can(context.demoIdentity, "citizen.supportingDocuments.read");
+        const canReadSubmittedRecords = context.authorization.can(context.demoIdentity, "serviceRequest.detail.read");
 
-        const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
-
-        if (!customer) {
+        if (!canReadCitizenDocuments && !canReadSubmittedRecords) {
           return [];
         }
 
         if (args.referenceNumber) {
-          const serviceRequest = await context.repository.getServiceRequestByReferenceForCustomer({
-            customerId: customer.id,
-            referenceNumber: args.referenceNumber
-          });
+          const serviceRequest = canReadSubmittedRecords
+            ? await context.repository.getServiceRequestByReference(args.referenceNumber)
+            : await (async () => {
+                const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
+
+                return customer
+                  ? context.repository.getServiceRequestByReferenceForCustomer({
+                      customerId: customer.id,
+                      referenceNumber: args.referenceNumber as string
+                    })
+                  : undefined;
+              })();
 
           return serviceRequest
             ? context.repository.listSupportingDocumentsForCustomer({
-                customerId: customer.id,
+                customerId: serviceRequest.customerId,
                 serviceRequestId: serviceRequest.id
               })
             : [];
         }
 
         if (args.draftId) {
+          const customer = await context.repository.getCustomerByEmail(context.demoIdentity.subject);
+
+          if (!customer) {
+            return [];
+          }
+
           const draft = await context.repository.getServiceRequestDraftForCustomer({
             customerId: customer.id,
             draftId: args.draftId

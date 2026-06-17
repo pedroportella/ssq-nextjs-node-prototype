@@ -711,6 +711,53 @@ describe("GraphQL route", () => {
     await app.close();
   });
 
+  it("lets a service officer list submitted supporting document metadata", async () => {
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createGraphqlTestDatabase()
+    });
+
+    const response = await app.inject({
+      headers: {
+        "content-type": "application/json",
+        "x-ssq-demo-role": "ServiceOfficer"
+      },
+      method: "POST",
+      payload: {
+        query: `
+          query ReviewerSupportingDocuments {
+            supportingDocuments(referenceNumber: "SSQ-DEMO-0001") {
+              id
+              fileName
+              uploadStatus
+              scanStatus
+            }
+          }
+        `
+      },
+      url: "/graphql"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      data: {
+        supportingDocuments: [
+          {
+            id: "93000000-0000-4000-8000-000000000001",
+            fileName: "identity-evidence.pdf",
+            uploadStatus: "UPLOADED",
+            scanStatus: "PASSED"
+          }
+        ]
+      }
+    });
+
+    await app.close();
+  });
+
   it("lets a service officer list submitted service requests", async () => {
     const app = await buildApp({
       config: loadConfig({

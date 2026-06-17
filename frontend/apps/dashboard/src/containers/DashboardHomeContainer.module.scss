@@ -14,6 +14,32 @@
   row-gap: var(--ssq-space-6);
 }
 
+.filterForm,
+.actionPanel {
+  display: grid;
+  gap: var(--ssq-space-4);
+  max-width: 48rem;
+}
+
+.formActions,
+.sectionActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ssq-space-3);
+}
+
+.actionPanel {
+  border-left: 4px solid var(--ssq-color-border);
+  margin-top: var(--ssq-space-6);
+  padding-left: var(--ssq-space-4);
+}
+
+.panelHeading {
+  font-size: 1.125rem;
+  margin: 0;
+}
+
 .itemDescription {
   margin: 0;
 }

@@ -49,15 +49,24 @@ export async function executeBackendGraphql<TData, TVariables extends Record<str
   options: {
     config?: BackendClientConfig;
     fetchImpl?: typeof fetch;
+    headers?: HeadersInit;
   } = {}
 ): Promise<BackendGraphqlResponse<TData>> {
   const config = options.config ?? loadBackendClientConfig();
   const correlationId = createCorrelationId();
   const fetchImpl = options.fetchImpl ?? fetch;
+  const headers = createBackendHeaders(correlationId);
+
+  if (options.headers) {
+    new Headers(options.headers).forEach((value, key) => {
+      headers.set(key, value);
+    });
+  }
+
   const response = await fetchImpl(`${config.backendUrl}/graphql`, {
     body: JSON.stringify(request),
     cache: "no-store",
-    headers: createBackendHeaders(correlationId),
+    headers,
     method: "POST"
   });
 

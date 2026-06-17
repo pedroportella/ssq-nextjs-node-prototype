@@ -6,6 +6,17 @@ import type {
   PrototypeDashboardSummaryData,
   PrototypeDraftSummary,
   PrototypeProfileSummary,
+  PrototypeReviewerActivityEntry,
+  PrototypeReviewerAssignInput,
+  PrototypeReviewerAssignResult,
+  PrototypeReviewerBatchStatusInput,
+  PrototypeReviewerBatchStatusResult,
+  PrototypeReviewerPayloadItem,
+  PrototypeReviewerQueueData,
+  PrototypeReviewerQueueFilters,
+  PrototypeReviewerRequestDetailData,
+  PrototypeReviewerRequestSummary,
+  PrototypeReviewerStatus,
   PrototypeServiceCatalogueEntry,
   PrototypeSupportingDocumentDownload,
   PrototypeSupportingDocumentUploadInput,
@@ -179,6 +190,234 @@ export function createMockUploadedDocuments(appKey: Exclude<PrototypeAppKey, "da
       status: "rejected"
     }
   ];
+}
+
+const mockReviewerRequests: Array<PrototypeReviewerRequestSummary & { payload: Record<string, unknown> }> = [
+  {
+    appKey: "seniors-card",
+    assignedTeam: "Seniors Card",
+    id: "30000000-0000-4000-8000-000000000001",
+    lastTouchedAt: "2026-06-12T02:20:00.000Z",
+    lastTouchedBy: "seed",
+    payload: {
+      concessionConsent: true,
+      dateOfBirth: "1960-01-01",
+      residencyStatus: "queensland-resident"
+    },
+    referenceNumber: "SC-2026-0001",
+    status: "SUBMITTED",
+    submittedAt: "2026-06-12T02:15:00.000Z",
+    title: "Seniors Card"
+  },
+  {
+    appKey: "rental-security-subsidy",
+    assignedOfficerSubject: "officer@example.test",
+    assignedTeam: "Rental support",
+    id: "30000000-0000-4000-8000-000000000002",
+    lastTouchedAt: "2026-06-12T03:10:00.000Z",
+    lastTouchedBy: "officer@example.test",
+    payload: {
+      householdIncome: 1240,
+      rentalBondAmount: 2480,
+      supportingDocuments: ["rental-property-evidence.pdf"]
+    },
+    referenceNumber: "RSS-2026-0001",
+    status: "IN_REVIEW",
+    submittedAt: "2026-06-12T03:00:00.000Z",
+    title: "Rental Security Subsidy"
+  },
+  {
+    appKey: "seniors-card",
+    assignedTeam: "Seniors Card",
+    id: "30000000-0000-4000-8000-000000000003",
+    lastTouchedAt: "2026-06-13T01:10:00.000Z",
+    lastTouchedBy: "lead@example.test",
+    payload: {
+      concessionConsent: false,
+      dateOfBirth: "1958-08-11",
+      residencyStatus: "needs-follow-up"
+    },
+    referenceNumber: "SC-2026-0002",
+    status: "ACTION_REQUIRED",
+    submittedAt: "2026-06-13T01:00:00.000Z",
+    title: "Seniors Card"
+  }
+];
+
+function filterMockReviewerRequests(filters: PrototypeReviewerQueueFilters) {
+  const search = filters.search?.trim().toLowerCase();
+
+  return mockReviewerRequests.filter((request) => {
+    const matchesStatus = filters.status ? request.status === filters.status : true;
+    const matchesSearch = search
+      ? [
+          request.referenceNumber,
+          request.title,
+          request.assignedOfficerSubject,
+          request.assignedTeam,
+          request.status
+        ].some((value) => value?.toLowerCase().includes(search))
+      : true;
+
+    return matchesStatus && matchesSearch;
+  });
+}
+
+function createMockReviewerStatusCounts(requests = mockReviewerRequests): PrototypeReviewerQueueData["statusCounts"] {
+  const counts = new Map<PrototypeReviewerStatus, number>();
+
+  for (const request of requests) {
+    counts.set(request.status, (counts.get(request.status) ?? 0) + 1);
+  }
+
+  return Array.from(counts.entries()).map(([status, count]) => ({ count, status }));
+}
+
+export function createMockReviewerQueueData(filters: PrototypeReviewerQueueFilters = {}): PrototypeReviewerQueueData {
+  const filteredRequests = filterMockReviewerRequests(filters);
+
+  return {
+    canReview: true,
+    filters,
+    pageInfo: {
+      page: 1,
+      pageSize: 20,
+      totalItems: filteredRequests.length,
+      totalPages: filteredRequests.length > 0 ? 1 : 0
+    },
+    requests: filteredRequests.map(({ payload: _payload, ...request }) => request),
+    reviewerRole: "ServiceOfficer",
+    reviewerSubject: "officer@example.test",
+    statusCounts: createMockReviewerStatusCounts()
+  };
+}
+
+function createPayloadItems(payload: Record<string, unknown>): PrototypeReviewerPayloadItem[] {
+  return Object.entries(payload).map(([key, value]) => ({
+    label: key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (character) => character.toUpperCase()),
+    value: Array.isArray(value) ? value.join(", ") : String(value)
+  }));
+}
+
+function createMockReviewerActivity(request: PrototypeReviewerRequestSummary): PrototypeReviewerActivityEntry[] {
+  return [
+    {
+      at: request.submittedAt,
+      description: `${request.referenceNumber} submitted`
+    },
+    ...(request.lastTouchedAt && request.lastTouchedBy
+      ? [
+          {
+            at: request.lastTouchedAt,
+            description: `Last touched by ${request.lastTouchedBy}`
+          }
+        ]
+      : [])
+  ];
+}
+
+export function createMockReviewerRequestDetailData(referenceNumber: string): PrototypeReviewerRequestDetailData {
+  const request = mockReviewerRequests.find((candidate) => candidate.referenceNumber === referenceNumber);
+
+  if (!request) {
+    return {
+      activity: [],
+      canReview: true,
+      payloadItems: [],
+      reviewerRole: "ServiceOfficer",
+      reviewerSubject: "officer@example.test",
+      supportingDocuments: []
+    };
+  }
+
+  const { payload, ...summary } = request;
+
+  return {
+    activity: createMockReviewerActivity(summary),
+    canReview: true,
+    payloadItems: createPayloadItems(payload),
+    request: summary,
+    reviewerRole: "ServiceOfficer",
+    reviewerSubject: "officer@example.test",
+    supportingDocuments: createMockUploadedDocuments(summary.appKey).filter((document) => document.status === "uploaded")
+  };
+}
+
+export function createMockReviewerBatchStatusResult(
+  input: PrototypeReviewerBatchStatusInput
+): PrototypeReviewerBatchStatusResult {
+  const references = input.referenceNumbers.map((referenceNumber) => referenceNumber.trim()).filter(Boolean);
+
+  if (references.length === 0) {
+    return {
+      error: {
+        code: "INVALID_REFERENCE_NUMBERS",
+        message: "Select at least one request."
+      },
+      ok: false,
+      results: []
+    };
+  }
+
+  const results = references.map((referenceNumber) => {
+    const request = mockReviewerRequests.find((candidate) => candidate.referenceNumber === referenceNumber);
+
+    return request
+      ? {
+          ok: true,
+          referenceNumber,
+          request: {
+            ...request,
+            status: input.status
+          }
+        }
+      : {
+          error: {
+            code: "SERVICE_REQUEST_NOT_FOUND",
+            message: "Service request was not found."
+          },
+          ok: false,
+          referenceNumber
+        };
+  });
+
+  return {
+    error: results.every((result) => result.ok)
+      ? undefined
+      : {
+          code: "PARTIAL_FAILURE",
+          message: "One or more service request status updates failed."
+        },
+    ok: results.every((result) => result.ok),
+    results
+  };
+}
+
+export function createMockReviewerAssignResult(input: PrototypeReviewerAssignInput): PrototypeReviewerAssignResult {
+  const request = mockReviewerRequests.find((candidate) => candidate.referenceNumber === input.referenceNumber);
+
+  if (!request) {
+    return {
+      error: {
+        code: "SERVICE_REQUEST_NOT_FOUND",
+        message: "Service request was not found."
+      },
+      ok: false
+    };
+  }
+
+  return {
+    ok: true,
+    request: {
+      ...request,
+      assignedOfficerSubject: input.assignedOfficerSubject,
+      assignedTeam: input.assignedTeam,
+      lastTouchedAt: "2026-06-17T00:00:00.000Z",
+      lastTouchedBy: "officer@example.test"
+    }
+  };
 }
 
 export function createMockSupportingDocumentUploadResult(

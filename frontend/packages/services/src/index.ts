@@ -80,6 +80,112 @@ export interface PrototypeUploadedDocument {
   status: "uploaded" | "rejected";
 }
 
+export type PrototypeReviewerStatus = Exclude<ServiceRequestStatus, "DRAFT">;
+
+export interface PrototypeReviewerQueueFilters {
+  page?: number;
+  search?: string;
+  sortBy?: "assignedOfficer" | "assignedTeam" | "createdAt" | "lastTouchedAt" | "referenceNumber" | "status" | "transactionKey";
+  sortDirection?: "ASC" | "DESC";
+  status?: PrototypeReviewerStatus;
+}
+
+export interface PrototypeReviewerQueuePageInfo {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+export interface PrototypeReviewerStatusCount {
+  count: number;
+  status: PrototypeReviewerStatus;
+}
+
+export interface PrototypeReviewerRequestSummary {
+  appKey: Exclude<PrototypeAppKey, "dashboard">;
+  assignedOfficerSubject?: string;
+  assignedTeam?: string;
+  id: string;
+  lastTouchedAt?: string;
+  lastTouchedBy?: string;
+  referenceNumber: string;
+  status: PrototypeReviewerStatus;
+  submittedAt: string;
+  title: string;
+}
+
+export interface PrototypeReviewerQueueData {
+  canReview: boolean;
+  filters: PrototypeReviewerQueueFilters;
+  pageInfo: PrototypeReviewerQueuePageInfo;
+  reviewerRole: string;
+  reviewerSubject: string;
+  statusCounts: PrototypeReviewerStatusCount[];
+  requests: PrototypeReviewerRequestSummary[];
+}
+
+export interface PrototypeReviewerPayloadItem {
+  label: string;
+  value: string;
+}
+
+export interface PrototypeReviewerActivityEntry {
+  at: string;
+  description: string;
+}
+
+export interface PrototypeReviewerRequestDetailData {
+  activity: PrototypeReviewerActivityEntry[];
+  canReview: boolean;
+  payloadItems: PrototypeReviewerPayloadItem[];
+  request?: PrototypeReviewerRequestSummary;
+  reviewerRole: string;
+  reviewerSubject: string;
+  supportingDocuments: PrototypeUploadedDocument[];
+}
+
+export interface PrototypeReviewerBatchStatusInput {
+  reason?: string;
+  referenceNumbers: string[];
+  status: PrototypeReviewerStatus;
+}
+
+export interface PrototypeReviewerBatchStatusItem {
+  error?: {
+    code: string;
+    message: string;
+  };
+  ok: boolean;
+  referenceNumber: string;
+  request?: PrototypeReviewerRequestSummary;
+}
+
+export interface PrototypeReviewerBatchStatusResult {
+  error?: {
+    code: string;
+    message: string;
+  };
+  ok: boolean;
+  results: PrototypeReviewerBatchStatusItem[];
+}
+
+export interface PrototypeReviewerAssignInput {
+  assignedOfficerSubject?: string;
+  assignedTeam?: string;
+  reason?: string;
+  referenceNumber: string;
+}
+
+export interface PrototypeReviewerAssignResult {
+  error?: {
+    code: string;
+    message: string;
+  };
+  ok: boolean;
+  request?: PrototypeReviewerRequestSummary;
+}
+
 export type PrototypeSupportingDocumentTarget =
   | {
       draftId: string;

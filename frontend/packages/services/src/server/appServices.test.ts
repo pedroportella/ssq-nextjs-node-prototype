@@ -1,9 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  assignReviewerRequest,
+  batchUpdateReviewerRequestStatus,
   createTransactionDraft,
   getDashboardShellData,
   getDashboardSummaryData,
+  getReviewerQueueData,
+  getReviewerRequestDetailData,
   getSubmissionSummaryDownload,
   getSupportingDocumentDownload,
   getSupportingDocumentUploadPolicy,
@@ -308,6 +312,73 @@ describe("server app services", () => {
     });
   });
 
+  it("returns mock reviewer queue, detail and mutation results", async () => {
+    await expect(getReviewerQueueData({ status: "SUBMITTED" }, { dataSource: "mock" })).resolves.toMatchObject({
+      canReview: true,
+      pageInfo: {
+        totalItems: 1
+      },
+      requests: [
+        {
+          referenceNumber: "SC-2026-0001",
+          status: "SUBMITTED"
+        }
+      ],
+      reviewerRole: "ServiceOfficer",
+      statusCounts: expect.arrayContaining([
+        {
+          count: 1,
+          status: "SUBMITTED"
+        }
+      ])
+    });
+    await expect(getReviewerRequestDetailData("RSS-2026-0001", { dataSource: "mock" })).resolves.toMatchObject({
+      payloadItems: expect.arrayContaining([
+        expect.objectContaining({
+          label: "Household Income",
+          value: "1240"
+        })
+      ]),
+      request: {
+        referenceNumber: "RSS-2026-0001",
+        status: "IN_REVIEW"
+      },
+      supportingDocuments: expect.arrayContaining([
+        expect.objectContaining({
+          fileName: "rental-property-evidence.pdf"
+        })
+      ])
+    });
+    await expect(batchUpdateReviewerRequestStatus({
+      reason: "Queue triage",
+      referenceNumbers: ["SC-2026-0001"],
+      status: "IN_REVIEW"
+    }, { dataSource: "mock" })).resolves.toMatchObject({
+      ok: true,
+      results: [
+        {
+          ok: true,
+          referenceNumber: "SC-2026-0001",
+          request: {
+            status: "IN_REVIEW"
+          }
+        }
+      ]
+    });
+    await expect(assignReviewerRequest({
+      assignedOfficerSubject: "officer@example.test",
+      assignedTeam: "Seniors Card",
+      reason: "Picked up from queue",
+      referenceNumber: "SC-2026-0001"
+    }, { dataSource: "mock" })).resolves.toMatchObject({
+      ok: true,
+      request: {
+        assignedOfficerSubject: "officer@example.test",
+        assignedTeam: "Seniors Card"
+      }
+    });
+  });
+
   it("maps backend dashboard summary data", async () => {
     mockBackendFetch(({ body }) => {
       if (body?.query?.includes("FrontendSupportingDocuments")) {
@@ -601,6 +672,237 @@ describe("server app services", () => {
       documentId: "doc-income",
       filename: "income-evidence.pdf.prototype.txt",
       referenceNumber: "SSQ-TEST-0002"
+    });
+  });
+
+  it("maps backend reviewer queue, detail and actions through staff GraphQL headers", async () => {
+    mockBackendFetch(({ body, init }) => {
+      expect(init?.headers).toBeInstanceOf(Headers);
+      expect((init?.headers as Headers).get("x-ssq-demo-role")).toBe("ServiceOfficer");
+
+      if (body?.query?.includes("FrontendReviewerQueue")) {
+        expect(body.variables?.input).toMatchObject({
+          status: "UNDER_REVIEW"
+        });
+
+        return Response.json({
+          data: {
+            platform: {
+              demoRole: "ServiceOfficer",
+              demoSubject: "officer@example.test",
+              identityDisplayName: "ServiceOfficer officer@example.test"
+            },
+            submittedServiceRequestConnection: {
+              ok: true,
+              error: null,
+              connection: {
+                items: [
+                  {
+                    assignedOfficerSubject: "officer@example.test",
+                    assignedTeam: "Rental support",
+                    createdAt: "2026-06-12T03:00:00.000Z",
+                    id: "30000000-0000-4000-8000-000000000002",
+                    lastTouchedAt: "2026-06-12T03:10:00.000Z",
+                    lastTouchedBy: "officer@example.test",
+                    payload: {
+                      householdIncome: 1240
+                    },
+                    referenceNumber: "SSQ-TEST-0002",
+                    status: "UNDER_REVIEW",
+                    transactionKey: "rental-security-subsidy",
+                    updatedAt: "2026-06-12T03:10:00.000Z"
+                  }
+                ],
+                pageInfo: {
+                  page: 1,
+                  pageSize: 20,
+                  totalItems: 1,
+                  totalPages: 1
+                },
+                statusCounts: [
+                  {
+                    count: 1,
+                    status: "UNDER_REVIEW"
+                  }
+                ]
+              }
+            }
+          }
+        });
+      }
+
+      if (body?.query?.includes("FrontendReviewerRequest")) {
+        return Response.json({
+          data: {
+            platform: {
+              demoRole: "TeamLead",
+              demoSubject: "lead@example.test",
+              identityDisplayName: "TeamLead lead@example.test"
+            },
+            serviceRequest: {
+              assignedOfficerSubject: "officer@example.test",
+              assignedTeam: "Rental support",
+              createdAt: "2026-06-12T03:00:00.000Z",
+              id: "30000000-0000-4000-8000-000000000002",
+              lastTouchedAt: "2026-06-12T03:10:00.000Z",
+              lastTouchedBy: "officer@example.test",
+              payload: {
+                householdIncome: 1240
+              },
+              referenceNumber: "SSQ-TEST-0002",
+              status: "UNDER_REVIEW",
+              transactionKey: "rental-security-subsidy",
+              updatedAt: "2026-06-12T03:10:00.000Z"
+            },
+            supportingDocuments: [
+              {
+                category: "income",
+                fileName: "income-evidence.pdf",
+                id: "doc-income",
+                mimeType: "application/pdf",
+                scanStatus: "PASSED",
+                sizeBytes: 512000,
+                uploadStatus: "STORED_PROTOTYPE"
+              }
+            ]
+          }
+        });
+      }
+
+      if (body?.query?.includes("FrontendReviewerActivity")) {
+        return Response.json({
+          data: {
+            activityLogs: [
+              {
+                createdAt: "2026-06-12T03:10:00.000Z",
+                eventPayload: {
+                  referenceNumber: "SSQ-TEST-0002"
+                },
+                eventType: "SERVICE_REQUEST_STATUS_CHANGED"
+              }
+            ]
+          }
+        });
+      }
+
+      if (body?.query?.includes("FrontendReviewerBatchStatus")) {
+        expect(body.variables?.input).toMatchObject({
+          referenceNumbers: ["SSQ-TEST-0002"],
+          status: "UNDER_REVIEW"
+        });
+
+        return Response.json({
+          data: {
+            batchUpdateServiceRequestStatus: {
+              ok: true,
+              error: null,
+              results: [
+                {
+                  ok: true,
+                  referenceNumber: "SSQ-TEST-0002",
+                  error: null,
+                  serviceRequest: {
+                    assignedOfficerSubject: "officer@example.test",
+                    assignedTeam: "Rental support",
+                    createdAt: "2026-06-12T03:00:00.000Z",
+                    id: "30000000-0000-4000-8000-000000000002",
+                    lastTouchedAt: "2026-06-12T03:10:00.000Z",
+                    lastTouchedBy: "officer@example.test",
+                    payload: {},
+                    referenceNumber: "SSQ-TEST-0002",
+                    status: "UNDER_REVIEW",
+                    transactionKey: "rental-security-subsidy",
+                    updatedAt: "2026-06-12T03:10:00.000Z"
+                  }
+                }
+              ]
+            }
+          }
+        });
+      }
+
+      return Response.json({
+        data: {
+          assignServiceRequest: {
+            ok: true,
+            error: null,
+            serviceRequest: {
+              assignedOfficerSubject: "lead@example.test",
+              assignedTeam: "Rental support",
+              createdAt: "2026-06-12T03:00:00.000Z",
+              id: "30000000-0000-4000-8000-000000000002",
+              lastTouchedAt: "2026-06-12T03:10:00.000Z",
+              lastTouchedBy: "lead@example.test",
+              payload: {},
+              referenceNumber: "SSQ-TEST-0002",
+              status: "UNDER_REVIEW",
+              transactionKey: "rental-security-subsidy",
+              updatedAt: "2026-06-12T03:10:00.000Z"
+            }
+          }
+        }
+      });
+    });
+
+    await expect(getReviewerQueueData({ status: "IN_REVIEW" }, backendConfig)).resolves.toMatchObject({
+      canReview: true,
+      requests: [
+        {
+          referenceNumber: "SSQ-TEST-0002",
+          status: "IN_REVIEW"
+        }
+      ],
+      statusCounts: [
+        {
+          count: 1,
+          status: "IN_REVIEW"
+        }
+      ]
+    });
+    await expect(getReviewerRequestDetailData("SSQ-TEST-0002", backendConfig)).resolves.toMatchObject({
+      activity: [
+        {
+          description: "Status changed for SSQ-TEST-0002"
+        }
+      ],
+      payloadItems: [
+        {
+          label: "Household Income",
+          value: "1240"
+        }
+      ],
+      supportingDocuments: [
+        {
+          downloadHref: "/service-requests/SSQ-TEST-0002/supporting-documents/doc-income/download",
+          fileName: "income-evidence.pdf"
+        }
+      ]
+    });
+    await expect(batchUpdateReviewerRequestStatus({
+      reason: "Queue triage",
+      referenceNumbers: ["SSQ-TEST-0002"],
+      status: "IN_REVIEW"
+    }, backendConfig)).resolves.toMatchObject({
+      ok: true,
+      results: [
+        {
+          referenceNumber: "SSQ-TEST-0002",
+          request: {
+            status: "IN_REVIEW"
+          }
+        }
+      ]
+    });
+    await expect(assignReviewerRequest({
+      assignedOfficerSubject: "lead@example.test",
+      assignedTeam: "Rental support",
+      reason: "Escalated",
+      referenceNumber: "SSQ-TEST-0002"
+    }, backendConfig)).resolves.toMatchObject({
+      ok: true,
+      request: {
+        assignedOfficerSubject: "lead@example.test"
+      }
     });
   });
 

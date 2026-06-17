@@ -1,9 +1,13 @@
 import "server-only";
 
 import {
+  assignBackendReviewerRequest,
+  batchUpdateBackendReviewerRequestStatus,
   createBackendAppShellData,
   createBackendTransactionDraft,
   getBackendDashboardSummaryData,
+  getBackendReviewerQueueData,
+  getBackendReviewerRequestDetailData,
   getBackendSubmissionSummaryDownload,
   getBackendSupportingDocumentDownload,
   getBackendSupportingDocumentUploadPolicy,
@@ -14,9 +18,13 @@ import {
   updateBackendDraftWithValidationError
 } from "./backendServices";
 import {
+  assignMockReviewerRequest,
+  batchUpdateMockReviewerRequestStatus,
   createMockAppShellData,
   createMockDraft,
   getMockDashboardSummaryData,
+  getMockReviewerQueueData,
+  getMockReviewerRequestDetailData,
   getMockSubmissionSummaryDownload,
   getMockSupportingDocumentDownload,
   getMockSupportingDocumentUploadPolicy,
@@ -34,6 +42,13 @@ import type {
   PrototypeAppSummary,
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
+  PrototypeReviewerAssignInput,
+  PrototypeReviewerAssignResult,
+  PrototypeReviewerBatchStatusInput,
+  PrototypeReviewerBatchStatusResult,
+  PrototypeReviewerQueueData,
+  PrototypeReviewerQueueFilters,
+  PrototypeReviewerRequestDetailData,
   PrototypeSupportingDocumentDownload,
   PrototypeSupportingDocumentUploadInput,
   PrototypeSupportingDocumentUploadResult,
@@ -167,6 +182,58 @@ export async function getUploadedDocuments(
   }
 
   return getMockUploadedDocuments(appKey);
+}
+
+export async function getReviewerQueueData(
+  filters: PrototypeReviewerQueueFilters = {},
+  config?: FrontendRuntimeConfig
+): Promise<PrototypeReviewerQueueData> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    return getBackendReviewerQueueData(filters, runtimeConfig);
+  }
+
+  return getMockReviewerQueueData(filters);
+}
+
+export async function getReviewerRequestDetailData(
+  referenceNumber: string,
+  config?: FrontendRuntimeConfig
+): Promise<PrototypeReviewerRequestDetailData> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    return getBackendReviewerRequestDetailData(referenceNumber, runtimeConfig);
+  }
+
+  return getMockReviewerRequestDetailData(referenceNumber);
+}
+
+export async function batchUpdateReviewerRequestStatus(
+  input: PrototypeReviewerBatchStatusInput,
+  config?: FrontendRuntimeConfig
+): Promise<PrototypeReviewerBatchStatusResult> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    return batchUpdateBackendReviewerRequestStatus(input, runtimeConfig);
+  }
+
+  return batchUpdateMockReviewerRequestStatus(input);
+}
+
+export async function assignReviewerRequest(
+  input: PrototypeReviewerAssignInput,
+  config?: FrontendRuntimeConfig
+): Promise<PrototypeReviewerAssignResult> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    return assignBackendReviewerRequest(input, runtimeConfig);
+  }
+
+  return assignMockReviewerRequest(input);
 }
 
 export async function recordSupportingDocumentUploadMetadata(

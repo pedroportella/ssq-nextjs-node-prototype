@@ -12,6 +12,19 @@ import type {
   PrototypeDraftMutationResult,
   PrototypeDraftSummary,
   PrototypeProfileSummary,
+  PrototypeReviewerActivityEntry,
+  PrototypeReviewerAssignInput,
+  PrototypeReviewerAssignResult,
+  PrototypeReviewerBatchStatusInput,
+  PrototypeReviewerBatchStatusItem,
+  PrototypeReviewerBatchStatusResult,
+  PrototypeReviewerPayloadItem,
+  PrototypeReviewerQueueData,
+  PrototypeReviewerQueueFilters,
+  PrototypeReviewerRequestDetailData,
+  PrototypeReviewerRequestSummary,
+  PrototypeReviewerStatus,
+  PrototypeReviewerStatusCount,
   PrototypeServiceCatalogueEntry,
   PrototypeSupportingDocumentDownload,
   PrototypeSupportingDocumentUploadInput,
@@ -72,13 +85,23 @@ interface BackendServiceRequestDraft {
 }
 
 interface BackendServiceRequest {
+  assignedOfficerSubject?: string | null;
+  assignedTeam?: string | null;
   id: string;
+  lastTouchedAt?: string | null;
+  lastTouchedBy?: string | null;
   payload: Record<string, unknown>;
   referenceNumber: string;
   status: BackendServiceRequestStatus | string;
   transactionKey?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+interface BackendPlatformInfo {
+  demoRole: string;
+  demoSubject: string;
+  identityDisplayName: string;
 }
 
 interface BackendSupportingDocument {
@@ -117,6 +140,53 @@ interface BackendSupportingDocumentUploadResponse {
 interface BackendSubmissionSummary {
   contentType: string;
   fileName: string;
+}
+
+interface BackendPageInfo {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+interface BackendServiceRequestStatusCount {
+  count: number;
+  status: BackendServiceRequestStatus | string;
+}
+
+interface BackendServiceRequestConnection {
+  items: BackendServiceRequest[];
+  pageInfo: BackendPageInfo;
+  statusCounts: BackendServiceRequestStatusCount[];
+}
+
+interface BackendServiceRequestConnectionResult {
+  connection: BackendServiceRequestConnection | null;
+  error: BackendMutationError | null;
+  ok: boolean;
+}
+
+interface BackendActivityLog {
+  createdAt: string;
+  eventPayload: Record<string, unknown>;
+  eventType: string;
+}
+
+interface BackendStatusMutationResponse {
+  error: BackendMutationError | null;
+  ok: boolean;
+  serviceRequest: BackendServiceRequest | null;
+}
+
+interface BackendBatchStatusMutationResponse {
+  error: BackendMutationError | null;
+  ok: boolean;
+  results: Array<{
+    error: BackendMutationError | null;
+    ok: boolean;
+    referenceNumber: string;
+    serviceRequest: BackendServiceRequest | null;
+  }>;
 }
 
 interface BackendMutationError {
@@ -284,6 +354,148 @@ const SUPPORTING_DOCUMENTS_QUERY = /* GraphQL */ `
       sizeBytes
       uploadStatus
       scanStatus
+    }
+  }
+`;
+
+const REVIEWER_QUEUE_QUERY = /* GraphQL */ `
+  query FrontendReviewerQueue($input: ServiceRequestListInput) {
+    platform {
+      demoRole
+      demoSubject
+      identityDisplayName
+    }
+    submittedServiceRequestConnection(input: $input) {
+      ok
+      error {
+        code
+        message
+      }
+      connection {
+        items {
+          id
+          payload
+          referenceNumber
+          status
+          transactionKey
+          assignedOfficerSubject
+          assignedTeam
+          lastTouchedBy
+          lastTouchedAt
+          createdAt
+          updatedAt
+        }
+        pageInfo {
+          page
+          pageSize
+          totalItems
+          totalPages
+        }
+        statusCounts {
+          status
+          count
+        }
+      }
+    }
+  }
+`;
+
+const REVIEWER_REQUEST_QUERY = /* GraphQL */ `
+  query FrontendReviewerRequest($referenceNumber: String!) {
+    platform {
+      demoRole
+      demoSubject
+      identityDisplayName
+    }
+    serviceRequest(referenceNumber: $referenceNumber) {
+      id
+      payload
+      referenceNumber
+      status
+      transactionKey
+      assignedOfficerSubject
+      assignedTeam
+      lastTouchedBy
+      lastTouchedAt
+      createdAt
+      updatedAt
+    }
+    supportingDocuments(referenceNumber: $referenceNumber) {
+      id
+      category
+      fileName
+      mimeType
+      sizeBytes
+      uploadStatus
+      scanStatus
+    }
+  }
+`;
+
+const REVIEWER_ACTIVITY_QUERY = /* GraphQL */ `
+  query FrontendReviewerActivity($serviceRequestId: ID!) {
+    activityLogs(serviceRequestId: $serviceRequestId) {
+      eventType
+      eventPayload
+      createdAt
+    }
+  }
+`;
+
+const REVIEWER_BATCH_STATUS_MUTATION = /* GraphQL */ `
+  mutation FrontendReviewerBatchStatus($input: BatchUpdateServiceRequestStatusInput!) {
+    batchUpdateServiceRequestStatus(input: $input) {
+      ok
+      error {
+        code
+        message
+      }
+      results {
+        ok
+        referenceNumber
+        error {
+          code
+          message
+        }
+        serviceRequest {
+          id
+          payload
+          referenceNumber
+          status
+          transactionKey
+          assignedOfficerSubject
+          assignedTeam
+          lastTouchedBy
+          lastTouchedAt
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+`;
+
+const REVIEWER_ASSIGN_MUTATION = /* GraphQL */ `
+  mutation FrontendReviewerAssign($input: AssignServiceRequestInput!) {
+    assignServiceRequest(input: $input) {
+      ok
+      error {
+        code
+        message
+      }
+      serviceRequest {
+        id
+        payload
+        referenceNumber
+        status
+        transactionKey
+        assignedOfficerSubject
+        assignedTeam
+        lastTouchedBy
+        lastTouchedAt
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
@@ -480,6 +692,121 @@ export async function getBackendUploadedDocuments(
   return submittedRequest.supportingDocuments ?? [];
 }
 
+export async function getBackendReviewerQueueData(
+  filters: PrototypeReviewerQueueFilters,
+  config: FrontendRuntimeConfig
+): Promise<PrototypeReviewerQueueData> {
+  const data = await executeBackendReviewerData<{
+    platform: BackendPlatformInfo;
+    submittedServiceRequestConnection: BackendServiceRequestConnectionResult;
+  }, { input: Record<string, unknown> }>({
+    config,
+    query: REVIEWER_QUEUE_QUERY,
+    variables: {
+      input: toBackendReviewerQueueInput(filters)
+    }
+  });
+  const result = data.submittedServiceRequestConnection;
+
+  if (!result.ok || !result.connection) {
+    return emptyReviewerQueueData({
+      filters,
+      platform: data.platform
+    });
+  }
+
+  return {
+    canReview: isReviewerRole(data.platform.demoRole),
+    filters,
+    pageInfo: result.connection.pageInfo,
+    requests: result.connection.items
+      .map(mapReviewerRequestSummary)
+      .filter((request): request is PrototypeReviewerRequestSummary => Boolean(request)),
+    reviewerRole: data.platform.demoRole,
+    reviewerSubject: data.platform.demoSubject,
+    statusCounts: mapReviewerStatusCounts(result.connection.statusCounts)
+  };
+}
+
+export async function getBackendReviewerRequestDetailData(
+  referenceNumber: string,
+  config: FrontendRuntimeConfig
+): Promise<PrototypeReviewerRequestDetailData> {
+  const data = await executeBackendReviewerData<{
+    platform: BackendPlatformInfo;
+    serviceRequest: BackendServiceRequest | null;
+    supportingDocuments: BackendSupportingDocument[];
+  }, { referenceNumber: string }>({
+    config,
+    query: REVIEWER_REQUEST_QUERY,
+    variables: {
+      referenceNumber
+    }
+  });
+  const request = data.serviceRequest ? mapReviewerRequestSummary(data.serviceRequest) : undefined;
+  const activity = request
+    ? await getBackendReviewerActivity(data.serviceRequest as BackendServiceRequest, config)
+    : [];
+
+  return {
+    activity,
+    canReview: isReviewerRole(data.platform.demoRole),
+    payloadItems: data.serviceRequest ? mapPayloadItems(data.serviceRequest.payload) : [],
+    request,
+    reviewerRole: data.platform.demoRole,
+    reviewerSubject: data.platform.demoSubject,
+    supportingDocuments: data.supportingDocuments.map((document) => mapUploadedDocument(document, referenceNumber))
+  };
+}
+
+export async function batchUpdateBackendReviewerRequestStatus(
+  input: PrototypeReviewerBatchStatusInput,
+  config: FrontendRuntimeConfig
+): Promise<PrototypeReviewerBatchStatusResult> {
+  const data = await executeBackendReviewerData<{
+    batchUpdateServiceRequestStatus: BackendBatchStatusMutationResponse;
+  }, { input: { reason?: string; referenceNumbers: string[]; status: string } }>({
+    config,
+    query: REVIEWER_BATCH_STATUS_MUTATION,
+    variables: {
+      input: {
+        reason: input.reason,
+        referenceNumbers: input.referenceNumbers,
+        status: toBackendServiceRequestStatus(input.status)
+      }
+    }
+  });
+  const result = data.batchUpdateServiceRequestStatus;
+
+  return {
+    error: result.error ?? undefined,
+    ok: result.ok,
+    results: result.results.map(mapReviewerBatchStatusItem)
+  };
+}
+
+export async function assignBackendReviewerRequest(
+  input: PrototypeReviewerAssignInput,
+  config: FrontendRuntimeConfig
+): Promise<PrototypeReviewerAssignResult> {
+  const data = await executeBackendReviewerData<{
+    assignServiceRequest: BackendStatusMutationResponse;
+  }, { input: PrototypeReviewerAssignInput }>({
+    config,
+    query: REVIEWER_ASSIGN_MUTATION,
+    variables: {
+      input
+    }
+  });
+  const result = data.assignServiceRequest;
+
+  return {
+    error: result.error ?? undefined,
+    ok: result.ok,
+    request: result.serviceRequest ? mapReviewerRequestSummary(result.serviceRequest) : undefined
+  };
+}
+
 async function getBackendSupportingDocumentsForReference(
   referenceNumber: string,
   config: FrontendRuntimeConfig
@@ -648,6 +975,163 @@ function mapSubmittedRequestSummary(
     submittedAt: request.createdAt,
     title: createPrototypeAppSummary(appKey).label
   };
+}
+
+function mapReviewerRequestSummary(request: BackendServiceRequest): PrototypeReviewerRequestSummary | undefined {
+  if (!isTransactionAppKey(request.transactionKey)) {
+    return undefined;
+  }
+
+  return {
+    appKey: request.transactionKey,
+    assignedOfficerSubject: request.assignedOfficerSubject ?? undefined,
+    assignedTeam: request.assignedTeam ?? undefined,
+    id: request.id,
+    lastTouchedAt: request.lastTouchedAt ?? undefined,
+    lastTouchedBy: request.lastTouchedBy ?? undefined,
+    referenceNumber: request.referenceNumber,
+    status: mapReviewerStatus(request.status),
+    submittedAt: request.createdAt,
+    title: createPrototypeAppSummary(request.transactionKey).label
+  };
+}
+
+function mapReviewerStatus(status: string): PrototypeReviewerStatus {
+  return mapServiceRequestStatus(status);
+}
+
+function toBackendServiceRequestStatus(status: PrototypeReviewerStatus): BackendServiceRequestStatus {
+  switch (status) {
+    case "IN_REVIEW":
+      return "UNDER_REVIEW";
+    case "APPROVED":
+      return "COMPLETED";
+    case "ACTION_REQUIRED":
+      return "ACTION_REQUIRED";
+    case "SUBMITTED":
+      return "SUBMITTED";
+  }
+}
+
+function toBackendReviewerQueueInput(filters: PrototypeReviewerQueueFilters): Record<string, unknown> {
+  return {
+    page: filters.page ?? 1,
+    pageSize: 20,
+    search: filters.search,
+    sortBy: filters.sortBy ?? "createdAt",
+    sortDirection: filters.sortDirection ?? "DESC",
+    status: filters.status ? toBackendServiceRequestStatus(filters.status) : undefined
+  };
+}
+
+function emptyReviewerQueueData(input: {
+  filters: PrototypeReviewerQueueFilters;
+  platform: BackendPlatformInfo;
+}): PrototypeReviewerQueueData {
+  return {
+    canReview: isReviewerRole(input.platform.demoRole),
+    filters: input.filters,
+    pageInfo: {
+      page: input.filters.page ?? 1,
+      pageSize: 20,
+      totalItems: 0,
+      totalPages: 0
+    },
+    requests: [],
+    reviewerRole: input.platform.demoRole,
+    reviewerSubject: input.platform.demoSubject,
+    statusCounts: []
+  };
+}
+
+function mapReviewerStatusCounts(counts: BackendServiceRequestStatusCount[]): PrototypeReviewerStatusCount[] {
+  const mappedCounts = new Map<PrototypeReviewerStatus, number>();
+
+  for (const count of counts) {
+    const status = mapReviewerStatus(count.status);
+    mappedCounts.set(status, (mappedCounts.get(status) ?? 0) + count.count);
+  }
+
+  return Array.from(mappedCounts.entries()).map(([status, count]) => ({ count, status }));
+}
+
+function mapReviewerBatchStatusItem(item: BackendBatchStatusMutationResponse["results"][number]): PrototypeReviewerBatchStatusItem {
+  return {
+    error: item.error ?? undefined,
+    ok: item.ok,
+    referenceNumber: item.referenceNumber,
+    request: item.serviceRequest ? mapReviewerRequestSummary(item.serviceRequest) : undefined
+  };
+}
+
+function mapPayloadItems(payload: Record<string, unknown>): PrototypeReviewerPayloadItem[] {
+  return Object.entries(payload).map(([key, value]) => ({
+    label: formatPayloadLabel(key),
+    value: formatPayloadValue(value)
+  }));
+}
+
+function formatPayloadLabel(key: string): string {
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (character) => character.toUpperCase());
+}
+
+function formatPayloadValue(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value.map(formatPayloadValue).join(", ");
+  }
+
+  if (value && typeof value === "object") {
+    return JSON.stringify(value);
+  }
+
+  return String(value);
+}
+
+async function getBackendReviewerActivity(
+  request: BackendServiceRequest,
+  config: FrontendRuntimeConfig
+): Promise<PrototypeReviewerActivityEntry[]> {
+  const data = await executeBackendReviewerData<{
+    activityLogs: BackendActivityLog[];
+  }, { serviceRequestId: string }>({
+    config,
+    query: REVIEWER_ACTIVITY_QUERY,
+    variables: {
+      serviceRequestId: request.id
+    }
+  });
+
+  return data.activityLogs.map((entry) => ({
+    at: entry.createdAt,
+    description: formatActivityDescription(entry)
+  }));
+}
+
+function formatActivityDescription(entry: BackendActivityLog): string {
+  const referenceNumber = typeof entry.eventPayload.referenceNumber === "string" ? entry.eventPayload.referenceNumber : undefined;
+
+  switch (entry.eventType) {
+    case "SERVICE_REQUEST_ASSIGNMENT_CHANGED":
+      return `Assignment changed${referenceNumber ? ` for ${referenceNumber}` : ""}`;
+    case "SERVICE_REQUEST_STATUS_CHANGED":
+      return `Status changed${referenceNumber ? ` for ${referenceNumber}` : ""}`;
+    case "SUPPORTING_DOCUMENT_DOWNLOADED":
+      return "Supporting document downloaded";
+    case "SERVICE_REQUEST_DETAIL_VIEWED":
+      return "Request detail viewed";
+    default:
+      return entry.eventType
+        .toLowerCase()
+        .split("_")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
+  }
+}
+
+function isReviewerRole(role: string): boolean {
+  return role === "ServiceOfficer" || role === "TeamLead" || role === "Admin";
 }
 
 function createActivity(
@@ -851,6 +1335,25 @@ async function executeBackendData<TData, TVariables extends Record<string, unkno
   return unwrapBackendResponse(response);
 }
 
+async function executeBackendReviewerData<TData, TVariables extends Record<string, unknown> = Record<string, never>>(input: {
+  config: FrontendRuntimeConfig;
+  query: string;
+  variables?: TVariables;
+}): Promise<TData> {
+  const response = await executeBackendGraphql<TData, TVariables>(
+    {
+      query: input.query,
+      variables: input.variables
+    },
+    {
+      config: toBackendClientConfig(input.config),
+      headers: createReviewerHeaders()
+    }
+  );
+
+  return unwrapBackendResponse(response);
+}
+
 function unwrapBackendResponse<TData>(response: BackendGraphqlResponse<TData>): TData {
   if (response.errors && response.errors.length > 0) {
     throw new BackendClientError(response.errors[0]?.message ?? "Backend GraphQL request failed.", response.correlationId);
@@ -878,6 +1381,13 @@ function toBackendClientConfig(config: FrontendRuntimeConfig): BackendClientConf
 
   return {
     backendUrl: config.backendUrl
+  };
+}
+
+function createReviewerHeaders(): HeadersInit {
+  return {
+    "x-ssq-demo-role": process.env.SSQ_REVIEWER_DEMO_ROLE ?? "ServiceOfficer",
+    "x-ssq-demo-subject": process.env.SSQ_REVIEWER_DEMO_SUBJECT ?? "officer@example.test"
   };
 }
 

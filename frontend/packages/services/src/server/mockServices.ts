@@ -5,6 +5,10 @@ import {
   createMockActivity,
   createMockDashboardSummaryData,
   createMockDraftSummary,
+  createMockReviewerAssignResult,
+  createMockReviewerBatchStatusResult,
+  createMockReviewerQueueData,
+  createMockReviewerRequestDetailData,
   createMockSubmissionSummaryMetadata,
   createMockSubmissionSummaryDownload,
   createMockSupportingDocumentDownload,
@@ -20,6 +24,13 @@ import type {
   PrototypeAppKey,
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
+  PrototypeReviewerAssignInput,
+  PrototypeReviewerAssignResult,
+  PrototypeReviewerBatchStatusInput,
+  PrototypeReviewerBatchStatusResult,
+  PrototypeReviewerQueueData,
+  PrototypeReviewerQueueFilters,
+  PrototypeReviewerRequestDetailData,
   PrototypeSupportingDocumentDownload,
   PrototypeSupportingDocumentUploadInput,
   PrototypeSupportingDocumentUploadResult,
@@ -84,6 +95,26 @@ export async function getMockSupportingDocumentUploadPolicy(): Promise<Prototype
 
 export async function getMockUploadedDocuments(appKey: Exclude<PrototypeAppKey, "dashboard">): Promise<PrototypeUploadedDocument[]> {
   return createMockUploadedDocuments(appKey);
+}
+
+export async function getMockReviewerQueueData(
+  filters: PrototypeReviewerQueueFilters = {}
+): Promise<PrototypeReviewerQueueData> {
+  return createMockReviewerQueueData(filters);
+}
+
+export async function getMockReviewerRequestDetailData(referenceNumber: string): Promise<PrototypeReviewerRequestDetailData> {
+  return createMockReviewerRequestDetailData(referenceNumber);
+}
+
+export async function batchUpdateMockReviewerRequestStatus(
+  input: PrototypeReviewerBatchStatusInput
+): Promise<PrototypeReviewerBatchStatusResult> {
+  return createMockReviewerBatchStatusResult(input);
+}
+
+export async function assignMockReviewerRequest(input: PrototypeReviewerAssignInput): Promise<PrototypeReviewerAssignResult> {
+  return createMockReviewerAssignResult(input);
 }
 
 export async function recordMockSupportingDocumentUploadMetadata(

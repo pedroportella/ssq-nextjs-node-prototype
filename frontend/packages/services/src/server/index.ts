@@ -6,9 +6,13 @@ export {
 export type { BackendClientConfig, BackendGraphqlRequest, BackendGraphqlResponse } from "./backendClient";
 export { CORRELATION_HEADER, createBackendHeaders, createCorrelationId } from "./correlation";
 export {
+  assignReviewerRequest,
+  batchUpdateReviewerRequestStatus,
   createTransactionDraft,
   getDashboardSummaryData,
   getDashboardShellData,
+  getReviewerQueueData,
+  getReviewerRequestDetailData,
   getSubmissionSummaryDownload,
   getSupportingDocumentDownload,
   getSupportingDocumentUploadPolicy,
