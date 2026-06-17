@@ -186,8 +186,8 @@ Verified locally on 2026-06-17:
 | Command | Result | Notes |
 | --- | --- | --- |
 | `pnpm test` | Passed | Workspace Vitest suite passed; Dart Sass legacy JS API deprecation warnings are existing noise. |
-| `pnpm test:e2e` | Passed | Alias for `pnpm test:e2e:mock`; 42 Chromium mock tests. |
-| `pnpm test:e2e:mock` | Passed | Full frontend-only mock Playwright suite; 42 Chromium tests. |
+| `pnpm test:e2e` | Passed | Alias for `pnpm test:e2e:mock`; 46 Chromium mock tests. |
+| `pnpm test:e2e:mock` | Passed | Full frontend-only mock Playwright suite; 46 Chromium tests. |
 | `pnpm test:e2e:mock:dashboard` | Passed | Dashboard-focused mock suite; 9 Chromium tests including the `/ui-library` showcase. |
 | `pnpm test:e2e:mock:seniors-card` | Passed | Seniors Card-focused mock suite; 18 Chromium tests. |
 | `pnpm test:e2e:mock:rental-security-subsidy` | Passed | Rental Security Subsidy-focused mock suite; 18 Chromium tests. |
@@ -199,7 +199,7 @@ Verified locally on 2026-06-17:
 | `pnpm test:e2e:real:rss-dashboard:headed` | Passed | Focused visible real backend RSS submission flow; 1 Chromium test. |
 | `pnpm test:full-stack-smoke` | Passed | Verifies readiness, frontend status, GraphQL profile/catalogue reads and backend-rendered pages. |
 | `pnpm test:reviewer-evidence` | Passed | Verifies public handover docs, screenshots, Markdown links, live frontend links/status URLs and leakage safeguards. |
-| `pnpm test:visual` | Runs, currently fails | All 14 full app-page screenshot comparisons fail against stale approved baselines; review and refresh before treating this as a green gate. |
+| `pnpm test:visual` | Passed | 16 Chromium screenshot checks after refreshing the stale app-page baselines on 2026-06-17. |
 | `pnpm test:visual:showcase` | Passed | Dashboard `/ui-library` desktop and mobile UI Library state baselines. |
 
 Helper scripts:

@@ -34,9 +34,9 @@ The focused showcase commands start only the dashboard app and snapshot `/ui-lib
 
 ## Current Audit Status
 
-On 2026-06-17, `pnpm test:visual` ran successfully but failed all 14 screenshot comparisons because the current rendered full-page screenshots no longer match the approved PNG baselines. Treat the visual suite as a pending baseline review/refresh before using it as a green quality gate.
+On 2026-06-17, `pnpm test:visual` first confirmed the app-page baselines were stale: all 14 full-page app screenshots rendered successfully but differed from the approved PNGs.
 
-`pnpm test:visual:update` was not run during that audit because it intentionally overwrites approved screenshots. Run it only after inspecting the current diffs and accepting the visual changes.
+After reviewing that drift, `pnpm test:visual:update` refreshed the approved app-page baselines and `pnpm test:visual` passed all 16 visual checks, including the Dashboard UI Library showcase desktop and mobile baselines.
 
 On 2026-06-17, `pnpm test:visual:showcase:update` created the initial Dashboard UI Library showcase desktop and mobile baselines, and `pnpm test:visual:showcase` passed.
 

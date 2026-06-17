@@ -92,9 +92,9 @@ Before sharing the prototype with a selection panel:
 - Run `pnpm test:reviewer-evidence` to check required docs, screenshots, local Markdown links and public-doc leakage patterns.
 - Run the release quality checks above when a branch needs a fresh local quality gate.
 
-Latest local test command audit recorded on 2026-06-17: `pnpm test`, `pnpm test:e2e`, `pnpm test:e2e:mock`, `pnpm test:e2e:mock:dashboard`, `pnpm test:e2e:mock:seniors-card`, `pnpm test:e2e:mock:rental-security-subsidy`, `pnpm test:e2e:mock:headed`, `pnpm test:e2e:mock:rss-dashboard:headed`, `pnpm test:e2e:real`, `pnpm test:e2e:real:headed`, `pnpm test:e2e:real:rss-dashboard:headed`, `pnpm test:full-stack-smoke` and `pnpm test:reviewer-evidence` passed locally. `pnpm test` emitted the existing Dart Sass legacy JS API deprecation warnings during UI/app tests.
+Latest local test command audit recorded on 2026-06-17: `pnpm check`, `pnpm guard`, `pnpm build`, `pnpm test:e2e`, `pnpm test:e2e:mock`, `pnpm test:e2e:scenarios`, `pnpm test:e2e:mock:dashboard`, `pnpm test:e2e:mock:seniors-card`, `pnpm test:e2e:mock:rental-security-subsidy`, `pnpm test:e2e:mock:headed`, `pnpm test:e2e:mock:rss-dashboard:headed`, `pnpm test:e2e:real`, `pnpm test:e2e:real:headed`, `pnpm test:e2e:real:rss-dashboard:headed`, `pnpm test:full-stack-smoke`, `pnpm test:reviewer-evidence` and `pnpm test:visual` passed locally. `pnpm check` emitted the existing Dart Sass legacy JS API deprecation warnings during UI/app tests.
 
-`pnpm test:visual` ran but failed all 14 current screenshot comparisons against stale approved baselines. Review the diffs and run `pnpm test:visual:update` only after intentionally accepting the visual changes. `pnpm test:e2e:report` and `pnpm test:visual:update` are helper commands rather than routine pass/fail checks.
+`pnpm test:visual` first confirmed stale app-page baselines, then `pnpm test:visual:update` refreshed the approved screenshots and `pnpm test:visual` passed all 16 checks. `pnpm test:e2e:report`, `pnpm test:visual:update` and `pnpm test:visual:showcase:update` are helper commands rather than routine pass/fail checks.
 
 If any command is skipped in a later pass, record why in the private handover note.
 

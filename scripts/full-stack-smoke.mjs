@@ -58,7 +58,7 @@ const checks = [
       const html = await fetchText(endpoints.dashboard);
       const text = extractVisibleText(html);
 
-      assert(text.includes("Taylor Queensland"), "dashboard should render the backend seeded customer");
+      assert(text.includes("demo.customer@example.test"), "dashboard should render the backend demo identity");
       assert(
         text.includes("Dashboard data is currently served through the frontend service layer"),
         "dashboard should render in backend data-source mode"

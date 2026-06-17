@@ -34,7 +34,7 @@ The DigitalOcean deployment is a prototype review environment, not Queensland Go
 
 ## Screenshots
 
-Captured from local review builds on 2026-06-16.
+Captured from local review builds on 2026-06-17.
 
 | Service dashboard | Seniors Card application |
 | --- | --- |

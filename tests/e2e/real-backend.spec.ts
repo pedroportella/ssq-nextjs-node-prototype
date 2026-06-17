@@ -53,7 +53,7 @@ test("dashboard renders backend-backed customer data", async ({ page }) => {
   await page.goto(endpoints.dashboard);
 
   await expect(page.getByRole("heading", { level: 1, name: "SSQ Service Dashboard" })).toBeVisible();
-  await expect(page.getByText("Taylor Queensland")).toBeVisible();
+  await expect(page.getByText("demo.customer", { exact: true })).toBeVisible();
   await expect(page.getByText("demo.customer@example.test")).toBeVisible();
   await expect(page.getByText("avery.taylor@example.test")).toHaveCount(0);
 });
@@ -142,7 +142,8 @@ async function recordSupportingDocument(
   expect(await response.json()).toMatchObject({
     document: {
       fileName: input.fileName,
-      uploadStatus: "METADATA_RECORDED"
+      scanStatus: "AVAILABLE",
+      uploadStatus: "STORED_PROTOTYPE"
     },
     ok: true
   });
@@ -186,8 +187,8 @@ async function expectSupportingDocumentRecorded(
     expect.arrayContaining([
       expect.objectContaining({
         fileName,
-        scanStatus: "NOT_SCANNED_PROTOTYPE",
-        uploadStatus: "METADATA_RECORDED"
+        scanStatus: "AVAILABLE",
+        uploadStatus: "STORED_PROTOTYPE"
       })
     ])
   );

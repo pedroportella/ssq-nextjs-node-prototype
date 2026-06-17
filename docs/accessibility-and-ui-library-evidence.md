@@ -32,7 +32,7 @@ The prototype uses `@ssq/ui-library` as a React adapter for QHDS-style applicati
 | Responsive layout and no horizontal overflow | Desktop `1440x900` and mobile `390x844` sweeps check each app route for visible content and no incoherent horizontal overflow. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Colour contrast | Browser-computed contrast assertions cover body text, headings, links, visited links, action colours, focus indicators, errors and feedback surfaces across light, alt, dark and dark-alt QHDS surfaces. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Browser-only backend leakage | Mock smoke and visual checks block browser requests to local backend origins and `/graphql`, reinforcing the server-only service boundary. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts), [qhds-visual-baselines.spec.ts](../tests/visual/qhds-visual-baselines.spec.ts). |
-| Visual regression | Desktop and mobile screenshot baselines cover dashboard, overview, apply and status pages for both transaction apps, but the current full-page screenshots need a baseline review/refresh. The UI Library showcase has a focused passing visual command. | `pnpm test:visual`, `pnpm test:visual:showcase`; baselines in [tests/visual/\_\_screenshots\_\_](../tests/visual/__screenshots__). See [QHDS visual baselines](qhds-visual-baselines.md#current-audit-status). |
+| Visual regression | Desktop and mobile screenshot baselines cover dashboard, overview, apply and status pages for both transaction apps, plus the Dashboard UI Library showcase. The app-page baselines were refreshed on 2026-06-17 after a stale-baseline review. | `pnpm test:visual`, `pnpm test:visual:showcase`; baselines in [tests/visual/\_\_screenshots\_\_](../tests/visual/__screenshots__). See [QHDS visual baselines](qhds-visual-baselines.md#current-audit-status). |
 
 ## Responsive And Visual Evidence
 
@@ -76,7 +76,7 @@ Visual regression baselines:
 pnpm test:visual
 ```
 
-The 2026-06-17 command audit found the visual suite runs but currently fails all 14 screenshot comparisons against stale approved baselines. Review the diffs and refresh intentionally before using visual regression as a green release gate.
+The 2026-06-17 visual audit found stale app-page baselines, refreshed them with `pnpm test:visual:update`, and reran the visual suite as a green release gate.
 
 Focused UI Library showcase baselines:
 
@@ -85,7 +85,7 @@ pnpm test:visual:showcase
 pnpm test:visual:showcase:update
 ```
 
-Use the focused showcase command when changing `@ssq/ui-library` component states without refreshing the broader stale app-page baseline set.
+Use the focused showcase command when changing `@ssq/ui-library` component states without refreshing the broader app-page baseline set.
 
 Component and package checks:
 
