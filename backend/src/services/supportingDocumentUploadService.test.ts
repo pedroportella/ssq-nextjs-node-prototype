@@ -56,9 +56,9 @@ function createRepository(options: {
         mimeType: "application/pdf",
         sizeBytes: document.sizeBytes,
         storageKey: `local-review/existing-${index}.pdf`,
-        uploadStatus: document.uploadStatus ?? "METADATA_RECORDED",
-        scanStatus: document.scanStatus ?? "NOT_SCANNED_PROTOTYPE",
-        retentionPolicy: "PRODUCTION_NEXT_REQUIRED",
+        uploadStatus: document.uploadStatus ?? "STORED_PROTOTYPE",
+        scanStatus: document.scanStatus ?? "AVAILABLE",
+        retentionPolicy: "PROTOTYPE_REVIEW_90_DAYS",
         metadata: document.metadata ?? {},
         createdAt: "2026-06-10T00:00:00.000Z",
         updatedAt: "2026-06-10T00:00:00.000Z"
@@ -124,9 +124,9 @@ describe("SupportingDocumentUploadService", () => {
       document: {
         category: "identity",
         fileExtension: ".pdf",
-        uploadStatus: "METADATA_RECORDED",
-        scanStatus: "NOT_SCANNED_PROTOTYPE",
-        retentionPolicy: "PRODUCTION_NEXT_REQUIRED",
+        uploadStatus: "STORED_PROTOTYPE",
+        scanStatus: "AVAILABLE",
+        retentionPolicy: "PROTOTYPE_REVIEW_90_DAYS",
         metadata: {
           personKey: "applicant",
           policy: {
@@ -137,10 +137,19 @@ describe("SupportingDocumentUploadService", () => {
             maxTotalSizeBytesPerPerson: 10485760,
             transactionKey: "seniors-card"
           },
-          localStorageMode: "metadata-only",
+          localStorageMode: "prototype-evidence-storage-adapter",
           productionNext: {
-            malwareScanning: "required",
-            privateStorage: "required"
+            malwareScanning: "replace deterministic prototype scan",
+            privateObjectStorage: "replace metadata-backed local adapter",
+            retentionSchedule: "replace prototype review retention class"
+          },
+          retention: {
+            policy: "PROTOTYPE_REVIEW_90_DAYS",
+            reviewDisposition: "delete-after-local-review"
+          },
+          scan: {
+            engine: "prototype-deterministic-scan",
+            status: "AVAILABLE"
           }
         }
       }

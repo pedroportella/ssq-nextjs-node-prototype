@@ -6,8 +6,13 @@ import { loadConfig } from "../config.js";
 import type { DatabaseClient } from "../database/client.js";
 import type { QueryResult, QueryResultRow } from "pg";
 
-function createUploadTestDatabase(options: { transactionKey?: string } = {}): DatabaseClient {
-  const supportingDocuments: QueryResultRow[] = [];
+function createUploadTestDatabase(options: {
+  recordedEvents?: QueryResultRow[];
+  seedSupportingDocuments?: QueryResultRow[];
+  transactionKey?: string;
+} = {}): DatabaseClient {
+  const supportingDocuments: QueryResultRow[] = [...(options.seedSupportingDocuments ?? [])];
+  const recordedEvents = options.recordedEvents ?? [];
   const transactionKey = options.transactionKey ?? "seniors-card";
 
   return {
@@ -52,6 +57,21 @@ function createUploadTestDatabase(options: { transactionKey?: string } = {}): Da
           ]);
         }
 
+        if (normalizedSql.includes("FROM supporting_documents sd") && normalizedSql.includes("INNER JOIN service_requests sr")) {
+          const documentId = String(values[0]);
+          const referenceNumber = String(values[1]);
+          const customerId = values[2] ? String(values[2]) : undefined;
+
+          return result<T>(supportingDocuments.filter(
+            (document) =>
+              document.id === documentId &&
+              document.service_request_id &&
+              (document.reference_number ?? "SSQ-DEMO-0001") === referenceNumber &&
+              (document.service_request_status ?? "SUBMITTED") !== "DRAFT" &&
+              (!customerId || document.customer_id === customerId)
+          ) as T[]);
+        }
+
         if (normalizedSql.includes("FROM service_requests sr") && normalizedSql.includes("AND sr.customer_id = $2")) {
           return result<T>([]);
         }
@@ -91,6 +111,19 @@ function createUploadTestDatabase(options: { transactionKey?: string } = {}): Da
           return result<T>([row as unknown as T]);
         }
 
+        if (normalizedSql.startsWith("INSERT INTO service_request_events")) {
+          const row = {
+            id: `80000000-0000-4000-8000-${String(recordedEvents.length + 1).padStart(12, "0")}`,
+            service_request_id: String(values[0]),
+            event_type: String(values[1]),
+            event_payload: JSON.parse(String(values[2])),
+            created_at: "2026-06-10T00:00:00.000Z"
+          };
+
+          recordedEvents.push(row);
+          return result<T>([row as unknown as T]);
+        }
+
         return result<T>([]);
       }
     },
@@ -100,6 +133,32 @@ function createUploadTestDatabase(options: { transactionKey?: string } = {}): Da
     async close() {
       return;
     }
+  };
+}
+
+function createSubmittedSupportingDocument(overrides: QueryResultRow = {}): QueryResultRow {
+  return {
+    id: "90000000-0000-4000-8000-000000000001",
+    customer_id: "10000000-0000-4000-8000-000000000001",
+    service_request_draft_id: null,
+    service_request_id: "30000000-0000-4000-8000-000000000001",
+    reference_number: "SSQ-DEMO-0001",
+    service_request_status: "SUBMITTED",
+    category: "identity",
+    file_name: "identity-evidence.pdf",
+    file_extension: ".pdf",
+    mime_type: "application/pdf",
+    size_bytes: 512000,
+    storage_key: "prototype-evidence/10000000-0000-4000-8000-000000000001/identity-evidence.pdf",
+    upload_status: "STORED_PROTOTYPE",
+    scan_status: "AVAILABLE",
+    retention_policy: "PROTOTYPE_REVIEW_90_DAYS",
+    metadata: {
+      personKey: "applicant"
+    },
+    created_at: "2026-06-10T00:00:00.000Z",
+    updated_at: "2026-06-10T00:00:00.000Z",
+    ...overrides
   };
 }
 
@@ -141,16 +200,20 @@ describe("supporting document upload route", () => {
         fileName: "proof-of-age.pdf",
         mimeType: "application/pdf",
         sizeBytes: 2048,
-        uploadStatus: "METADATA_RECORDED",
-        scanStatus: "NOT_SCANNED_PROTOTYPE",
-        retentionPolicy: "PRODUCTION_NEXT_REQUIRED",
+        uploadStatus: "STORED_PROTOTYPE",
+        scanStatus: "AVAILABLE",
+        retentionPolicy: "PROTOTYPE_REVIEW_90_DAYS",
         metadata: {
-          localStorageMode: "metadata-only",
+          localStorageMode: "prototype-evidence-storage-adapter",
           personKey: "applicant",
           policy: {
             maxFilesPerPerson: 5,
             maxSizeBytes: 5242880,
             maxTotalSizeBytesPerPerson: 10485760
+          },
+          scan: {
+            engine: "prototype-deterministic-scan",
+            status: "AVAILABLE"
           }
         }
       },
@@ -403,6 +466,175 @@ describe("supporting document upload route", () => {
         maxTotalSizeBytesPerPerson: 10485760
       }
     });
+
+    await app.close();
+  });
+
+  it("downloads an available customer-owned submitted supporting document", async () => {
+    const recordedEvents: QueryResultRow[] = [];
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createUploadTestDatabase({
+        recordedEvents,
+        seedSupportingDocuments: [
+          createSubmittedSupportingDocument()
+        ]
+      })
+    });
+
+    const response = await app.inject({
+      headers: {
+        "x-correlation-id": "download-correlation"
+      },
+      method: "GET",
+      url: "/service-requests/SSQ-DEMO-0001/supporting-documents/90000000-0000-4000-8000-000000000001/download"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers["content-type"]).toContain("text/plain");
+    expect(response.headers["content-disposition"]).toBe('attachment; filename="identity-evidence.pdf.prototype.txt"');
+    expect(response.body).toContain("Original filename: identity-evidence.pdf");
+    expect(response.body).toContain("Storage key: prototype-evidence/10000000-0000-4000-8000-000000000001/identity-evidence.pdf");
+    expect(recordedEvents).toEqual([
+      expect.objectContaining({
+        service_request_id: "30000000-0000-4000-8000-000000000001",
+        event_type: "SUPPORTING_DOCUMENT_DOWNLOADED",
+        event_payload: expect.objectContaining({
+          actorRole: "Citizen",
+          actorSubject: "demo.customer@example.test",
+          correlationId: "download-correlation",
+          documentId: "90000000-0000-4000-8000-000000000001",
+          scanStatus: "AVAILABLE"
+        })
+      })
+    ]);
+
+    await app.close();
+  });
+
+  it("allows staff roles to download submitted supporting documents", async () => {
+    const recordedEvents: QueryResultRow[] = [];
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createUploadTestDatabase({
+        recordedEvents,
+        seedSupportingDocuments: [
+          createSubmittedSupportingDocument({
+            customer_id: "10000000-0000-4000-8000-000000000999"
+          })
+        ]
+      })
+    });
+
+    const response = await app.inject({
+      headers: {
+        "x-ssq-demo-role": "ServiceOfficer",
+        "x-ssq-demo-subject": "officer@example.test"
+      },
+      method: "GET",
+      url: "/service-requests/SSQ-DEMO-0001/supporting-documents/90000000-0000-4000-8000-000000000001/download"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(recordedEvents).toEqual([
+      expect.objectContaining({
+        event_type: "SUPPORTING_DOCUMENT_DOWNLOADED",
+        event_payload: expect.objectContaining({
+          actorRole: "ServiceOfficer",
+          actorSubject: "officer@example.test",
+          documentId: "90000000-0000-4000-8000-000000000001"
+        })
+      })
+    ]);
+
+    await app.close();
+  });
+
+  it("does not download another customer's submitted supporting document for a citizen", async () => {
+    const recordedEvents: QueryResultRow[] = [];
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createUploadTestDatabase({
+        recordedEvents,
+        seedSupportingDocuments: [
+          createSubmittedSupportingDocument({
+            customer_id: "10000000-0000-4000-8000-000000000999"
+          })
+        ]
+      })
+    });
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/service-requests/SSQ-DEMO-0001/supporting-documents/90000000-0000-4000-8000-000000000001/download"
+    });
+
+    expect(response.statusCode).toBe(404);
+    expect(response.json()).toMatchObject({
+      ok: false,
+      error: {
+        code: "DOCUMENT_NOT_FOUND"
+      }
+    });
+    expect(recordedEvents).toEqual([]);
+
+    await app.close();
+  });
+
+  it("blocks unavailable submitted supporting document downloads with an audit event", async () => {
+    const recordedEvents: QueryResultRow[] = [];
+    const app = await buildApp({
+      config: loadConfig({
+        NODE_ENV: "test",
+        PORT: "7001"
+      }),
+      database: createUploadTestDatabase({
+        recordedEvents,
+        seedSupportingDocuments: [
+          createSubmittedSupportingDocument({
+            scan_status: "QUARANTINED"
+          })
+        ]
+      })
+    });
+
+    const response = await app.inject({
+      headers: {
+        "x-correlation-id": "blocked-download-correlation"
+      },
+      method: "GET",
+      url: "/service-requests/SSQ-DEMO-0001/supporting-documents/90000000-0000-4000-8000-000000000001/download"
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({
+      ok: false,
+      error: {
+        code: "DOCUMENT_NOT_AVAILABLE"
+      },
+      correlationId: "blocked-download-correlation"
+    });
+    expect(recordedEvents).toEqual([
+      expect.objectContaining({
+        service_request_id: "30000000-0000-4000-8000-000000000001",
+        event_type: "SUPPORTING_DOCUMENT_DOWNLOAD_BLOCKED",
+        event_payload: expect.objectContaining({
+          correlationId: "blocked-download-correlation",
+          documentId: "90000000-0000-4000-8000-000000000001",
+          reason: "DOCUMENT_NOT_AVAILABLE",
+          scanStatus: "QUARANTINED"
+        })
+      })
+    ]);
 
     await app.close();
   });

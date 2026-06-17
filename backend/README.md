@@ -79,7 +79,7 @@ Draft submission validates the stored payload against the seeded transaction sch
 
 Submitted requests capture simulated profile evidence for transaction-declared prefill attributes. This evidence is marked `SIMULATED_PROFILE` and includes production-next metadata rather than claiming real Digital Identity integration.
 
-Supporting document uploads are currently metadata-only for local review. The backend validates target ownership, transaction-specific category/person-bucket policy, file extension, MIME type, per-file size and per-person count/total-size limits, then records production-next scanning, private storage and retention fields.
+Supporting document uploads use a metadata-backed local prototype evidence storage adapter for review. The backend validates target ownership, transaction-specific category/person-bucket policy, file extension, MIME type, per-file size and per-person count/total-size limits, then records a replaceable storage key, deterministic prototype scan state, retention class and production-next storage/scanning notes. Download routes return a generated text artifact through the backend boundary rather than exposing browser-visible assets or claiming production binary storage.
 
 Service request status changes are backend-owned. The current lifecycle supports `SUBMITTED -> UNDER_REVIEW`, `SUBMITTED -> WITHDRAWN`, `UNDER_REVIEW -> ACTION_REQUIRED`, `UNDER_REVIEW -> COMPLETED`, and `ACTION_REQUIRED -> UNDER_REVIEW` or `WITHDRAWN`, with each accepted transition recorded as an activity event.
 
@@ -92,6 +92,7 @@ Successful submission records pending outbox events for submitted request, summa
 Current REST surface:
 
 - `POST /uploads/supporting-documents`: records validated supporting document metadata for a customer-owned draft or service request.
+- `GET /service-requests/:referenceNumber/supporting-documents/:documentId/download`: downloads an available prototype evidence artifact for an owned submitted request, or for reviewer roles with submitted-record access.
 - `GET /service-requests/:referenceNumber/summary/download`: downloads the generated text submission summary for a customer-owned submitted request with `content-type` and `content-disposition` headers.
 - `GET /operations/outbox-events`: summarises outbox event counts by event type and status for local operations review.
 

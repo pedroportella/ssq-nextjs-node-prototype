@@ -614,6 +614,8 @@ function createActivity(
 }
 
 function mapUploadedDocument(document: BackendSupportingDocument): PrototypeUploadedDocument {
+  const rejectedScanStatuses = new Set(["QUARANTINED", "REJECTED"]);
+
   return {
     category: formatDocumentCategory(document.category),
     fileName: document.fileName,
@@ -621,7 +623,7 @@ function mapUploadedDocument(document: BackendSupportingDocument): PrototypeUplo
     mimeType: document.mimeType,
     personKey: typeof document.metadata?.personKey === "string" ? document.metadata.personKey : undefined,
     sizeBytes: document.sizeBytes,
-    status: document.uploadStatus === "REJECTED" || document.scanStatus === "REJECTED" ? "rejected" : "uploaded"
+    status: document.uploadStatus === "REJECTED" || rejectedScanStatuses.has(document.scanStatus) ? "rejected" : "uploaded"
   };
 }
 

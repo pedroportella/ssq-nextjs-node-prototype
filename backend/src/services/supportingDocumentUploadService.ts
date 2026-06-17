@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { extname } from "node:path";
 
 import { z } from "zod";
@@ -9,6 +8,7 @@ import {
   supportingDocumentUploadPolicy,
   SUPPORTING_DOCUMENT_EXTENSION_MIME_TYPES
 } from "../policies/supportingDocumentPolicy.js";
+import { EvidenceStorageService } from "./evidenceStorageService.js";
 
 import type { PrototypeRepository, SupportingDocumentRecord } from "../repositories/prototypeRepository.js";
 import type { SupportingDocumentUploadPolicy } from "../policies/supportingDocumentPolicy.js";
@@ -65,9 +65,13 @@ function isActiveDocument(document: SupportingDocumentRecord): boolean {
 }
 
 export class SupportingDocumentUploadService {
-  constructor(private readonly repository: PrototypeRepository) {}
+  constructor(
+    private readonly repository: PrototypeRepository,
+    private readonly evidenceStorage = new EvidenceStorageService()
+  ) {}
 
   async recordUpload(input: {
+    correlationId?: string;
     customerId: string;
     upload: SupportingDocumentUploadInput;
   }): Promise<SupportingDocumentUploadResult> {
@@ -231,6 +235,18 @@ export class SupportingDocumentUploadService {
       };
     }
 
+    const storage = this.evidenceStorage.createStoredPrototypeEvidence({
+      category: parsed.data.category,
+      correlationId: input.correlationId,
+      customerId: input.customerId,
+      fileExtension,
+      fileName: parsed.data.fileName,
+      mimeType: parsed.data.mimeType,
+      personKey: parsed.data.personKey,
+      sizeBytes: parsed.data.sizeBytes,
+      transactionKey: target.transactionKey
+    });
+
     const document = await this.repository.createSupportingDocument({
       customerId: input.customerId,
       serviceRequestDraftId: target.serviceRequestDraftId,
@@ -240,14 +256,12 @@ export class SupportingDocumentUploadService {
       fileExtension,
       mimeType: parsed.data.mimeType,
       sizeBytes: parsed.data.sizeBytes,
-      storageKey: `local-review/${input.customerId}/${randomUUID()}${fileExtension}`,
-      uploadStatus: "METADATA_RECORDED",
-      scanStatus: "NOT_SCANNED_PROTOTYPE",
-      retentionPolicy: "PRODUCTION_NEXT_REQUIRED",
+      storageKey: storage.storageKey,
+      uploadStatus: storage.uploadStatus,
+      scanStatus: storage.scanStatus,
+      retentionPolicy: storage.retentionPolicy,
       metadata: {
-        category: parsed.data.category,
-        localStorageMode: "metadata-only",
-        personKey: parsed.data.personKey,
+        ...storage.metadata,
         policy: {
           allowedCategories: policy.allowedCategories,
           allowedPersonKeys: policy.allowedPersonKeys,
@@ -255,15 +269,24 @@ export class SupportingDocumentUploadService {
           maxSizeBytes: policy.maxSizeBytes,
           maxTotalSizeBytesPerPerson: policy.maxTotalSizeBytesPerPerson,
           transactionKey: target.transactionKey ?? "default"
-        },
-        productionNext: {
-          privateStorage: "required",
-          malwareScanning: "required",
-          retentionSchedule: "required",
-          accessControlReview: "required"
         }
       }
     });
+
+    if (target.serviceRequestId) {
+      await this.repository.createServiceRequestEvent({
+        serviceRequestId: target.serviceRequestId,
+        eventType: "SUPPORTING_DOCUMENT_STORED",
+        eventPayload: {
+          correlationId: input.correlationId,
+          documentId: document.id,
+          fileName: document.fileName,
+          scanStatus: document.scanStatus,
+          storageKey: document.storageKey,
+          uploadStatus: document.uploadStatus
+        }
+      });
+    }
 
     return {
       ok: true,

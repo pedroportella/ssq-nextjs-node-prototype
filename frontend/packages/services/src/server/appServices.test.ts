@@ -510,6 +510,14 @@ describe("server app services", () => {
               scanStatus: "PASSED",
               sizeBytes: 512000,
               uploadStatus: "UPLOADED"
+            },
+            {
+              category: "identity",
+              fileName: "identity-quarantine.pdf",
+              mimeType: "application/pdf",
+              scanStatus: "QUARANTINED",
+              sizeBytes: 512000,
+              uploadStatus: "STORED_PROTOTYPE"
             }
           ]
         }
@@ -531,6 +539,11 @@ describe("server app services", () => {
         category: "Income",
         fileName: "income-evidence.pdf",
         status: "uploaded"
+      }),
+      expect.objectContaining({
+        category: "Identity",
+        fileName: "identity-quarantine.pdf",
+        status: "rejected"
       })
     ]);
     await expect(getSubmissionSummaryDownload("rental-security-subsidy", "SSQ-TEST-0002", backendConfig)).resolves.toEqual({
@@ -563,9 +576,9 @@ describe("server app services", () => {
             personKey: "applicant"
           },
           mimeType: "application/pdf",
-          scanStatus: "NOT_SCANNED_PROTOTYPE",
+          scanStatus: "AVAILABLE",
           sizeBytes: 512000,
-          uploadStatus: "METADATA_RECORDED"
+          uploadStatus: "STORED_PROTOTYPE"
         },
         ok: true,
         policy: {

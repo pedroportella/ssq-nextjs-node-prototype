@@ -1005,6 +1005,48 @@ export class PrototypeRepository {
     return result.rows.map(mapSupportingDocument);
   }
 
+  async getSupportingDocumentForServiceRequest(input: {
+    customerId?: string;
+    documentId: string;
+    referenceNumber: string;
+  }): Promise<SupportingDocumentRecord | undefined> {
+    const customerClause = input.customerId ? "AND sd.customer_id = $3" : "";
+    const values = input.customerId
+      ? [input.documentId, input.referenceNumber, input.customerId]
+      : [input.documentId, input.referenceNumber];
+    const result = await this.database.query<SupportingDocumentRow>(
+      `
+        SELECT
+          sd.id,
+          sd.customer_id,
+          sd.service_request_draft_id,
+          sd.service_request_id,
+          sd.category,
+          sd.file_name,
+          sd.file_extension,
+          sd.mime_type,
+          sd.size_bytes,
+          sd.storage_key,
+          sd.upload_status,
+          sd.scan_status,
+          sd.retention_policy,
+          sd.metadata,
+          sd.created_at,
+          sd.updated_at
+        FROM supporting_documents sd
+        INNER JOIN service_requests sr
+          ON sr.id = sd.service_request_id
+        WHERE sd.id = $1
+          AND sr.reference_number = $2
+          AND sr.status <> 'DRAFT'
+          ${customerClause}
+      `,
+      values
+    );
+
+    return result.rows[0] ? mapSupportingDocument(result.rows[0]) : undefined;
+  }
+
   async createSubmissionSummary(input: {
     serviceRequestId: string;
     summaryFormat: SubmissionSummaryRecord["summaryFormat"];
