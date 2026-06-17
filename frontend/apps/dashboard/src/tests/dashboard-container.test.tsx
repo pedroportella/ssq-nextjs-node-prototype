@@ -60,7 +60,9 @@ const summary: PrototypeDashboardSummaryData = {
       supportingDocuments: [
         {
           category: "Identity evidence",
+          downloadHref: "/service-requests/SC-2026-0001/supporting-documents/mock-sc-identity-evidence/download",
           fileName: "identity-evidence.pdf",
+          id: "mock-sc-identity-evidence",
           mimeType: "application/pdf",
           personKey: "applicant",
           sizeBytes: 512_000,
@@ -77,7 +79,9 @@ const summary: PrototypeDashboardSummaryData = {
       supportingDocuments: [
         {
           category: "Rental evidence",
+          downloadHref: "/service-requests/RSS-2026-0001/supporting-documents/mock-rss-rental-evidence/download",
           fileName: "rental-property-evidence.pdf",
+          id: "mock-rss-rental-evidence",
           mimeType: "application/pdf",
           personKey: "applicant",
           sizeBytes: 512_000,
@@ -85,7 +89,9 @@ const summary: PrototypeDashboardSummaryData = {
         },
         {
           category: "Income evidence",
+          downloadHref: "/service-requests/RSS-2026-0001/supporting-documents/mock-rss-income-evidence/download",
           fileName: "household-income-evidence.pdf",
+          id: "mock-rss-income-evidence",
           mimeType: "application/pdf",
           personKey: "household-member",
           sizeBytes: 384_000,
@@ -141,7 +147,12 @@ describe("DashboardContent", () => {
     expect(html).toContain("identity-evidence.pdf");
     expect(html).toContain("rental-property-evidence.pdf");
     expect(html).toContain("household-income-evidence.pdf");
-    expect(html).toContain('href="https://example.test/rental-security-subsidy/application-status#supporting-documents"');
+    expect(html).toContain(
+      'href="https://example.test/seniors-card/service-requests/SC-2026-0001/supporting-documents/mock-sc-identity-evidence/download"'
+    );
+    expect(html).toContain(
+      'href="https://example.test/rental-security-subsidy/service-requests/RSS-2026-0001/supporting-documents/mock-rss-rental-evidence/download"'
+    );
   });
 
   it("renders safe empty states when dashboard data is missing", () => {

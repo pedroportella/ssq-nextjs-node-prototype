@@ -16,6 +16,7 @@ describe("QhdsFileUpload", () => {
         uploadedFiles={[
           {
             category: "Evidence",
+            downloadHref: "/service-requests/SC-2026-0001/supporting-documents/mock-sc-identity-evidence/download",
             fileName: "identity.pdf",
             sizeBytes: 512_000,
             status: "uploaded"
@@ -43,6 +44,7 @@ describe("QhdsFileUpload", () => {
     expect(html).toContain("qld__form-file--error");
     expect(html).toContain("Maximum file size: 10.0 MB");
     expect(html).toContain("identity.pdf");
+    expect(html).toContain('href="/service-requests/SC-2026-0001/supporting-documents/mock-sc-identity-evidence/download"');
     expect(html).toContain("archive.zip");
     expect(html).toContain("Rejected");
   });

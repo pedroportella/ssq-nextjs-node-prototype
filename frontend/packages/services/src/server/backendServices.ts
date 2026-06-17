@@ -13,6 +13,7 @@ import type {
   PrototypeDraftSummary,
   PrototypeProfileSummary,
   PrototypeServiceCatalogueEntry,
+  PrototypeSupportingDocumentDownload,
   PrototypeSupportingDocumentUploadInput,
   PrototypeSupportingDocumentUploadResult,
   PrototypeSubmissionSummaryDownload,
@@ -83,6 +84,7 @@ interface BackendServiceRequest {
 interface BackendSupportingDocument {
   category: string;
   fileName: string;
+  id?: string;
   metadata?: {
     personKey?: unknown;
   };
@@ -275,6 +277,7 @@ const SUBMISSION_SUMMARY_QUERY = /* GraphQL */ `
 const SUPPORTING_DOCUMENTS_QUERY = /* GraphQL */ `
   query FrontendSupportingDocuments($referenceNumber: String) {
     supportingDocuments(referenceNumber: $referenceNumber) {
+      id
       category
       fileName
       mimeType
@@ -306,7 +309,18 @@ export async function getBackendDashboardSummaryData(
     query: DASHBOARD_SUMMARY_QUERY
   });
 
-  return createDashboardSummary(data);
+  const summary = createDashboardSummary(data);
+  const submittedRequests = await Promise.all(
+    summary.submittedRequests.map(async (request) => ({
+      ...request,
+      supportingDocuments: await getBackendSupportingDocumentsForReference(request.referenceNumber, config)
+    }))
+  );
+
+  return {
+    ...summary,
+    submittedRequests
+  };
 }
 
 export async function getBackendWorkflowData(
@@ -318,9 +332,7 @@ export async function getBackendWorkflowData(
   const submittedRequest =
     summary.submittedRequests.find((candidate) => candidate.appKey === appKey) ??
     createPendingSubmittedRequestSummary(appKey);
-  const supportingDocuments = submittedRequest.referenceNumber.startsWith("SSQ-")
-    ? await getBackendUploadedDocuments(appKey, config)
-    : [];
+  const supportingDocuments = submittedRequest.supportingDocuments ?? [];
 
   return {
     activity: summary.activity.filter((entry) =>
@@ -442,7 +454,12 @@ export async function recordBackendSupportingDocumentUploadMetadata(
   }
 
   return {
-    document: payload.document ? mapUploadedDocument(payload.document) : undefined,
+    document: payload.document
+      ? mapUploadedDocument(
+          payload.document,
+          input.target.type === "SERVICE_REQUEST" ? input.target.referenceNumber : undefined
+        )
+      : undefined,
     fieldErrors: [],
     ok: true,
     policy
@@ -460,17 +477,24 @@ export async function getBackendUploadedDocuments(
     return [];
   }
 
+  return submittedRequest.supportingDocuments ?? [];
+}
+
+async function getBackendSupportingDocumentsForReference(
+  referenceNumber: string,
+  config: FrontendRuntimeConfig
+): Promise<PrototypeUploadedDocument[]> {
   const data = await executeBackendData<{
     supportingDocuments: BackendSupportingDocument[];
   }, { referenceNumber: string }>({
     config,
     query: SUPPORTING_DOCUMENTS_QUERY,
     variables: {
-      referenceNumber: submittedRequest.referenceNumber
+      referenceNumber
     }
   });
 
-  return data.supportingDocuments.map(mapUploadedDocument);
+  return data.supportingDocuments.map((document) => mapUploadedDocument(document, referenceNumber));
 }
 
 export async function getBackendSubmissionSummaryDownload(
@@ -493,6 +517,37 @@ export async function getBackendSubmissionSummaryDownload(
     body: await response.text(),
     contentType: "text/plain",
     filename: extractFilename(response.headers.get("content-disposition")) ?? `${referenceNumber.toLowerCase()}-summary.txt`,
+    referenceNumber
+  };
+}
+
+export async function getBackendSupportingDocumentDownload(
+  _appKey: TransactionAppKey,
+  referenceNumber: string,
+  documentId: string,
+  config: FrontendRuntimeConfig
+): Promise<PrototypeSupportingDocumentDownload> {
+  const backendConfig = toBackendClientConfig(config);
+  const correlationId = createCorrelationId();
+  const encodedReferenceNumber = encodeURIComponent(referenceNumber);
+  const encodedDocumentId = encodeURIComponent(documentId);
+  const response = await fetch(
+    `${backendConfig.backendUrl}/service-requests/${encodedReferenceNumber}/supporting-documents/${encodedDocumentId}/download`,
+    {
+      cache: "no-store",
+      headers: createBackendHeaders(correlationId)
+    }
+  );
+
+  if (!response.ok) {
+    throw new BackendClientError("Backend supporting document download failed.", correlationId, response.status);
+  }
+
+  return {
+    body: await response.text(),
+    contentType: "text/plain",
+    documentId,
+    filename: extractFilename(response.headers.get("content-disposition")) ?? `${documentId}.prototype.txt`,
     referenceNumber
   };
 }
@@ -613,18 +668,36 @@ function createActivity(
   ].sort((left, right) => new Date(left.at).getTime() - new Date(right.at).getTime());
 }
 
-function mapUploadedDocument(document: BackendSupportingDocument): PrototypeUploadedDocument {
+function mapUploadedDocument(document: BackendSupportingDocument, referenceNumber?: string): PrototypeUploadedDocument {
   const rejectedScanStatuses = new Set(["QUARANTINED", "REJECTED"]);
+  const status = document.uploadStatus === "REJECTED" || rejectedScanStatuses.has(document.scanStatus) ? "rejected" : "uploaded";
+  const downloadHref = status === "uploaded" && document.id && isBackendDocumentAvailable(document)
+    ? createSupportingDocumentDownloadHref(referenceNumber, document.id)
+    : undefined;
 
   return {
     category: formatDocumentCategory(document.category),
+    downloadHref,
     fileName: document.fileName,
+    id: document.id,
     message: document.uploadStatus === "REJECTED" ? backendUploadPolicy.rejectedExample.message : undefined,
     mimeType: document.mimeType,
     personKey: typeof document.metadata?.personKey === "string" ? document.metadata.personKey : undefined,
     sizeBytes: document.sizeBytes,
-    status: document.uploadStatus === "REJECTED" || rejectedScanStatuses.has(document.scanStatus) ? "rejected" : "uploaded"
+    status
   };
+}
+
+function createSupportingDocumentDownloadHref(referenceNumber: string | undefined, documentId: string): string | undefined {
+  if (!referenceNumber) {
+    return undefined;
+  }
+
+  return `/service-requests/${encodeURIComponent(referenceNumber)}/supporting-documents/${encodeURIComponent(documentId)}/download`;
+}
+
+function isBackendDocumentAvailable(document: BackendSupportingDocument): boolean {
+  return document.uploadStatus !== "REJECTED" && ["AVAILABLE", "PASSED"].includes(document.scanStatus);
 }
 
 function mapUploadPolicy(policy: BackendUploadPolicy | undefined): PrototypeUploadPolicy {

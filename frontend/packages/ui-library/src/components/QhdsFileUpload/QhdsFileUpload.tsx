@@ -11,6 +11,7 @@ export interface QhdsFileUploadPolicy {
 
 export interface QhdsFileUploadItem {
   category?: string;
+  downloadHref?: string;
   fileName: string;
   message?: ReactNode;
   sizeBytes: number;
@@ -98,7 +99,13 @@ export function QhdsFileUpload({
               )}
               key={`${file.status}-${file.fileName}`}
             >
-              <span className="ssq-file-upload__file-name">{file.fileName}</span>
+              {file.downloadHref ? (
+                <a className="ssq-file-upload__file-name" href={file.downloadHref}>
+                  {file.fileName}
+                </a>
+              ) : (
+                <span className="ssq-file-upload__file-name">{file.fileName}</span>
+              )}
               <span className="ssq-file-upload__meta">
                 {file.category ? `${file.category} · ` : ""}
                 {formatBytes(file.sizeBytes)}

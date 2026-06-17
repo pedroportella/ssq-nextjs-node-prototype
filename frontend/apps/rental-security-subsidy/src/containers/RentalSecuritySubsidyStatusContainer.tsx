@@ -86,7 +86,7 @@ export function RentalSecuritySubsidyStatusContent({
 
       <QhdsContentSection heading="Supporting documents" id="supporting-documents">
         <QhdsFileUpload
-          hint="The prototype upload policy shows accepted and rejected file states without storing real files."
+          hint="Document links are available when the prototype evidence store has an uploaded artifact."
           id="supporting-documents-upload"
           label="Upload supporting documents"
           name="supportingDocuments"

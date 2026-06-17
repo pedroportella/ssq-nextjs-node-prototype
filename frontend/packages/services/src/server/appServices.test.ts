@@ -5,6 +5,7 @@ import {
   getDashboardShellData,
   getDashboardSummaryData,
   getSubmissionSummaryDownload,
+  getSupportingDocumentDownload,
   getSupportingDocumentUploadPolicy,
   getUploadedDocuments,
   getRentalSecuritySubsidyShellData,
@@ -272,6 +273,17 @@ describe("server app services", () => {
       filename: "sc-2026-0001-summary.txt",
       referenceNumber: "SC-2026-0001"
     });
+    await expect(getSupportingDocumentDownload(
+      "seniors-card",
+      "SC-2026-0001",
+      "mock-sc-identity-evidence",
+      { dataSource: "mock" }
+    )).resolves.toMatchObject({
+      contentType: "text/plain",
+      documentId: "mock-sc-identity-evidence",
+      filename: "identity-evidence.pdf.prototype.txt",
+      referenceNumber: "SC-2026-0001"
+    });
     await expect(recordSupportingDocumentUploadMetadata({
       category: "identity",
       fileName: "identity-evidence.pdf",
@@ -298,6 +310,18 @@ describe("server app services", () => {
 
   it("maps backend dashboard summary data", async () => {
     mockBackendFetch(({ body }) => {
+      if (body?.query?.includes("FrontendSupportingDocuments")) {
+        expect(body.variables).toMatchObject({
+          referenceNumber: "SSQ-DEMO-0001"
+        });
+
+        return Response.json({
+          data: {
+            supportingDocuments: []
+          }
+        });
+      }
+
       expect(body?.query).toContain("FrontendDashboardSummary");
 
       return Response.json({
@@ -476,6 +500,15 @@ describe("server app services", () => {
 
   it("reads backend upload policy, uploaded documents and summary downloads", async () => {
     mockBackendFetch(({ body, url }) => {
+      if (url.endsWith("/service-requests/SSQ-TEST-0002/supporting-documents/doc-income/download")) {
+        return new Response("Document: doc-income", {
+          headers: {
+            "content-disposition": 'attachment; filename="income-evidence.pdf.prototype.txt"',
+            "content-type": "text/plain; charset=utf-8"
+          }
+        });
+      }
+
       if (url.endsWith("/service-requests/SSQ-TEST-0002/summary/download")) {
         return new Response("Reference: SSQ-TEST-0002", {
           headers: {
@@ -506,6 +539,7 @@ describe("server app services", () => {
             {
               category: "income",
               fileName: "income-evidence.pdf",
+              id: "doc-income",
               mimeType: "application/pdf",
               scanStatus: "PASSED",
               sizeBytes: 512000,
@@ -514,6 +548,7 @@ describe("server app services", () => {
             {
               category: "identity",
               fileName: "identity-quarantine.pdf",
+              id: "doc-quarantine",
               mimeType: "application/pdf",
               scanStatus: "QUARANTINED",
               sizeBytes: 512000,
@@ -537,11 +572,14 @@ describe("server app services", () => {
     await expect(getUploadedDocuments("rental-security-subsidy", backendConfig)).resolves.toEqual([
       expect.objectContaining({
         category: "Income",
+        downloadHref: "/service-requests/SSQ-TEST-0002/supporting-documents/doc-income/download",
         fileName: "income-evidence.pdf",
+        id: "doc-income",
         status: "uploaded"
       }),
       expect.objectContaining({
         category: "Identity",
+        downloadHref: undefined,
         fileName: "identity-quarantine.pdf",
         status: "rejected"
       })
@@ -550,6 +588,18 @@ describe("server app services", () => {
       body: "Reference: SSQ-TEST-0002",
       contentType: "text/plain",
       filename: "SSQ-TEST-0002-summary.txt",
+      referenceNumber: "SSQ-TEST-0002"
+    });
+    await expect(getSupportingDocumentDownload(
+      "rental-security-subsidy",
+      "SSQ-TEST-0002",
+      "doc-income",
+      backendConfig
+    )).resolves.toEqual({
+      body: "Document: doc-income",
+      contentType: "text/plain",
+      documentId: "doc-income",
+      filename: "income-evidence.pdf.prototype.txt",
       referenceNumber: "SSQ-TEST-0002"
     });
   });
@@ -572,6 +622,7 @@ describe("server app services", () => {
         document: {
           category: "identity",
           fileName: "identity-evidence.pdf",
+          id: "doc-uploaded",
           metadata: {
             personKey: "applicant"
           },

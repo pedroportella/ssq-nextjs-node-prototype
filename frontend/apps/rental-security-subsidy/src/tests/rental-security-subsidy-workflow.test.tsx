@@ -55,13 +55,17 @@ const workflow: PrototypeWorkflowData = {
   supportingDocuments: [
     {
       category: "Rental evidence",
+      downloadHref: "/service-requests/RSS-2026-0001/supporting-documents/mock-rss-rental-evidence/download",
       fileName: "rental-property-evidence.pdf",
+      id: "mock-rss-rental-evidence",
       sizeBytes: 512_000,
       status: "uploaded"
     },
     {
       category: "Income evidence",
+      downloadHref: "/service-requests/RSS-2026-0001/supporting-documents/mock-rss-income-evidence/download",
       fileName: "household-income-evidence.pdf",
+      id: "mock-rss-income-evidence",
       personKey: "household-member",
       sizeBytes: 384_000,
       status: "uploaded"
@@ -274,6 +278,9 @@ describe("Rental Security Subsidy workflow containers", () => {
     expect(html).toContain("RSS-2026-0001");
     expect(html).toContain("Download submission summary");
     expect(html).toContain("rental-property-evidence.pdf");
+    expect(html).toContain(
+      'href="/service-requests/RSS-2026-0001/supporting-documents/mock-rss-rental-evidence/download"'
+    );
     expect(html).toContain("household-income-evidence.pdf");
     expect(html).toContain("rental-property-archive.zip");
     expect(html).toContain("Draft saved");

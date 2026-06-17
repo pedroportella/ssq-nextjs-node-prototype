@@ -10,6 +10,7 @@ export {
   getDashboardSummaryData,
   getDashboardShellData,
   getSubmissionSummaryDownload,
+  getSupportingDocumentDownload,
   getSupportingDocumentUploadPolicy,
   getUploadedDocuments,
   getRentalSecuritySubsidyWorkflowData,

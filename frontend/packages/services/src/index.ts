@@ -70,7 +70,9 @@ export interface PrototypeUploadPolicy {
 
 export interface PrototypeUploadedDocument {
   category: string;
+  downloadHref?: string;
   fileName: string;
+  id?: string;
   message?: string;
   mimeType?: string;
   personKey?: string;
@@ -117,6 +119,14 @@ export interface PrototypeSubmissionSummaryMetadata {
 export interface PrototypeSubmissionSummaryDownload {
   body: string;
   contentType: "text/plain";
+  filename: string;
+  referenceNumber: string;
+}
+
+export interface PrototypeSupportingDocumentDownload {
+  body: string;
+  contentType: "text/plain";
+  documentId: string;
   filename: string;
   referenceNumber: string;
 }

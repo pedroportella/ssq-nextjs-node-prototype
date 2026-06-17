@@ -55,7 +55,9 @@ const workflow: PrototypeWorkflowData = {
   supportingDocuments: [
     {
       category: "Identity evidence",
+      downloadHref: "/service-requests/SC-2026-0001/supporting-documents/mock-sc-identity-evidence/download",
       fileName: "identity-evidence.pdf",
+      id: "mock-sc-identity-evidence",
       sizeBytes: 512_000,
       status: "uploaded"
     },
@@ -262,6 +264,7 @@ describe("Seniors Card workflow containers", () => {
     expect(html).toContain("SC-2026-0001");
     expect(html).toContain("Download submission summary");
     expect(html).toContain("identity-evidence.pdf");
+    expect(html).toContain('href="/service-requests/SC-2026-0001/supporting-documents/mock-sc-identity-evidence/download"');
     expect(html).toContain("identity-archive.zip");
     expect(html).toContain("Draft saved");
     expect(html).toContain("SC-2026-0001 submitted");

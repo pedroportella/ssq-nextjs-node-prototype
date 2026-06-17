@@ -57,6 +57,12 @@ function getSubmittedRequestHref(summary: PrototypeDashboardSummaryData, request
   return `${service.href.replace(/\/$/, "")}/application-status`;
 }
 
+function getServiceHref(summary: PrototypeDashboardSummaryData, request: PrototypeSubmittedRequestSummary) {
+  const service = summary.availableServices.find((candidate) => candidate.appKey === request.appKey);
+
+  return service?.href.replace(/\/$/, "");
+}
+
 function RecordTitleLink({ href, request }: { href?: string; request: PrototypeSubmittedRequestSummary }) {
   if (!href) {
     return <strong>{request.title}</strong>;
@@ -69,7 +75,27 @@ function RecordTitleLink({ href, request }: { href?: string; request: PrototypeS
   );
 }
 
-function FileLinks({ documents, href }: { documents?: PrototypeUploadedDocument[]; href?: string }) {
+function createDashboardDocumentHref(document: PrototypeUploadedDocument, serviceHref?: string) {
+  if (!document.downloadHref) {
+    return undefined;
+  }
+
+  if (document.downloadHref.startsWith("http://") || document.downloadHref.startsWith("https://")) {
+    return document.downloadHref;
+  }
+
+  return serviceHref ? `${serviceHref}${document.downloadHref}` : document.downloadHref;
+}
+
+function FileLinks({
+  documents,
+  serviceHref,
+  submittedRequestHref
+}: {
+  documents?: PrototypeUploadedDocument[];
+  serviceHref?: string;
+  submittedRequestHref?: string;
+}) {
   const uploadedDocuments = documents?.filter((document) => document.status === "uploaded") ?? [];
 
   if (uploadedDocuments.length === 0) {
@@ -78,12 +104,23 @@ function FileLinks({ documents, href }: { documents?: PrototypeUploadedDocument[
 
   return (
     <ul className={styles.fileList}>
-      {uploadedDocuments.map((document) => (
-        <li className={styles.fileListItem} key={`${document.personKey}-${document.fileName}`}>
-          {href ? <a href={`${href}#supporting-documents`}>{document.fileName}</a> : <span>{document.fileName}</span>}
-          <span className={styles.meta}>{document.category}</span>
-        </li>
-      ))}
+      {uploadedDocuments.map((document) => {
+        const documentHref = createDashboardDocumentHref(document, serviceHref);
+        const fallbackHref = submittedRequestHref ? `${submittedRequestHref}#supporting-documents` : undefined;
+
+        return (
+          <li className={styles.fileListItem} key={`${document.id ?? document.personKey}-${document.fileName}`}>
+            {documentHref ? (
+              <a href={documentHref}>{document.fileName}</a>
+            ) : fallbackHref ? (
+              <a href={fallbackHref}>{document.fileName}</a>
+            ) : (
+              <span>{document.fileName}</span>
+            )}
+            <span className={styles.meta}>{document.category}</span>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -189,10 +226,17 @@ function SubmittedRequestsTable({ summary }: { summary: PrototypeDashboardSummar
         { header: "Files", key: "files" }
       ]}
       rows={summary.submittedRequests.map((request) => {
+        const serviceHref = getServiceHref(summary, request);
         const submittedRequestHref = getSubmittedRequestHref(summary, request);
 
         return {
-          files: <FileLinks documents={request.supportingDocuments} href={submittedRequestHref} />,
+          files: (
+            <FileLinks
+              documents={request.supportingDocuments}
+              serviceHref={serviceHref}
+              submittedRequestHref={submittedRequestHref}
+            />
+          ),
           id: request.referenceNumber,
           request: (
             <>

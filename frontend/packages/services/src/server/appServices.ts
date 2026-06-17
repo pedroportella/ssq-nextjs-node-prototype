@@ -5,6 +5,7 @@ import {
   createBackendTransactionDraft,
   getBackendDashboardSummaryData,
   getBackendSubmissionSummaryDownload,
+  getBackendSupportingDocumentDownload,
   getBackendSupportingDocumentUploadPolicy,
   getBackendUploadedDocuments,
   getBackendWorkflowData,
@@ -17,6 +18,7 @@ import {
   createMockDraft,
   getMockDashboardSummaryData,
   getMockSubmissionSummaryDownload,
+  getMockSupportingDocumentDownload,
   getMockSupportingDocumentUploadPolicy,
   getMockUploadedDocuments,
   getMockRentalSecuritySubsidyWorkflowData,
@@ -32,6 +34,7 @@ import type {
   PrototypeAppSummary,
   PrototypeDashboardSummaryData,
   PrototypeDraftMutationResult,
+  PrototypeSupportingDocumentDownload,
   PrototypeSupportingDocumentUploadInput,
   PrototypeSupportingDocumentUploadResult,
   PrototypeSubmissionSummaryDownload,
@@ -191,4 +194,19 @@ export async function getSubmissionSummaryDownload(
   }
 
   return getMockSubmissionSummaryDownload(appKey, referenceNumber);
+}
+
+export async function getSupportingDocumentDownload(
+  appKey: Exclude<PrototypeAppKey, "dashboard">,
+  referenceNumber: string,
+  documentId: string,
+  config?: FrontendRuntimeConfig
+): Promise<PrototypeSupportingDocumentDownload> {
+  const runtimeConfig = getRuntimeConfig(config);
+
+  if (runtimeConfig.dataSource === "backend") {
+    return getBackendSupportingDocumentDownload(appKey, referenceNumber, documentId, runtimeConfig);
+  }
+
+  return getMockSupportingDocumentDownload(appKey, referenceNumber, documentId);
 }
