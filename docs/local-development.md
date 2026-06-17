@@ -64,6 +64,20 @@ pnpm test:full-stack-smoke
 
 The smoke check verifies backend readiness, all three frontend `/status` endpoints, direct GraphQL profile/catalogue reads and backend-rendered dashboard/transaction pages.
 
+Run the browser E2E suite against the same Docker-backed stack:
+
+```bash
+pnpm test:e2e:real
+```
+
+The real E2E command starts the backend-mode Compose runtime, waits for backend and frontend health, drives Chromium through the dashboard and transaction apply pages, posts supporting-document metadata to the real backend API and verifies the backend GraphQL record.
+
+For a visible real-backend pass focused on Rental Security Subsidy submission and Dashboard visibility:
+
+```bash
+pnpm test:e2e:real:rss-dashboard:headed
+```
+
 The database is exposed on host port `54329` by default to avoid clashing with a local PostgreSQL install.
 
 Connection details:
@@ -105,34 +119,35 @@ Seniors Card: http://localhost:3001
 Rental Security Subsidy: http://localhost:3002
 ```
 
-Run the default frontend mock smoke check:
+Run the default frontend mock E2E suite:
 
 ```bash
-pnpm test:mock-smoke
+pnpm test:e2e
 ```
 
-The default smoke check starts only the dashboard in mock mode and verifies that it renders without backend or private GraphQL requests. Use the app-specific scripts when you need a narrower transaction app check or the complete three-app suite:
+`pnpm test:e2e` is an alias for `pnpm test:e2e:mock`. It starts all three Next.js apps in mock mode and runs the Playwright browser suite without Docker, PostgreSQL or the backend API.
+
+Use the focused mock aliases when you need a narrower app check:
 
 ```bash
-pnpm test:mock-smoke:dashboard
-pnpm test:mock-smoke:seniors-card
-pnpm test:mock-smoke:rental-security-subsidy
-pnpm test:mock-smoke:all
+pnpm test:e2e:mock:dashboard
+pnpm test:e2e:mock:seniors-card
+pnpm test:e2e:mock:rental-security-subsidy
 ```
 
 Run a headed Playwright E2E flow when you want to watch Chromium drive the app. This command opens Rental Security Subsidy, clicks the Start application entry point, stages the mock evidence files, submits the record, opens Dashboard and verifies the RSS record and file links:
 
 ```bash
-SSQ_MOCK_SMOKE_APP=dashboard,rental-security-subsidy pnpm exec playwright test -c playwright.mock-smoke.config.ts tests/mock-smoke/frontend-rss-dashboard-record-flow.spec.ts --headed
+pnpm test:e2e:mock:rss-dashboard:headed
 ```
 
 For a headed run of the complete mock smoke suite across all frontend apps:
 
 ```bash
-SSQ_MOCK_SMOKE_APP=all pnpm exec playwright test -c playwright.mock-smoke.config.ts --headed
+pnpm test:e2e:mock:headed
 ```
 
-The mock smoke Playwright config starts the selected Next.js apps automatically. In managed sandboxes, headed runs may need permission to bind the selected local app ports: `3000`, `3001` or `3002`.
+The mock E2E Playwright config starts the selected Next.js apps automatically. In managed sandboxes, headed runs may need permission to bind the selected local app ports: `3000`, `3001` or `3002`.
 
 Run visual baseline checks when reviewing QHDS-facing layout changes:
 
@@ -142,6 +157,32 @@ pnpm test:visual:update
 ```
 
 See `docs/qhds-visual-baselines.md` for the captured page list and screenshot update workflow.
+
+## Test Command Audit
+
+Verified locally on 2026-06-17:
+
+| Command | Result | Notes |
+| --- | --- | --- |
+| `pnpm test` | Passed | Workspace Vitest suite passed; Dart Sass legacy JS API deprecation warnings are existing noise. |
+| `pnpm test:e2e` | Passed | Alias for `pnpm test:e2e:mock`; 42 Chromium mock tests. |
+| `pnpm test:e2e:mock` | Passed | Full frontend-only mock Playwright suite; 42 Chromium tests. |
+| `pnpm test:e2e:mock:dashboard` | Passed | Dashboard-focused mock suite; 5 Chromium tests. |
+| `pnpm test:e2e:mock:seniors-card` | Passed | Seniors Card-focused mock suite; 18 Chromium tests. |
+| `pnpm test:e2e:mock:rental-security-subsidy` | Passed | Rental Security Subsidy-focused mock suite; 18 Chromium tests. |
+| `pnpm test:e2e:mock:headed` | Passed | Full visible-browser mock suite; 42 Chromium tests. |
+| `pnpm test:e2e:mock:rss-dashboard:headed` | Passed | Focused visible RSS submission to Dashboard flow; 1 Chromium test. |
+| `pnpm test:e2e:real` | Passed | Docker-backed real backend suite; 3 Chromium tests. The first run may build local images. |
+| `pnpm test:e2e:real:headed` | Passed | Visible-browser Docker-backed real backend suite; 3 Chromium tests. |
+| `pnpm test:e2e:real:rss-dashboard:headed` | Passed | Focused visible real backend RSS submission flow; 1 Chromium test. |
+| `pnpm test:full-stack-smoke` | Passed | Verifies readiness, frontend status, GraphQL profile/catalogue reads and backend-rendered pages. |
+| `pnpm test:reviewer-evidence` | Passed | Verifies public handover docs, screenshots, Markdown links, live frontend links/status URLs and leakage safeguards. |
+| `pnpm test:visual` | Runs, currently fails | All 14 screenshot comparisons fail against stale approved baselines; review and refresh before treating this as a green gate. |
+
+Helper scripts:
+
+- `pnpm test:e2e:report` opens the Playwright HTML report and is not a pass/fail test command.
+- `pnpm test:visual:update` intentionally rewrites approved screenshots; run it only after reviewing and accepting visual changes.
 
 Use backend mode only for explicit integration checks:
 

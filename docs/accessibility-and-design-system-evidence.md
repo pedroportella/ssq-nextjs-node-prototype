@@ -24,13 +24,13 @@ The prototype uses `@ssq/ui-library` as a React adapter for QHDS-style applicati
 | Accessibility concern | Implemented evidence | Check |
 | --- | --- | --- |
 | Landmarks and headings | Each covered page is expected to render a visible `main` landmark and one visible `h1`. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
-| Keyboard focus | The smoke suite tabs into each page and verifies the focused element has a visible outline or focus treatment. It also focuses invalid controls directly. | `pnpm test:mock-smoke:dashboard` for dashboard, `pnpm test:mock-smoke:all` for all apps. |
+| Keyboard focus | The smoke suite tabs into each page and verifies the focused element has a visible outline or focus treatment. It also focuses invalid controls directly. | `pnpm test:e2e:mock:dashboard` for dashboard, `pnpm test:e2e:mock` for all apps. |
 | Form labels and validation association | Invalid fields expose `aria-invalid="true"` and connect hint/error text through `aria-describedby`; form controls are native inputs, selects, radios, checkboxes and textareas. | Seniors Card date-of-birth and Rental Security Subsidy weekly-rent assertions in [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Upload and download accessible names | Status pages expose upload controls with the shared accessible file-input label and summary download links with expected accessible names. | Status-page assertions in [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Responsive layout and no horizontal overflow | Desktop `1440x900` and mobile `390x844` sweeps check each app route for visible content and no incoherent horizontal overflow. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Colour contrast | Browser-computed contrast assertions cover body text, headings, links, visited links, action colours, focus indicators, errors and feedback surfaces across light, alt, dark and dark-alt QHDS surfaces. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts). |
 | Browser-only backend leakage | Mock smoke and visual checks block browser requests to local backend origins and `/graphql`, reinforcing the server-only service boundary. | [frontend-accessibility-qa.spec.ts](../tests/mock-smoke/frontend-accessibility-qa.spec.ts), [qhds-visual-baselines.spec.ts](../tests/visual/qhds-visual-baselines.spec.ts). |
-| Visual regression | Approved desktop and mobile screenshots cover dashboard, overview, apply and status pages for both transaction apps. | `pnpm test:visual`; baselines in [tests/visual/\_\_screenshots\_\_](../tests/visual/__screenshots__). |
+| Visual regression | Desktop and mobile screenshot baselines cover dashboard, overview, apply and status pages for both transaction apps, but the current screenshots need a baseline review/refresh. | `pnpm test:visual`; baselines in [tests/visual/\_\_screenshots\_\_](../tests/visual/__screenshots__). See [QHDS visual baselines](qhds-visual-baselines.md#current-audit-status). |
 
 ## Responsive And Visual Evidence
 
@@ -57,13 +57,13 @@ The full baseline set is documented in [QHDS visual baselines](qhds-visual-basel
 Focused dashboard accessibility and layout smoke:
 
 ```bash
-pnpm test:mock-smoke:dashboard
+pnpm test:e2e:mock:dashboard
 ```
 
 Full frontend accessibility and layout smoke across dashboard, Seniors Card and Rental Security Subsidy:
 
 ```bash
-pnpm test:mock-smoke:all
+pnpm test:e2e:mock
 ```
 
 Visual regression baselines:
@@ -71,6 +71,8 @@ Visual regression baselines:
 ```bash
 pnpm test:visual
 ```
+
+The 2026-06-17 command audit found the visual suite runs but currently fails all 14 screenshot comparisons against stale approved baselines. Review the diffs and refresh intentionally before using visual regression as a green release gate.
 
 Component and package checks:
 

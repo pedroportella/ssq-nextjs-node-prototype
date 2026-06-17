@@ -1,4 +1,4 @@
-import { defineConfig } from "@playwright/test";
+import { defineConfig, devices } from "@playwright/test";
 import { selectedMockSmokeAppNames } from "./tests/mock-smoke/app-selection";
 
 const mockEnv = {
@@ -34,6 +34,12 @@ export default defineConfig({
   expect: {
     timeout: 10_000
   },
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] }
+    }
+  ],
   testDir: "tests/mock-smoke",
   timeout: 30_000,
   use: {

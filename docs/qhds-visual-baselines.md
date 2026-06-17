@@ -18,6 +18,12 @@ pnpm test:visual:update
 
 Both commands run the dashboard, Seniors Card and Rental Security Subsidy apps locally in mock mode. Docker, PostgreSQL and the backend API are not required.
 
+## Current Audit Status
+
+On 2026-06-17, `pnpm test:visual` ran successfully but failed all 14 screenshot comparisons because the current rendered full-page screenshots no longer match the approved PNG baselines. Treat the visual suite as a pending baseline review/refresh before using it as a green quality gate.
+
+`pnpm test:visual:update` was not run during that audit because it intentionally overwrites approved screenshots. Run it only after inspecting the current diffs and accepting the visual changes.
+
 ## Captured Pages
 
 Baselines are stored in `tests/visual/__screenshots__/` and cover desktop `1440x900` plus mobile `390x844` viewports.

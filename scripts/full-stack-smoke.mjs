@@ -60,7 +60,7 @@ const checks = [
 
       assert(text.includes("Taylor Queensland"), "dashboard should render the backend seeded customer");
       assert(
-        text.includes("Dashboard data is currently served from the backend frontend service layer"),
+        text.includes("Dashboard data is currently served through the frontend service layer"),
         "dashboard should render in backend data-source mode"
       );
       assert(!text.includes("avery.taylor@example.test"), "dashboard should not render frontend mock profile data");
@@ -75,7 +75,7 @@ const checks = [
       assert(text.includes("Taylor Queensland"), "Seniors Card should render the backend seeded customer");
       assertReferenceNumber(text, "Seniors Card should render a backend service request reference");
       assert(
-        text.includes("This Seniors Card journey is using backend data from the frontend service layer"),
+        text.includes("This Seniors Card journey uses the frontend service layer to show draft, validation and submission responses"),
         "Seniors Card should render in backend data-source mode"
       );
     }
@@ -89,7 +89,7 @@ const checks = [
       assert(text.includes("Taylor Queensland"), "Rental Security Subsidy should render the backend seeded customer");
       assert(text.includes("Rental Security Subsidy"), "Rental Security Subsidy page should render");
       assert(
-        text.includes("This rental support journey is using backend data from the frontend service layer"),
+        text.includes("This rental support journey uses the frontend service layer to show draft, validation and submission responses"),
         "Rental Security Subsidy should render in backend data-source mode"
       );
     }

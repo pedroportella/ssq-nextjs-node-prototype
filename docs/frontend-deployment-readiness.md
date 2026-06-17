@@ -62,12 +62,18 @@ pnpm --filter @ssq/rental-security-subsidy build
 Run the default dashboard mock browser QA suite:
 
 ```bash
-pnpm test:mock-smoke
+pnpm test:e2e:mock:dashboard
 ```
 
-Run `pnpm test:mock-smoke:all` when the release check needs all three frontend apps.
+Run `pnpm test:e2e:mock` when the release check needs all three frontend apps.
 
 For a visible browser pass, run the headed Playwright E2E command documented in [local development](local-development.md). The focused RSS flow verifies file upload, submitted status and Dashboard file links in Chromium.
+
+For the same visible RSS flow against the Docker-backed backend runtime:
+
+```bash
+pnpm test:e2e:real:rss-dashboard:headed
+```
 
 For local backend-mode container smoke checks:
 

@@ -85,6 +85,7 @@ pnpm install
 pnpm docker:build
 pnpm docker:up:backend
 pnpm test:full-stack-smoke
+pnpm test:e2e:real
 pnpm docker:down
 ```
 
@@ -95,7 +96,7 @@ Local URLs:
 - Seniors Card: `http://localhost:3001`
 - Rental Security Subsidy: `http://localhost:3002`
 
-The full-stack smoke verifies backend readiness, all three frontend `/status` endpoints, GraphQL profile/catalogue reads and backend-rendered frontend pages. See [docs/local-development.md](docs/local-development.md) for alternate ports, frontend-only runtime and Docker details.
+The full-stack smoke verifies backend readiness, all three frontend `/status` endpoints, GraphQL profile/catalogue reads and backend-rendered frontend pages. `pnpm test:e2e:real` adds Chromium coverage against the Docker-backed stack. See [docs/local-development.md](docs/local-development.md) for alternate ports, frontend-only runtime and Docker details.
 
 ## Frontend-Only Development
 
@@ -108,6 +109,15 @@ pnpm --filter @ssq/rental-security-subsidy dev
 ```
 
 See [docs/local-development.md](docs/local-development.md) for frontend-only smoke commands and runtime options.
+
+The browser E2E command split mirrors the Services Australia prototype:
+
+```bash
+pnpm test:e2e:mock
+pnpm test:e2e:real
+```
+
+Use `pnpm test:e2e:mock:*` for focused frontend-only checks and `pnpm test:e2e:real:*` for Docker-backed backend checks. The verified command matrix, headed variants and visual-baseline caveat are tracked in [docs/local-development.md](docs/local-development.md#test-command-audit).
 
 ## Main Checks
 
