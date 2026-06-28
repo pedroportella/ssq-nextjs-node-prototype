@@ -63,7 +63,7 @@ const serviceConfigs: Record<SsqServiceApp, ServiceFlowConfig> = {
   "rental-security-subsidy": {
     applyHeading: "Prepare your rental support application",
     applyUrl: "http://localhost:3002/apply",
-    dashboardUrl: "http://localhost:3000",
+    dashboardUrl: "http://localhost:3300",
     evidence: [
       {
         category: "supporting-evidence",
@@ -90,7 +90,7 @@ const serviceConfigs: Record<SsqServiceApp, ServiceFlowConfig> = {
   "seniors-card": {
     applyHeading: "Check your eligibility",
     applyUrl: "http://localhost:3001/apply",
-    dashboardUrl: "http://localhost:3000",
+    dashboardUrl: "http://localhost:3300",
     evidence: [
       {
         category: "identity",

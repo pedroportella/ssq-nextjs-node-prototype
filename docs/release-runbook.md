@@ -37,7 +37,7 @@ pnpm docker:down
 Default local URLs:
 
 - Backend API: `http://localhost:7001`
-- Dashboard: `http://localhost:3000`
+- Dashboard: `http://localhost:3300`
 - Seniors Card: `http://localhost:3001`
 - Rental Security Subsidy: `http://localhost:3002`
 

@@ -12,7 +12,7 @@ const pages = [
     heading: "SSQ Service Dashboard",
     keyText: "Prototype review data",
     name: "dashboard-home",
-    url: "http://localhost:3000"
+    url: "http://localhost:3300"
   },
   {
     heading: "Seniors Card",

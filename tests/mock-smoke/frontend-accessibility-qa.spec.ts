@@ -21,14 +21,14 @@ const pages = [
     heading: "SSQ Service Dashboard",
     keyText: "Prototype review data",
     path: "/",
-    url: "http://localhost:3000"
+    url: "http://localhost:3300"
   },
   {
     app: "dashboard",
     heading: "UI Library showcase",
     keyText: "Loading component state.",
     path: "/ui-library",
-    url: "http://localhost:3000/ui-library"
+    url: "http://localhost:3300/ui-library"
   },
   {
     app: "seniors-card",

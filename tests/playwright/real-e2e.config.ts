@@ -17,7 +17,7 @@ export default defineConfig({
   testDir: "../e2e",
   timeout: 60_000,
   use: {
-    baseURL: process.env.SSQ_E2E_DASHBOARD_URL ?? "http://127.0.0.1:3000",
+    baseURL: process.env.SSQ_E2E_DASHBOARD_URL ?? "http://127.0.0.1:3300",
     screenshot: "only-on-failure",
     trace: "on-first-retry",
     video: "retain-on-failure"

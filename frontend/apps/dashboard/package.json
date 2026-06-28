@@ -6,9 +6,9 @@
   "scripts": {
     "build": "next build --webpack",
     "check": "pnpm typecheck && pnpm test",
-    "dev": "next dev -p 3000",
+    "dev": "next dev -p 3300",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "start": "next start -p 3000",
+    "start": "next start -p 3300",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

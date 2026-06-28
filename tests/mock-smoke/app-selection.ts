@@ -10,7 +10,7 @@ export const mockSmokeApps: MockSmokeApp[] = [
   {
     heading: "SSQ Service Dashboard",
     name: "dashboard",
-    url: "http://localhost:3000"
+    url: "http://localhost:3300"
   },
   {
     heading: "Seniors Card",

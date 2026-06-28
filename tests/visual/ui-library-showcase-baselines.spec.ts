@@ -58,7 +58,7 @@ for (const viewport of viewports) {
         }
       });
 
-      await page.goto("http://localhost:3000/ui-library");
+      await page.goto("http://localhost:3300/ui-library");
       await expect(page.getByRole("heading", { level: 1, name: "UI Library showcase" })).toBeVisible();
       await expect(page.getByRole("heading", { name: "Upload states" })).toBeVisible();
       await waitForStablePage(page);

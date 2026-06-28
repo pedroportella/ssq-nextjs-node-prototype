@@ -11,7 +11,7 @@ export const mockWebServersByApp = {
     env: mockEnv,
     reuseExistingServer: true,
     timeout: 120_000,
-    url: "http://localhost:3000"
+    url: "http://localhost:3300"
   },
   "rental-security-subsidy": {
     command: "pnpm --filter @ssq/rental-security-subsidy dev",

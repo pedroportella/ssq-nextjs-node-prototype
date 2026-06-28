@@ -2,7 +2,7 @@ import { expect, test, type APIRequestContext, type Page } from "@playwright/tes
 
 const endpoints = {
   backend: process.env.SSQ_E2E_BACKEND_URL ?? "http://127.0.0.1:7001",
-  dashboard: process.env.SSQ_E2E_DASHBOARD_URL ?? "http://127.0.0.1:3000",
+  dashboard: process.env.SSQ_E2E_DASHBOARD_URL ?? "http://127.0.0.1:3300",
   rentalSecuritySubsidy: process.env.SSQ_E2E_RENTAL_SECURITY_SUBSIDY_URL ?? "http://127.0.0.1:3002",
   seniorsCard: process.env.SSQ_E2E_SENIORS_CARD_URL ?? "http://127.0.0.1:3001"
 };

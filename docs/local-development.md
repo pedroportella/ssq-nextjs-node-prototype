@@ -16,7 +16,7 @@ pnpm docker:down
 Default URLs:
 
 - Backend API: `http://localhost:7001`
-- Dashboard: `http://localhost:3000`
+- Dashboard: `http://localhost:3300`
 - Seniors Card: `http://localhost:3001`
 - Rental Security Subsidy: `http://localhost:3002`
 
@@ -24,9 +24,9 @@ Default URLs:
 
 ```bash
 BACKEND_PORT=7101 \
-DASHBOARD_PORT=3100 \
-SENIORS_CARD_PORT=3101 \
-RENTAL_SECURITY_SUBSIDY_PORT=3102 \
+DASHBOARD_PORT=3310 \
+SENIORS_CARD_PORT=3311 \
+RENTAL_SECURITY_SUBSIDY_PORT=3312 \
 SSQ_FRONTEND_DATA_SOURCE=backend \
 docker compose up -d postgres backend dashboard seniors-card rental-security-subsidy
 ```
